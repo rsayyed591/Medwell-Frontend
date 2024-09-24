@@ -1,55 +1,58 @@
-import React, { useEffect, useRef } from 'react'
-import * as d3 from 'd3'
-import { Activity, Heart, Thermometer, Droplet, User, Brain } from 'lucide-react'
+import React, { useEffect, useRef } from 'react';
+import * as d3 from 'd3';
+import Patient from './../../public/patient.png';
+import { Activity, Heart, Thermometer, Droplet, User, Brain } from 'lucide-react';
 
 // Mock data for charts
-const generateChartData = () => Array.from({ length: 20 }, (_, i) => ({ x: i, y: Math.random() * 100 }))
+const generateChartData = () => Array.from({ length: 20 }, (_, i) => ({ x: i, y: Math.random() * 100 }));
 
-const LineChart = ({ data, width, height, color }) => {
-  const svgRef = useRef(null)
+const LineChart = ({ data, color }) => {
+  const svgRef = useRef(null);
 
   useEffect(() => {
     if (data && svgRef.current) {
-      const svg = d3.select(svgRef.current)
-      svg.selectAll("*").remove() // Clear previous chart
+      const svg = d3.select(svgRef.current);
+      svg.selectAll("*").remove(); // Clear previous chart
 
-      const margin = { top: 20, right: 20, bottom: 30, left: 40 }
-      const innerWidth = width - margin.left - margin.right
-      const innerHeight = height - margin.top - margin.bottom
+      const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+      const width = svg.node().getBoundingClientRect().width;
+      const height = svg.node().getBoundingClientRect().height;
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
 
-      const x = d3.scaleLinear().domain([0, data.length - 1]).range([0, innerWidth])
-      const y = d3.scaleLinear().domain([0, d3.max(data, d => d.y)]).range([innerHeight, 0])
+      const x = d3.scaleLinear().domain([0, data.length - 1]).range([0, innerWidth]);
+      const y = d3.scaleLinear().domain([0, d3.max(data, d => d.y)]).range([innerHeight, 0]);
 
       const line = d3.line()
         .x((d, i) => x(i))
-        .y(d => y(d.y))
+        .y(d => y(d.y));
 
-      const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`)
+      const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
       g.append("path")
         .datum(data)
         .attr("fill", "none")
         .attr("stroke", color)
         .attr("stroke-width", 2)
-        .attr("d", line)
+        .attr("d", line);
 
       g.append("g")
         .attr("transform", `translate(0,${innerHeight})`)
-        .call(d3.axisBottom(x))
+        .call(d3.axisBottom(x).ticks(5));
 
       g.append("g")
-        .call(d3.axisLeft(y))
+        .call(d3.axisLeft(y).ticks(5));
     }
-  }, [data, width, height, color])
+  }, [data, color]);
 
-  return <svg ref={svgRef} width={width} height={height}></svg>
-}
+  return <svg ref={svgRef} width="100%" height="100%" viewBox="0 0 300 150" preserveAspectRatio="xMidYMid meet"></svg>;
+};
 
-const CircularMetric = ({ value, total, label, icon: Icon }) => {
-  const percentage = (value / total) * 100
+const CircularMetric = ({ value, total, label, icon: Icon, color }) => {
+  const percentage = (value / total) * 100;
   return (
-    <div className="flex items-center space-x-4">
-      <div className="relative w-16 h-16">
+    <div className="flex items-center space-x-6">
+      <div className="relative w-24 h-24">
         <svg className="w-full h-full" viewBox="0 0 36 36">
           <path
             d="M18 2.0845
@@ -64,73 +67,81 @@ const CircularMetric = ({ value, total, label, icon: Icon }) => {
               a 15.9155 15.9155 0 0 1 0 31.831
               a 15.9155 15.9155 0 0 1 0 -31.831"
             fill="none"
-            stroke="#4caf50"
+            stroke={color}
             strokeWidth="3"
             strokeDasharray={`${percentage}, 100`}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <Icon className="w-8 h-8 text-primary" />
+          <Icon className="w-12 h-12 text-gray-600" />
         </div>
       </div>
       <div>
-        <div className="text-2xl font-semibold">{value}</div>
-        <div className="text-sm text-muted-foreground">{label}</div>
+        <div className="text-3xl font-bold" style={{ color }}>{value}</div>
+        <div className="text-sm text-gray-600">{label}</div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default function MedicalDashboard() {
+  const charts = [
+    { label: "Heart Rate", color: "#ff6b6b", icon: Heart },
+    { label: "Blood Pressure", color: "#4ecdc4", icon: Activity },
+    { label: "Blood Sugar", color: "#45aaf2", icon: Droplet },
+    { label: "Cholesterol", color: "#fed330", icon: Thermometer },
+    { label: "BMI", color: "#26de81", icon: User },
+    { label: "Sleep Pattern", color: "#a55eea", icon: Brain }
+  ];
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="container mx-auto p-4">
-        <div className="grid grid-cols-4 gap-4">
+    <div className="bg-gray-100 text-gray-800 min-h-screen">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Personalized Dashboard */}
-          <div className="col-span-1 bg-card rounded-lg shadow p-4">
-            <img src="/placeholder.svg?height=100&width=100" alt="Patient" className="w-24 h-24 rounded-full mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-center mb-2">John Doe</h2>
-            <p className="text-sm text-center text-muted-foreground mb-4">Patient ID: 12345</p>
-            <div className="text-sm">
-              <p><strong>Age:</strong> 45</p>
-              <p><strong>Doctor:</strong> Dr. Jane Smith</p>
-              <p><strong>Next Appointment:</strong> 15 Oct 2024</p>
+          <div className="md:col-span-1 bg-white rounded-lg shadow-lg p-6 border border-gray-200">
+            <img src={Patient} alt="Patient" className="w-32 h-32 rounded-full mx-auto mb-6" />
+            <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">Vivek Chouhan</h2>
+            <p className="text-lg text-center text-gray-600 mb-6">Patient ID: 12345</p>
+            <div className="text-lg space-y-2">
+              <p><strong className="font-semibold">Age:</strong> 45</p>
+              <p><strong className="font-semibold">Doctor:</strong> Dr. Jane Smith</p>
+              <p><strong className="font-semibold">Next Appointment:</strong> 15 Oct 2024</p>
             </div>
           </div>
 
           {/* Main Dashboard */}
-          <div className="col-span-3 bg-card rounded-lg shadow p-4">
-            <h1 className="text-2xl font-bold mb-4">Health Check</h1>
+          <div className="md:col-span-3 space-y-8">
+            <h1 className="text-3xl font-bold text-gray-800">Health Check</h1>
 
             {/* Line Charts */}
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              {[
-                { label: "Heart Rate", color: "#ff6b6b" },
-                { label: "Blood Pressure", color: "#4ecdc4" },
-                { label: "Blood Sugar", color: "#45aaf2" },
-                { label: "Cholesterol", color: "#fed330" },
-                { label: "BMI", color: "#26de81" },
-                { label: "Sleep Pattern", color: "#a55eea" }
-              ].map((chart, index) => (
-                <div key={index} className="bg-card-foreground rounded-lg p-2">
-                  <h3 className="text-lg font-semibold mb-2">{chart.label}</h3>
-                  <LineChart data={generateChartData()} width={300} height={150} color={chart.color} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {charts.map((chart, index) => (
+                <div key={index} className="bg-white rounded-lg p-4 shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                  <h3 className="text-xl font-semibold mb-4 text-gray-800">{chart.label}</h3>
+                  <div className="h-40">
+                    <LineChart data={generateChartData()} color={chart.color} />
+                  </div>
                 </div>
               ))}
             </div>
 
             {/* Circular Metrics */}
-            <div className="grid grid-cols-3 gap-4">
-              <CircularMetric value={72} total={100} label="Heart Rate" icon={Heart} />
-              <CircularMetric value={120} total={200} label="Blood Pressure" icon={Activity} />
-              <CircularMetric value={98} total={100} label="Blood Oxygen" icon={User} />
-              <CircularMetric value={37} total={50} label="Temperature" icon={Thermometer} />
-              <CircularMetric value={85} total={100} label="Hydration" icon={Droplet} />
-              <CircularMetric value={95} total={100} label="Mental Health" icon={Brain} />
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              {charts.map((chart, index) => (
+                <CircularMetric 
+                  key={index}
+                  value={Math.floor(Math.random() * 100)}
+                  total={100}
+                  label={chart.label}
+                  icon={chart.icon}
+                  color={chart.color}
+                />
+              ))}
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

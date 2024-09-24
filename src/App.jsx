@@ -13,7 +13,7 @@ function Layout() {
   return (
     <>
       {<Navbar />}
-      <main className="flex-grow">
+      <main className="flex-grow pt-16">
         <Routes>
           <Route path="/" element={<Hero />} />
           <Route path="/Dashboard" element={<Dashboard />} />
