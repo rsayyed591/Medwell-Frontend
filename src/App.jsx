@@ -12,16 +12,16 @@ function Layout() {
 
   return (
     <>
-      {<Navbar />}
-      <main className="flex-grow pt-16">
+      {location.pathname !== '/pricing' && <Navbar />}
+      <main className={`flex-grow ${location.pathname !== '/pricing' ? 'pt-16' : ''}`}>
         <Routes>
           <Route path="/" element={<Hero />} />
-          <Route path="/Dashboard" element={<Dashboard />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/pricing" element={<Pricing />} /> {/* Correctly defined the route */}
+          <Route path="/dashboard" element={<Dashboard />} /> {/* Fixed case sensitivity */}
+          <Route path="/about" element={<About />} />        
         </Routes>
       </main>
-      {<Footer />}
+      {location.pathname !== '/pricing' && <Footer />} {/* Fixed Footer position */}
     </>
   );
 }

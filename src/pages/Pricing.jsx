@@ -1,8 +1,9 @@
+import { Sidebars } from "./Sidebars"
 
 const Pricing = () => {
   return (
     <div>
-      pricing
+      <Sidebars/>
     </div>
   )
 }
