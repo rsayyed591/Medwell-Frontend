@@ -1,10 +1,13 @@
-import React, { useEffect, useRef } from 'react';
-import * as d3 from 'd3';
-import Patient from './../../public/patient.png';
-import { Activity, Heart, Thermometer, Droplet, User, Brain } from 'lucide-react';
+import React, { useEffect, useRef } from "react";
+import * as d3 from "d3";
+import Patient from "./../../public/patient.png";
+import { Activity, Heart, Thermometer, Droplet, User, Brain } from "lucide-react";
+import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 
 // Mock data for charts
-const generateChartData = () => Array.from({ length: 20 }, (_, i) => ({ x: i, y: Math.random() * 100 }));
+const generateChartData = () =>
+  Array.from({ length: 20 }, (_, i) => ({ x: i, y: Math.random() * 100 }));
 
 const LineChart = ({ data, color }) => {
   const svgRef = useRef(null);
@@ -21,11 +24,12 @@ const LineChart = ({ data, color }) => {
       const innerHeight = height - margin.top - margin.bottom;
 
       const x = d3.scaleLinear().domain([0, data.length - 1]).range([0, innerWidth]);
-      const y = d3.scaleLinear().domain([0, d3.max(data, d => d.y)]).range([innerHeight, 0]);
+      const y = d3.scaleLinear().domain([0, d3.max(data, (d) => d.y)]).range([innerHeight, 0]);
 
-      const line = d3.line()
+      const line = d3
+        .line()
         .x((d, i) => x(i))
-        .y(d => y(d.y));
+        .y((d) => y(d.y));
 
       const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -40,8 +44,7 @@ const LineChart = ({ data, color }) => {
         .attr("transform", `translate(0,${innerHeight})`)
         .call(d3.axisBottom(x).ticks(5));
 
-      g.append("g")
-        .call(d3.axisLeft(y).ticks(5));
+      g.append("g").call(d3.axisLeft(y).ticks(5));
     }
   }, [data, color]);
 
@@ -77,10 +80,36 @@ const CircularMetric = ({ value, total, label, icon: Icon, color }) => {
         </div>
       </div>
       <div>
-        <div className="text-3xl font-bold" style={{ color }}>{value}</div>
+        <div className="text-3xl font-bold" style={{ color }}>
+          {value}
+        </div>
         <div className="text-sm text-gray-600">{label}</div>
       </div>
     </div>
+  );
+};
+
+const AnimatedCard = ({ children, index }) => {
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
+
+  const variants = {
+    hidden: { opacity: 0, x: index % 2 === 0 ? -50 : 50, y: 50 },
+    visible: { opacity: 1, x: 0, y: 0 },
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={inView ? "visible" : "hidden"}
+      variants={variants}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+    >
+      {children}
+    </motion.div>
   );
 };
 
@@ -91,7 +120,7 @@ export default function MedicalDashboard() {
     { label: "Blood Sugar", color: "#45aaf2", icon: Droplet },
     { label: "Cholesterol", color: "#fed330", icon: Thermometer },
     { label: "BMI", color: "#26de81", icon: User },
-    { label: "Sleep Pattern", color: "#a55eea", icon: Brain }
+    { label: "Sleep Pattern", color: "#a55eea", icon: Brain },
   ];
 
   return (
@@ -99,16 +128,24 @@ export default function MedicalDashboard() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Personalized Dashboard */}
-          <div className="md:col-span-1 bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-            <img src={Patient} alt="Patient" className="w-32 h-32 rounded-full mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">Vivek Chouhan</h2>
-            <p className="text-lg text-center text-gray-600 mb-6">Patient ID: 12345</p>
-            <div className="text-lg space-y-2">
-              <p><strong className="font-semibold">Age:</strong> 45</p>
-              <p><strong className="font-semibold">Doctor:</strong> Dr. Jane Smith</p>
-              <p><strong className="font-semibold">Next Appointment:</strong> 15 Oct 2024</p>
+          <AnimatedCard index={0}>
+            <div className="md:col-span-1 bg-white rounded-lg shadow-lg p-6 border border-gray-200">
+              <img src={Patient} alt="Patient" className="w-32 h-32 rounded-full mx-auto mb-6" />
+              <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">Vivek Chouhan</h2>
+              <p className="text-lg text-center text-gray-600 mb-6">Patient ID: 12345</p>
+              <div className="text-lg space-y-2">
+                <p>
+                  <strong className="font-semibold">Age:</strong> 45
+                </p>
+                <p>
+                  <strong className="font-semibold">Doctor:</strong> Dr. Rohit Deshmukh
+                </p>
+                <p>
+                  <strong className="font-semibold">Next Appointment:</strong> 15 Oct 2024
+                </p>
+              </div>
             </div>
-          </div>
+          </AnimatedCard>
 
           {/* Main Dashboard */}
           <div className="md:col-span-3 space-y-8">
@@ -117,26 +154,29 @@ export default function MedicalDashboard() {
             {/* Line Charts */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {charts.map((chart, index) => (
-                <div key={index} className="bg-white rounded-lg p-4 shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                  <h3 className="text-xl font-semibold mb-4 text-gray-800">{chart.label}</h3>
-                  <div className="h-40">
-                    <LineChart data={generateChartData()} color={chart.color} />
+                <AnimatedCard key={index} index={index + 1}>
+                  <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{chart.label}</h3>
+                    <div className="h-40">
+                      <LineChart data={generateChartData()} color={chart.color} />
+                    </div>
                   </div>
-                </div>
+                </AnimatedCard>
               ))}
             </div>
 
             {/* Circular Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {charts.map((chart, index) => (
-                <CircularMetric 
-                  key={index}
-                  value={Math.floor(Math.random() * 100)}
-                  total={100}
-                  label={chart.label}
-                  icon={chart.icon}
-                  color={chart.color}
-                />
+                <AnimatedCard key={index} index={index + 7}>
+                  <CircularMetric
+                    value={Math.floor(Math.random() * 100)}
+                    total={100}
+                    label={chart.label}
+                    icon={chart.icon}
+                    color={chart.color}
+                  />
+                </AnimatedCard>
               ))}
             </div>
           </div>

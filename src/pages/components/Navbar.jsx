@@ -1,60 +1,88 @@
-import { useState, useEffect } from 'react';
-import { Bars3BottomRightIcon, XMarkIcon } from '@heroicons/react/24/solid';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react'
+import { Bars3BottomRightIcon, XMarkIcon } from '@heroicons/react/24/solid'
+import { Link } from 'react-router-dom'
 
 export default function Navbar() {
-    let Links = [
+    const Links = [
         { name: 'Home', link: '/' },
         { name: 'Dashboard', link: '/Dashboard' },
         { name: 'Pricing', link: '/pricing' },
         { name: 'About', link: '/about' },
         { name: 'Get Started', link: '/Dashboard' },
-    ];
+    ]
 
-    let [isOpen, setIsOpen] = useState(false);
-    let [navBackground, setNavBackground] = useState('bg-transparent');
+    const [isOpen, setIsOpen] = useState(false)
+    const [navBackground, setNavBackground] = useState('bg-transparent')
 
-    // Scroll event listener to change the background color on scroll
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 50) {
-                setNavBackground('bg-black/70'); // Translucent black background when scrolling down
+                setNavBackground('bg-white shadow-md')
             } else {
-                setNavBackground('bg-transparent'); // Transparent background when at the top
+                setNavBackground('bg-transparent')
             }
-        };
+        }
 
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+        window.addEventListener('scroll', handleScroll)
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden'
+            setNavBackground('bg-white')
+        } else {
+            document.body.style.overflow = 'unset'
+            if (window.scrollY <= 50) {
+                setNavBackground('bg-transparent')
+            }
+        }
+    }, [isOpen])
 
     return (
-        <div className={`w-full fixed top-0 left-0 z-50 transition-all duration-500 ${navBackground}`}>
-            <div className="md:px-10 py-4 px-7 md:flex justify-between items-center">
+        <nav className={`w-full fixed top-0 left-0 z-50 transition-all duration-300 ${navBackground}`}>
+            <div className="container mx-auto px-4 py-4 md:flex md:justify-between md:items-center">
                 {/* logo */}
-                <div className="flex text-2xl cursor-pointer items-center gap-2">
-                    <Link to="/"><span className='font-bold text-gray-400'>Med</span><span className='font-bold text-gray-600'>Well</span></Link>
-                </div>
-
-                {/* Hamburger Icon for mobile */}
-                <div onClick={() => setIsOpen(!isOpen)} className="bg-gray-200 p-1 rounded-sm w-7 h-7 absolute right-8 top-6 cursor-pointer md:hidden">
-                    {isOpen ? <XMarkIcon /> : <Bars3BottomRightIcon />}
+                <div className="flex justify-between items-center">
+                    <Link to="/" className="text-2xl font-bold">
+                        <span className='text-gray-700'>Med</span><span className='text-gray-900'>Well</span>
+                    </Link>
+                    <div className="md:hidden">
+                        <button
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600"
+                            aria-label="toggle menu"
+                        >
+                            {isOpen ? (
+                                <XMarkIcon className="h-6 w-6" />
+                            ) : (
+                                <Bars3BottomRightIcon className="h-6 w-6" />
+                            )}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Links */}
-                <ul
-                    className={`md:flex md:items-center md:pb-0 pb-12 absolute md:static bg-transparent md:z-auto z-[-1] left-0 w-full md:w-auto md:pl-0 pl-9 transition-all duration-500 ease-in ${
-                        isOpen ? 'top-12' : 'top-[-490px]'
-                    }`}
+                <div
+                    className={`${
+                        isOpen ? 'block' : 'hidden'
+                    } md:block mt-4 md:mt-0 ${isOpen ? 'bg-white' : 'bg-transparent'}`}
                 >
-                    {Links.map((link) => (
-                        <li key={link.name} className="font-semibold text-black hover:text-gray-400 my-7 md:my-0 md:ml-8 ">
-                            <Link to={link.link}>{link.name}</Link>
-                        </li>
-                    ))}
-                   
-                </ul>
+                    <ul className="flex flex-col md:flex-row md:items-center md:space-x-8">
+                        {Links.map((link) => (
+                            <li key={link.name} className="my-3 md:my-0">
+                                <Link
+                                    to={link.link}
+                                    className="text-gray-700 hover:text-gray-900 transition duration-300"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    {link.name}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
-        </div>
-    );
+        </nav>
+    )
 }
