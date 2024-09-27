@@ -8,6 +8,7 @@ import Pricing from './pages/Pricing';
 import Hero from './pages/Hero';
 import { SignUp } from './pages/SignUp';
 import { Login } from './pages/Login';
+import MedLogin from './pages/medlogin';
 
 function Layout() {
   const location = useLocation();
@@ -28,6 +29,7 @@ function Layout() {
           <Route path="/about" element={<About />} />        
           <Route path="/signup" element={<SignUp />} />        
           <Route path="/login" element={<Login />} />        
+          <Route path="/medlogin" element={<MedLogin />} />        
         </Routes>
       </main>
       {/* Show Footer only if it's not a page where it should be hidden */}
