@@ -4,7 +4,7 @@ import { IconBrandGoogle } from "@tabler/icons-react";
 export function SignUp() {
   useEffect(() => {
     google.accounts.id.initialize({
-      client_id: "",
+      client_id: import.meta.env.VITE_GOOGLE_KEY,
       callback: handleCallbackResponse
     });
     google.accounts.id.renderButton(
