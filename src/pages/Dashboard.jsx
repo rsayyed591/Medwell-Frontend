@@ -269,7 +269,14 @@ export default function MedicalDashboard() {
       <div className="flex-1 p-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">{activeSection}</h1>
-          
+          {(isMobile || !isSidebarOpen) && (
+            <button
+              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200"
+              onClick={toggleSidebar}
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+          )}
         </div>
 
         {renderContent()}
