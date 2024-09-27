@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import Patient from './../../public/patient.png'
-import { Activity, Heart, Thermometer, Droplet, User, Brain } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Activity, Heart, Thermometer, Droplet, User, Brain, Menu, X, FileText, PlusCircle, DollarSign, Calendar, Share2, ChevronRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
-
+import { Link } from 'react-router-dom'
 // Mock data for charts
 const generateChartData = () => Array.from({ length: 20 }, (_, i) => ({ x: i, y: Math.random() * 100 }))
 
@@ -114,6 +114,10 @@ const AnimatedCard = ({ children, index, delay = 0 }) => {
 
 export default function MedicalDashboard() {
   const [isLoaded, setIsLoaded] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState('Health Check')
+  const [isMobile, setIsMobile] = useState(false)
+
   const charts = [
     { label: "Heart Rate", color: "#ff6b6b", icon: Heart },
     { label: "Blood Pressure", color: "#4ecdc4", icon: Activity },
@@ -123,36 +127,34 @@ export default function MedicalDashboard() {
     { label: "Mental Health", color: "#a55eea", icon: Brain }
   ]
 
+  const navItems = [
+    { label: "Health Check", icon: Heart },
+    { label: "Reports", icon: FileText },
+    { label: "Add Report", icon: PlusCircle },
+    { label: "Expense Tracker", icon: DollarSign },
+    { label: "Appointments", icon: Calendar },
+    { label: "Share with Doctor", icon: Share2 },
+  ]
+
   useEffect(() => {
     setIsLoaded(true)
+    const checkIfMobile = () => setIsMobile(window.innerWidth < 768)
+    checkIfMobile()
+    window.addEventListener('resize', checkIfMobile)
+    return () => window.removeEventListener('resize', checkIfMobile)
   }, [])
 
-  return (
-    <div className="bg-gray-100 text-gray-800 min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Personalized Dashboard */}
-          <AnimatedCard index={0}>
-            <div className="md:col-span-1 bg-white rounded-lg shadow-lg p-6 border border-gray-200 h-full">
-              <img src={Patient} alt="Patient" className="w-32 h-32 rounded-full mx-auto mb-6" />
-              <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">Vivek Chouhan</h2>
-              <p className="text-lg text-center text-gray-600 mb-6">Patient ID: 12345</p>
-              <div className="text-lg space-y-2">
-                <p><strong className="font-semibold">Age:</strong> 45</p>
-                <p><strong className="font-semibold">Doctor:</strong> Dr. Rohit Deshmukh</p>
-                <p><strong className="font-semibold">Next Appointment:</strong> 15 Oct 2024</p>
-                <p><strong className="font-semibold">Blood Type:</strong> O+</p>
-                <p><strong className="font-semibold">Allergies:</strong> None</p>
-              </div>
-            </div>
-          </AnimatedCard>
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen)
+  }
 
-          {/* Main Dashboard */}
-          <div className="md:col-span-3 space-y-8">
-            <h1 className="text-3xl font-bold text-gray-800">Health Check</h1>
-
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'Health Check':
+        return (
+          <>
             {/* Line Charts */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {charts.map((chart, index) => (
                 <AnimatedCard key={index} index={index + 1}>
                   <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
@@ -179,9 +181,107 @@ export default function MedicalDashboard() {
                 </AnimatedCard>
               ))}
             </div>
-          </div>
+          </>
+        )
+      case 'Reports':
+        return <div className="text-2xl">Your Reports</div>
+      case 'Add Report':
+        return <div className="text-2xl">Add a New Report</div>
+      case 'Expense Tracker':
+        return <div className="text-2xl">Expense Tracker</div>
+      case 'Appointments':
+        return <div className="text-2xl">Your Appointments</div>
+      case 'Share with Doctor':
+        return <div className="text-2xl">Share Information with Your Doctor</div>
+      default:
+        return <div className="text-2xl">Select a section from the sidebar</div>
+    }
+  }
+
+  return (
+    <div className="bg-gray-100 text-gray-800 min-h-screen flex">
+      {/* Sidebar */}
+      <AnimatePresence>
+        {(isSidebarOpen || !isMobile) && (
+          <motion.div
+            initial={isMobile ? { x: -300 } : false}
+            animate={{ x: 0 }}
+            exit={isMobile ? { x: -300 } : {}}
+            transition={{ duration: 0.3 }}
+            className={`bg-white shadow-lg overflow-hidden flex flex-col ${
+              isMobile ? 'fixed inset-y-0 left-0 z-50' : 'relative'
+            }`}
+            style={{ width: isMobile ? '300px' : isSidebarOpen ? '300px' : '64px' }}
+          >
+            {(!isMobile && !isSidebarOpen) && (
+              <button
+                className="w-full flex justify-center items-center py-4 hover:bg-gray-100 transition-colors duration-200"
+                onClick={toggleSidebar}
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            )}
+            <div className={`p-4 ${(!isMobile && !isSidebarOpen) ? 'hidden' : ''}`}>
+              <div className="flex justify-between items-center mb-6">
+                <Link to="/" className="text-2xl font-bold">MedWell</Link>
+                <button
+                  className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200"
+                  onClick={toggleSidebar}
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              <img src={Patient} alt="Patient" className="w-32 h-32 rounded-full mx-auto mb-6" />
+              <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">Vivek Chouhan</h2>
+              <p className="text-lg text-center text-gray-600 mb-6">Patient ID: 12345</p>
+              <div className="text-lg space-y-2 mb-8">
+                <p><strong className="font-semibold">Age:</strong> 45</p>
+                <p><strong className="font-semibold">Doctor:</strong> Dr. Rohit Deshmukh</p>
+                <p><strong className="font-semibold">Next Appointment:</strong> 15 Oct 2024</p>
+                <p><strong className="font-semibold">Blood Type:</strong> O+</p>
+                <p><strong className="font-semibold">Allergies:</strong> None</p>
+              </div>
+            </div>
+            <nav className={`${(!isMobile && !isSidebarOpen) ? 'px-2 mt-4' : 'px-4'}`}>
+              {navItems.map((item, index) => (
+                <button
+                  key={index}
+                  className={`w-full text-left py-2 px-4 rounded-lg mb-2 flex items-center ${
+                    activeSection === item.label
+                      ? 'bg-blue-100 text-blue-600'
+                      : 'hover:bg-gray-100'
+                  } ${(!isMobile && !isSidebarOpen) ? 'justify-center' : ''}`}
+                  onClick={() => {
+                    setActiveSection(item.label)
+                    if (isMobile) setIsSidebarOpen(false)
+                  }}
+                >
+                  <item.icon className={`${(!isMobile && !isSidebarOpen) ? '' : 'mr-2'} h-5 w-5`} />
+                  {(isMobile || isSidebarOpen) && item.label}
+                </button>
+              ))}
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content */}
+      <div className="flex-1 p-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">{activeSection}</h1>
+          
         </div>
+
+        {renderContent()}
       </div>
+
+      {/* Overlay for mobile when sidebar is open */}
+      {isMobile && isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
     </div>
   )
 }

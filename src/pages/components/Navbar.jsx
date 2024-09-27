@@ -9,6 +9,8 @@ export default function Navbar() {
         { name: 'Pricing', link: '/pricing' },
         { name: 'About', link: '/about' },
         { name: 'Get Started', link: '/Dashboard' },
+        { name: 'SignUp', link: '/signup' },
+        { name: 'SignIn', link: '/login' },
     ]
 
     const [isOpen, setIsOpen] = useState(false)

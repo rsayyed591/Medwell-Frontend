@@ -6,22 +6,31 @@ import Dashboard from './pages/Dashboard';
 import About from './pages/About';
 import Pricing from './pages/Pricing';
 import Hero from './pages/Hero';
+import { SignUp } from './pages/SignUp';
+import { Login } from './pages/Login';
 
 function Layout() {
   const location = useLocation();
 
+  // Update the condition to correctly hide the Navbar and Footer
+  const hideNavbarFooter = location.pathname === '/Dashboard';
+
   return (
     <>
-      {location.pathname !== '/pricing' && <Navbar />}
-      <main className={`flex-grow ${location.pathname !== '/pricing' ? 'pt-16' : ''}`}>
+      {/* Show Navbar only if it's not a page where it should be hidden */}
+      {!hideNavbarFooter && <Navbar />}
+      <main className={`flex-grow ${!hideNavbarFooter ? 'pt-16' : ''}`}>
         <Routes>
           <Route path="/" element={<Hero />} />
-          <Route path="/pricing" element={<Pricing />} /> {/* Correctly defined the route */}
-          <Route path="/dashboard" element={<Dashboard />} /> {/* Fixed case sensitivity */}
+          <Route path="/pricing" element={<Pricing />} /> 
+          <Route path="/dashboard" element={<Dashboard />} /> 
           <Route path="/about" element={<About />} />        
+          <Route path="/signup" element={<SignUp />} />        
+          <Route path="/login" element={<Login />} />        
         </Routes>
       </main>
-      {location.pathname !== '/pricing' && <Footer />} {/* Fixed Footer position */}
+      {/* Show Footer only if it's not a page where it should be hidden */}
+      {!hideNavbarFooter && <Footer />}
     </>
   );
 }
