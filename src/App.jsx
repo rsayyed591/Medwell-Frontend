@@ -18,8 +18,9 @@ function Layout() {
   return (
     <>
       {/* Show Navbar only if it's not a page where it should be hidden */}
-      {!hideNavbarFooter && <Navbar />}
-      <main className={`flex-grow ${!hideNavbarFooter ? 'pt-16' : ''}`}>
+      {/* {!hideNavbarFooter && <Navbar />} */}
+      <Navbar />
+      <main className={`flex-grow pt-16 ${!hideNavbarFooter ? '' : ''}`}>
         <Routes>
           <Route path="/" element={<Hero />} />
           <Route path="/pricing" element={<Pricing />} /> 
@@ -30,7 +31,8 @@ function Layout() {
         </Routes>
       </main>
       {/* Show Footer only if it's not a page where it should be hidden */}
-      {!hideNavbarFooter && <Footer />}
+      {/* {!hideNavbarFooter && <Footer />} */}
+      <Footer/>
     </>
   );
 }
