@@ -16,7 +16,6 @@ export function Login() {
       { theme: "outline", size: "large" }
     );
   }, []);
-
   const handleCallbackResponse = (response) => {
     const formData = new FormData();
     formData.append("token", response.credential);
@@ -34,8 +33,21 @@ export function Login() {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log('Form submitted:', { email, password })
+    const formData = new FormData();
+    formData.append("",e.email);
+    formData.append("",e.password);
+
+    fetch("https://940a-43-231-238-206.ngrok-free.app/", {
+      method: "POST",
+      body: formData,  
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log("Backend response: ", data);
+        localStorage.setItem("Bearer", JSON.stringify(data));
+      })
+      .catch(err => console.error("Error in Google login: ", err));
+    
   }
 
   return (
