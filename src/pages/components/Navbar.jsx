@@ -8,7 +8,7 @@ export default function Navbar() {
         { name: 'Dashboard', link: '/Dashboard' },
         { name: 'Pricing', link: '/pricing' },
         { name: 'About', link: '/about' },
-        { name: 'Get Started', link: '/Dashboard' },
+        { name: 'Get Started', link: '/medlogin' },
         { name: 'SignUp', link: '/signup' },
         { name: 'SignIn', link: '/login' },
     ]
