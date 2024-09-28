@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import Stethoscope  from './../../public/Stethoscope.png'
 import {Link} from 'react-router-dom';
+import { ngrok_url } from '../utils/global';
+import { google_ngrok_url } from '../utils/global';
 
 export function SignUp() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showCPassword, setShowCPassword] = useState(false)
   useEffect(() => {
     google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_KEY,
@@ -23,7 +27,7 @@ export function SignUp() {
     const formData = new FormData();
     formData.append("token", response.credential);
 
-    fetch("https://2403-43-231-238-206.ngrok-free.app/login/", {
+    fetch(`${google_ngrok_url}/login/`, {
       method: "POST",
       body: formData,  
     })
@@ -36,8 +40,24 @@ export function SignUp() {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log('Form submitted:', { fullName, email, password })
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("full_name",fullName);
+    formData.append("email",email);
+    formData.append("password1",password);
+    formData.append("password2",confirmPassword);
+
+    fetch(`${ngrok_url}/auth/register_user/`, {
+      method: "POST",
+      body: formData,  
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log("Backend response: ", data);
+        localStorage.setItem("Bearer", JSON.stringify(data.access_token));
+      })
+      .catch(err => console.error("Error in SignUp: ", err));
+    
   }
 
   return (
@@ -126,6 +146,24 @@ export function SignUp() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOffIcon className="h-5 w-5 text-gray-400" /> : <EyeIcon className="h-5 w-5 text-gray-400" />}
+                </button>
+              </div>
+              <div className="relative">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirm Password:</label>
+                <input
+                  id="confirmPassword"
+                  type={showCPassword ? "text" : "password"}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                  onClick={() => setShowCPassword(!showCPassword)}
+                >
+                  {showCPassword ? <EyeOffIcon className="h-5 w-5 text-gray-400" /> : <EyeIcon className="h-5 w-5 text-gray-400" />}
                 </button>
               </div>
               <button
