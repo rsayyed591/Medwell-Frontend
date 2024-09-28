@@ -8,7 +8,7 @@ import Pricing from './pages/Pricing';
 import Hero from './pages/Hero';
 import { SignUp } from './pages/SignUp';
 import { Login } from './pages/Login';
-import {MedLogin} from './pages/medlogin';
+import {MedLogin} from './pages/MedLogin';
 
 function Layout() {
   const location = useLocation();

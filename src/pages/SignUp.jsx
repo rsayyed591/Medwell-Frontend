@@ -41,61 +41,6 @@ export function SignUp() {
           <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-6">
             Welcome to MedWell
           </h2>
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                placeholder="xyz@gmail.com"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="confirmpassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Confirm Password
-              </label>
-              <input
-                id="confirmpassword"
-                type="password"
-                placeholder="••••••••"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-400 to-red-400 text-white py-2 px-4 rounded-md hover:from-blue-500 hover:to-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 transition duration-200 ease-in-out"
-            >
-              Sign up
-            </button>
-          </form>
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                  Or continue with
-                </span>
-              </div>
-            </div>
             <div className="mt-6" id="signInDiv">
               <button
                 className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 transition duration-200 ease-in-out"
@@ -107,6 +52,5 @@ export function SignUp() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
