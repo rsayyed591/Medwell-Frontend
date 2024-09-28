@@ -20,7 +20,7 @@ export function Login() {
     const formData = new FormData();
     formData.append("token", response.credential);
 
-    fetch(`${google_nrogk_url}/login/`, {
+    fetch(`${google_ngrok_url}/login/`, {
       method: "POST",
       body: formData,  
     })
