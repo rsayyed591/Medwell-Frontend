@@ -1,53 +1,57 @@
-import React, { useEffect, useRef, useState } from 'react'
-import * as d3 from 'd3'
+import React, { useEffect, useState } from 'react'
 import Patient from './../../public/patient.png'
-import { Activity, Heart, Thermometer, Droplet, User, Brain, Menu, X, FileText, PlusCircle, DollarSign, Calendar, Share2, ChevronRight } from 'lucide-react'
+import { Activity, Heart, Thermometer, Droplet, User, Brain, Menu, X, FileText, PlusCircle, DollarSign, Calendar, Share2, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { Link } from 'react-router-dom'
-// Mock data for charts
-const generateChartData = () => Array.from({ length: 20 }, (_, i) => ({ x: i, y: Math.random() * 100 }))
+import { Line } from 'react-chartjs-2'
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js'
 
-const LineChart = ({ data, color }) => {
-  const svgRef = useRef(null)
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
-  useEffect(() => {
-    if (data && svgRef.current) {
-      const svg = d3.select(svgRef.current)
-      svg.selectAll("*").remove() // Clear previous chart
+const defaultChartData = {
+  heartRate: [68, 72, 70, 75, 69, 71, 73, 76, 74, 72],
+  bloodPressure: [120, 118, 122, 119, 121, 123, 120, 118, 117, 119],
+  bloodSugar: [95, 100, 98, 102, 97, 99, 101, 96, 98, 100],
+  cholesterol: [180, 185, 178, 182, 179, 183, 181, 184, 180, 182],
+  bmi: [24.5, 24.3, 24.6, 24.4, 24.5, 24.7, 24.6, 24.5, 24.4, 24.6],
+  mentalHealth: [7, 8, 7, 9, 8, 7, 8, 9, 8, 7]
+}
 
-      const margin = { top: 20, right: 20, bottom: 30, left: 40 }
-      const width = svg.node().getBoundingClientRect().width
-      const height = svg.node().getBoundingClientRect().height
-      const innerWidth = width - margin.left - margin.right
-      const innerHeight = height - margin.top - margin.bottom
+const LineChart = ({ data, color, label }) => {
+  const chartData = {
+    labels: Array.from({ length: data.length }, (_, i) => i + 1),
+    datasets: [
+      {
+        label: label,
+        data: data,
+        borderColor: color,
+        backgroundColor: color,
+        tension: 0.1,
+      },
+    ],
+  }
 
-      const x = d3.scaleLinear().domain([0, data.length - 1]).range([0, innerWidth])
-      const y = d3.scaleLinear().domain([0, d3.max(data, d => d.y)]).range([innerHeight, 0])
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: false,
+      },
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+      },
+    },
+  }
 
-      const line = d3.line()
-        .x((d, i) => x(i))
-        .y(d => y(d.y))
-
-      const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`)
-
-      g.append("path")
-        .datum(data)
-        .attr("fill", "none")
-        .attr("stroke", color)
-        .attr("stroke-width", 2)
-        .attr("d", line)
-
-      g.append("g")
-        .attr("transform", `translate(0,${innerHeight})`)
-        .call(d3.axisBottom(x).ticks(5))
-
-      g.append("g")
-        .call(d3.axisLeft(y).ticks(5))
-    }
-  }, [data, color])
-
-  return <svg ref={svgRef} width="100%" height="100%" viewBox="0 0 300 150" preserveAspectRatio="xMidYMid meet"></svg>
+  return <Line data={chartData} options={options} />
 }
 
 const CircularMetric = ({ value, total, label, icon: Icon, color }) => {
@@ -117,14 +121,15 @@ export default function MedicalDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('Health Check')
   const [isMobile, setIsMobile] = useState(false)
+  const [isProfileExpanded, setIsProfileExpanded] = useState(false)
 
   const charts = [
-    { label: "Heart Rate", color: "#ff6b6b", icon: Heart },
-    { label: "Blood Pressure", color: "#4ecdc4", icon: Activity },
-    { label: "Blood Sugar", color: "#45aaf2", icon: Droplet },
-    { label: "Cholesterol", color: "#fed330", icon: Thermometer },
-    { label: "BMI", color: "#26de81", icon: User },
-    { label: "Mental Health", color: "#a55eea", icon: Brain }
+    { label: "Heart Rate", color: "#ff6b6b", icon: Heart, data: defaultChartData.heartRate },
+    { label: "Blood Pressure", color: "#4ecdc4", icon: Activity, data: defaultChartData.bloodPressure },
+    { label: "Blood Sugar", color: "#45aaf2", icon: Droplet, data: defaultChartData.bloodSugar },
+    { label: "Cholesterol", color: "#fed330", icon: Thermometer, data: defaultChartData.cholesterol },
+    { label: "BMI", color: "#26de81", icon: User, data: defaultChartData.bmi },
+    { label: "Mental Health", color: "#a55eea", icon: Brain, data: defaultChartData.mentalHealth }
   ]
 
   const navItems = [
@@ -135,6 +140,16 @@ export default function MedicalDashboard() {
     { label: "Appointments", icon: Calendar },
     { label: "Share with Doctor", icon: Share2 },
   ]
+
+  const patientInfo = {
+    name: "Vivek Chouhan",
+    id: "12345",
+    age: "45",
+    doctor: "Dr. Rohit Deshmukh",
+    nextAppointment: "15 Oct 2024",
+    bloodType: "O+",
+    allergies: "None",
+  }
 
   useEffect(() => {
     setIsLoaded(true)
@@ -160,7 +175,7 @@ export default function MedicalDashboard() {
                   <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <h3 className="text-xl font-semibold mb-4 text-gray-800">{chart.label}</h3>
                     <div className="h-40">
-                      {isLoaded && <LineChart data={generateChartData()} color={chart.color} />}
+                      {isLoaded && <LineChart data={chart.data} color={chart.color} label={chart.label} />}
                     </div>
                   </div>
                 </AnimatedCard>
@@ -172,8 +187,8 @@ export default function MedicalDashboard() {
               {charts.map((chart, index) => (
                 <AnimatedCard key={index} index={index} delay={index >= 3 ? 0.5 : 0}>
                   <CircularMetric 
-                    value={Math.floor(Math.random() * 100)}
-                    total={100}
+                    value={chart.data[chart.data.length - 1]}
+                    total={Math.max(...chart.data)}
                     label={chart.label}
                     icon={chart.icon}
                     color={chart.color}
@@ -198,6 +213,41 @@ export default function MedicalDashboard() {
     }
   }
 
+  const ProfileSection = () => (
+    <div className={`p-4 ${(!isMobile && !isSidebarOpen) ? 'hidden' : ''}`}>
+      <button
+        onClick={() => setIsProfileExpanded(!isProfileExpanded)}
+        className="w-full flex items-center justify-between mb-4"
+      >
+        <div className="flex items-center">
+          <img src={Patient} alt="Patient" className="w-12 h-12 rounded-full mr-3" />
+          <div>
+            <h2 className="text-lg font-bold text-gray-800">{patientInfo.name}</h2>
+            <p className="text-sm text-gray-600">Patient ID: {patientInfo.id}</p>
+          </div>
+        </div>
+        {isProfileExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+      </button>
+      <AnimatePresence>
+        {isProfileExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-sm space-y-2 mb-4"
+          >
+            <p><strong>Age:</strong> {patientInfo.age}</p>
+            <p><strong>Doctor:</strong> {patientInfo.doctor}</p>
+            <p><strong>Next Appointment:</strong> {patientInfo.nextAppointment}</p>
+            <p><strong>Blood Type:</strong> {patientInfo.bloodType}</p>
+            <p><strong>Allergies:</strong> {patientInfo.allergies}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+
   return (
     <div className="bg-gray-100 text-gray-800 min-h-screen flex">
       {/* Sidebar */}
@@ -221,27 +271,22 @@ export default function MedicalDashboard() {
                 <ChevronRight className="h-6 w-6" />
               </button>
             )}
-            <div className={`p-4 ${(!isMobile && !isSidebarOpen) ? 'hidden' : ''}`}>
-              <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center p-4">
+              {isSidebarOpen ? (
                 <Link to="/" className="text-2xl font-bold">MedWell</Link>
+              ) : (
+                <img src={Patient} alt="Patient" className="w-10 h-8 rounded-full" />
+              )}
+              {(isMobile || isSidebarOpen) && (
                 <button
                   className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200"
                   onClick={toggleSidebar}
                 >
                   <X className="h-6 w-6" />
                 </button>
-              </div>
-              <img src={Patient} alt="Patient" className="w-32 h-32 rounded-full mx-auto mb-6" />
-              <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">Vivek Chouhan</h2>
-              <p className="text-lg text-center text-gray-600 mb-6">Patient ID: 12345</p>
-              <div className="text-lg space-y-2 mb-8">
-                <p><strong className="font-semibold">Age:</strong> 45</p>
-                <p><strong className="font-semibold">Doctor:</strong> Dr. Rohit Deshmukh</p>
-                <p><strong className="font-semibold">Next Appointment:</strong> 15 Oct 2024</p>
-                <p><strong className="font-semibold">Blood Type:</strong> O+</p>
-                <p><strong className="font-semibold">Allergies:</strong> None</p>
-              </div>
+              )}
             </div>
+            <ProfileSection />
             <nav className={`${(!isMobile && !isSidebarOpen) ? 'px-2 mt-4' : 'px-4'}`}>
               {navItems.map((item, index) => (
                 <button
