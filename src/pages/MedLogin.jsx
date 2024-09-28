@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { EyeIcon, EyeOffIcon, Heart, Stethoscope, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom' // Adjust Link import as per your routing
 
-export default function MedLogin() {
+export function MedLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
