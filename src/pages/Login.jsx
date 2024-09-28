@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { EyeIcon, EyeOffIcon, Heart, Stethoscope, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom' // Adjust Link import as per your routing
-
+import { google_ngrok_url } from '../utils/global';
 export function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -16,13 +16,11 @@ export function Login() {
       { theme: "outline", size: "large" }
     );
   }, []);
-  console.log(import.meta.env.VITE_GOOGLE_KEY)
-  console.log("HI")
   const handleCallbackResponse = (response) => {
     const formData = new FormData();
     formData.append("token", response.credential);
 
-    fetch("https://2403-43-231-238-206.ngrok-free.app/login/", {
+    fetch(`${google_nrogk_url}/login/`, {
       method: "POST",
       body: formData,  
     })

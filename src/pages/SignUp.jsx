@@ -3,6 +3,7 @@ import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import Stethoscope  from './../../public/Stethoscope.png'
 import {Link} from 'react-router-dom';
 import { ngrok_url } from '../utils/global';
+import { google_ngrok_url } from '../utils/global';
 
 export function SignUp() {
   const [fullName, setFullName] = useState('')
@@ -26,7 +27,7 @@ export function SignUp() {
     const formData = new FormData();
     formData.append("token", response.credential);
 
-    fetch("https://2403-43-231-238-206.ngrok-free.app/login/", {
+    fetch(`${google_ngrok_url}/login/`, {
       method: "POST",
       body: formData,  
     })
