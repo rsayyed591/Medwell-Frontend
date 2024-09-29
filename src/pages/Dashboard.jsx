@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import Patient from './../../public/patient.png'
-import { Activity, Heart, Thermometer, Droplet, User, Brain, Menu, X, FileText, PlusCircle, DollarSign, Calendar, Share2, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react'
+import { User, Heart, FileText, PlusCircle, DollarSign, Calendar, Share2, ChevronRight, ChevronUp, ChevronDown, Menu, X, Activity, Droplet, Thermometer, Brain } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useInView } from 'react-intersection-observer'
 import { Link } from 'react-router-dom'
-import { Line } from 'react-chartjs-2'
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js'
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
+import Profile from './Patient/Profile'
+import HealthCheck from './Patient/HealthCheck'
+import Reports from './Patient/Reports'
+import AddReport from './Patient/AddReport'
+import ExpenseTracker from './Patient/ExpenseTracker'
+import Appointments from './Patient/Appointments'
+import ShareWithDoctor from './Patient/ShareWithDoctor'
 
 const defaultChartData = {
   heartRate: [68, 72, 70, 75, 69, 71, 73, 76, 74, 72],
@@ -18,110 +20,22 @@ const defaultChartData = {
   mentalHealth: [7, 8, 7, 9, 8, 7, 8, 9, 8, 7]
 }
 
-const LineChart = ({ data, color, label }) => {
-  const chartData = {
-    labels: Array.from({ length: data.length }, (_, i) => i + 1),
-    datasets: [
-      {
-        label: label,
-        data: data,
-        borderColor: color,
-        backgroundColor: color,
-        tension: 0.1,
-      },
-    ],
-  }
-
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      y: {
-        beginAtZero: false,
-      },
-    },
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        mode: 'index',
-        intersect: false,
-      },
-    },
-  }
-
-  return <Line data={chartData} options={options} />
-}
-
-const CircularMetric = ({ value, total, label, icon: Icon, color }) => {
-  const percentage = (value / total) * 100;
-  return (
-    <div className="flex items-center space-x-6">
-      <div className="relative w-24 h-24">
-        <svg className="w-full h-full" viewBox="0 0 36 36">
-          <path
-            d="M18 2.0845
-              a 15.9155 15.9155 0 0 1 0 31.831
-              a 15.9155 15.9155 0 0 1 0 -31.831"
-            fill="none"
-            stroke="#e6e6e6"
-            strokeWidth="3"
-          />
-          <path
-            d="M18 2.0845
-              a 15.9155 15.9155 0 0 1 0 31.831
-              a 15.9155 15.9155 0 0 1 0 -31.831"
-            fill="none"
-            stroke={color}
-            strokeWidth="3"
-            strokeDasharray={`${percentage}, 100`}
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Icon className="w-12 h-12 text-gray-600" />
-        </div>
-      </div>
-      <div>
-        <div className="text-3xl font-bold" style={{ color }}>
-          {value}
-        </div>
-        <div className="text-sm text-gray-600">{label}</div>
-      </div>
-    </div>
-  );
-};
-
-const AnimatedCard = ({ children, index, delay = 0 }) => {
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  })
-
-  const variants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0 },
-  }
-
-  return (
-    <motion.div
-      ref={ref}
-      initial="hidden"
-      animate={inView ? "visible" : "hidden"}
-      variants={variants}
-      transition={{ duration: 0.5, delay: index * 0.1 + delay }}
-    >
-      {children}
-    </motion.div>
-  )
-}
-
 export default function MedicalDashboard() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('Health Check')
   const [isMobile, setIsMobile] = useState(false)
   const [isProfileExpanded, setIsProfileExpanded] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [patientInfo, setPatientInfo] = useState({
+    name: "Vivek Chouhan",
+    id: "12345",
+    age: "45",
+    doctor: "Dr. Rohit Deshmukh",
+    nextAppointment: "15 Oct 2024",
+    bloodType: "O+",
+    allergies: "None",
+  })
 
   const charts = [
     { label: "Heart Rate", color: "#ff6b6b", icon: Heart, data: defaultChartData.heartRate },
@@ -133,6 +47,7 @@ export default function MedicalDashboard() {
   ]
 
   const navItems = [
+    { label: "Profile", icon: User },
     { label: "Health Check", icon: Heart },
     { label: "Reports", icon: FileText },
     { label: "Add Report", icon: PlusCircle },
@@ -140,16 +55,6 @@ export default function MedicalDashboard() {
     { label: "Appointments", icon: Calendar },
     { label: "Share with Doctor", icon: Share2 },
   ]
-
-  const patientInfo = {
-    name: "Vivek Chouhan",
-    id: "12345",
-    age: "45",
-    doctor: "Dr. Rohit Deshmukh",
-    nextAppointment: "15 Oct 2024",
-    bloodType: "O+",
-    allergies: "None",
-  }
 
   useEffect(() => {
     setIsLoaded(true)
@@ -163,51 +68,38 @@ export default function MedicalDashboard() {
     setIsSidebarOpen(!isSidebarOpen)
   }
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setPatientInfo(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSave = () => {
+    console.log('Updated patient info:', patientInfo)
+    setIsEditMode(false)
+  }
+
   const renderContent = () => {
     switch (activeSection) {
+      case 'Profile':
+        return <Profile 
+          patientInfo={patientInfo} 
+          isEditMode={isEditMode} 
+          setIsEditMode={setIsEditMode} 
+          handleInputChange={handleInputChange} 
+          handleSave={handleSave} 
+        />
       case 'Health Check':
-        return (
-          <>
-            {/* Line Charts */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {charts.map((chart, index) => (
-                <AnimatedCard key={index} index={index + 1}>
-                  <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{chart.label}</h3>
-                    <div className="h-40">
-                      {isLoaded && <LineChart data={chart.data} color={chart.color} label={chart.label} />}
-                    </div>
-                  </div>
-                </AnimatedCard>
-              ))}
-            </div>
-
-            {/* Circular Metrics */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              {charts.map((chart, index) => (
-                <AnimatedCard key={index} index={index} delay={index >= 3 ? 0.5 : 0}>
-                  <CircularMetric 
-                    value={chart.data[chart.data.length - 1]}
-                    total={Math.max(...chart.data)}
-                    label={chart.label}
-                    icon={chart.icon}
-                    color={chart.color}
-                  />
-                </AnimatedCard>
-              ))}
-            </div>
-          </>
-        )
+        return <HealthCheck isLoaded={isLoaded} charts={charts} />
       case 'Reports':
-        return <div className="text-2xl">Your Reports</div>
+        return <Reports />
       case 'Add Report':
-        return <div className="text-2xl">Add a New Report</div>
+        return <AddReport />
       case 'Expense Tracker':
-        return <div className="text-2xl">Expense Tracker</div>
+        return <ExpenseTracker />
       case 'Appointments':
-        return <div className="text-2xl">Your Appointments</div>
+        return <Appointments />
       case 'Share with Doctor':
-        return <div className="text-2xl">Share Information with Your Doctor</div>
+        return <ShareWithDoctor />
       default:
         return <div className="text-2xl">Select a section from the sidebar</div>
     }
@@ -327,7 +219,6 @@ export default function MedicalDashboard() {
         {renderContent()}
       </div>
 
-      {/* Overlay for mobile when sidebar is open */}
       {isMobile && isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40"
