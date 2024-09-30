@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, FileText, AlertCircle, ExternalLink, X } from 'lucide-react'
 import Modal from 'react-modal'
@@ -59,23 +59,23 @@ export default function Reports() {
   const [selectedReport, setSelectedReport] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const handleReportClick = (report) => {
+  const handleReportClick = useCallback((report) => {
     setSelectedReport(report)
-  }
+  }, [])
 
-  const handleBackClick = () => {
+  const handleBackClick = useCallback(() => {
     setSelectedReport(null)
-  }
+  }, [])
 
-  const handleViewReport = () => {
+  const handleViewReport = useCallback(() => {
     setIsModalOpen(true)
-  }
+  }, [])
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setIsModalOpen(false)
-  }
+  }, [])
 
-  const ReportCard = ({ report, onClick, index }) => (
+  const ReportCard = useCallback(({ report, onClick, index }) => (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
@@ -88,9 +88,9 @@ export default function Reports() {
       <h3 className="text-xl font-semibold mb-3">{report.title}</h3>
       <p className="text-sm text-gray-600">{report.date}</p>
     </motion.div>
-  )
+  ), [])
 
-  const DetailedReport = ({ report }) => (
+  const DetailedReport = useCallback(({ report }) => (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
@@ -179,7 +179,7 @@ export default function Reports() {
         })}
       </motion.div>
     </motion.div>
-  )
+  ), [handleBackClick, handleViewReport])
 
   return (
     <div className="container mx-auto px-4 py-8">

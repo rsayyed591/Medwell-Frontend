@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Bars3BottomRightIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import { Link } from 'react-router-dom'
 
