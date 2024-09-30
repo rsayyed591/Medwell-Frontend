@@ -1,10 +1,8 @@
+export default function Pricing() {
 
-const Pricing = () => {
   return (
-    <div>
-      Pricing
+    <div >
+        Pricing
     </div>
   )
 }
-
-export default Pricing

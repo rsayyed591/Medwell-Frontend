@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { EyeIcon, EyeOffIcon, Heart, Stethoscope, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom' // Adjust Link import as per your routing
 import { google_ngrok_url } from '../utils/global';

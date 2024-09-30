@@ -1,4 +1,3 @@
-import React from 'react'
 import { Edit, Save } from 'lucide-react'
 import Patient from './../../../public/patient.png'
 

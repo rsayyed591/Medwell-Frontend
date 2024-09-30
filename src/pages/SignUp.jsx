@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import Stethoscope  from './../../public/Stethoscope.png'
 import {Link} from 'react-router-dom';

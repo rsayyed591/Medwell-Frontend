@@ -1,4 +1,3 @@
-import React from 'react';
 import BG from './../../public/hero.jpg';
 import { motion } from 'framer-motion';
 

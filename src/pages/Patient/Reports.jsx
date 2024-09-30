@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, FileText, AlertCircle, ExternalLink, X } from 'lucide-react'
 import Modal from 'react-modal'
 
@@ -74,34 +75,49 @@ export default function Reports() {
     setIsModalOpen(false)
   }
 
-  const ReportCard = ({ report, onClick }) => (
-    <div
-      className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow"
+  const ReportCard = ({ report, onClick, index }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className="bg-white p-6 rounded-lg shadow-md cursor-pointer"
       onClick={() => onClick(report)}
     >
       <h3 className="text-xl font-semibold mb-3">{report.title}</h3>
       <p className="text-sm text-gray-600">{report.date}</p>
-    </div>
+    </motion.div>
   )
 
   const DetailedReport = ({ report }) => (
-    <div className="bg-white p-6 rounded-lg shadow-lg">
-      <button
-        className="mb-4 flex items-center text-blue-600 hover:text-blue-800"
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -50 }}
+      transition={{ duration: 0.5 }}
+      className="bg-white p-6 rounded-lg shadow-lg"
+    >
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="mb-4 flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-300"
         onClick={handleBackClick}
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to Reports
-      </button>
+      </motion.button>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">{report.title}</h2>
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={handleViewReport}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded flex items-center"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded flex items-center transition-colors duration-300"
         >
           <ExternalLink className="w-4 h-4 mr-2" />
           View Full Report
-        </button>
+        </motion.button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div>
@@ -122,12 +138,27 @@ export default function Reports() {
         <p className="text-gray-700">{report.summary}</p>
       </div>
       <h3 className="text-lg font-semibold mb-4">Detailed Results</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={{
+          visible: {
+            transition: {
+              staggerChildren: 0.1
+            }
+          }
+        }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
         {Object.entries(report.elements).map(([name, data]) => {
           const isInRange = data.value >= data.min && data.value <= data.max
           return (
-            <div
+            <motion.div
               key={name}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 }
+              }}
               className={`p-4 rounded-lg ${isInRange ? 'bg-green-100' : 'bg-red-100'}`}
             >
               <h4 className="font-semibold mb-2 capitalize">{name.replace(/([A-Z])/g, ' $1').trim()}</h4>
@@ -143,58 +174,80 @@ export default function Reports() {
                   Out of normal range
                 </p>
               )}
-            </div>
+            </motion.div>
           )
         })}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {selectedReport ? (
-        <>
-          <DetailedReport report={selectedReport} />
-          <Modal
-            isOpen={isModalOpen}
-            onRequestClose={closeModal}
-            contentLabel="View Full Report"
-            className="fixed inset-0 flex items-center justify-center"
-            overlayClassName="fixed inset-0 bg-black bg-opacity-75"
+      <AnimatePresence mode="wait">
+        {selectedReport ? (
+          <motion.div
+            key="detailed-report"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            <div className="bg-white rounded-lg w-11/12 h-5/6 max-w-4xl max-h-full flex flex-col">
-              <div className="flex justify-between items-center p-4 border-b">
-                <h2 className="text-2xl font-bold">Full Report: {selectedReport.title}</h2>
-                <button
-                  onClick={closeModal}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              <div className="flex-grow relative">
-                <iframe
-                  src={`${selectedReport.reportUrl.replace('/view', '/preview')}#view=FitH`}
-                  title="Report PDF"
-                  className="absolute inset-0 w-full h-full"
-                />
-              </div>
+            <DetailedReport report={selectedReport} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="report-list"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <h1 className="text-3xl font-bold mb-6 flex items-center">
+              <FileText className="w-8 h-8 mr-2" />
+              Your Reports
+            </h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mockReports.map((report, index) => (
+                <ReportCard key={report.id} report={report} onClick={handleReportClick} index={index} />
+              ))}
             </div>
-          </Modal>
-        </>
-      ) : (
-        <>
-          <h1 className="text-3xl font-bold mb-6 flex items-center">
-            <FileText className="w-8 h-8 mr-2" />
-            Your Reports
-          </h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockReports.map((report) => (
-              <ReportCard key={report.id} report={report} onClick={handleReportClick} />
-            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        contentLabel="View Full Report"
+        className="fixed inset-0 flex items-center justify-center"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-75"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.3 }}
+          className="bg-white rounded-lg w-11/12 h-5/6 max-w-4xl max-h-full flex flex-col"
+        >
+          <div className="flex justify-between items-center p-4 border-b">
+            <h2 className="text-2xl font-bold">Full Report: {selectedReport?.title}</h2>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={closeModal}
+              className="text-gray-500 hover:text-gray-700 transition-colors duration-300"
+            >
+              <X className="w-6 h-6" />
+            </motion.button>
           </div>
-        </>
-      )}
+          <div className="flex-grow relative">
+            <iframe
+              src={`${selectedReport?.reportUrl.replace('/view', '/preview')}#view=FitH`}
+              title="Report PDF"
+              className="absolute inset-0 w-full h-full"
+            />
+          </div>
+        </motion.div>
+      </Modal>
     </div>
   )
 }
