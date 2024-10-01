@@ -1,12 +1,14 @@
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, FileText, AlertCircle, ExternalLink, X } from 'lucide-react'
+import { ArrowLeft, FileText, AlertCircle, ExternalLink, X, Download } from 'lucide-react'
 import Modal from 'react-modal'
+import jsPDF from 'jspdf'
+import 'jspdf-autotable'
 
 // Set the app element for accessibility
 Modal.setAppElement('#root') // Adjust this if your app's root element has a different id
 
-// Mock data for demonstration
+// Mock data for demonstration (same as before)
 const mockReports = [
   {
     id: 1,
@@ -75,6 +77,69 @@ export default function Reports() {
     setIsModalOpen(false)
   }, [])
 
+  const handleDownloadPDF = useCallback((report) => {
+    const doc = new jsPDF()
+
+    // Set custom fonts
+    doc.setFont("helvetica", "bold")
+
+    // Add title
+    doc.setFontSize(24)
+    doc.setTextColor(66, 135, 245)
+    doc.text(report.title, 20, 20)
+
+    // Add report details
+    doc.setFont("helvetica", "normal")
+    doc.setFontSize(12)
+    doc.setTextColor(0, 0, 0)
+    doc.text(`Date: ${report.date}`, 20, 35)
+    doc.text(`Collection Date: ${report.collectionDate}`, 20, 42)
+    doc.text(`Doctor: ${report.doctorName}`, 20, 49)
+
+    // Add summary
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(16)
+    doc.text('Summary', 20, 60)
+    doc.setFont("helvetica", "normal")
+    doc.setFontSize(12)
+    const splitSummary = doc.splitTextToSize(report.summary, 170)
+    doc.text(splitSummary, 20, 70)
+
+    // Add detailed results
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(16)
+    doc.text('Detailed Results', 20, 90)
+
+    const tableData = Object.entries(report.elements).map(([name, data]) => [
+      name.replace(/([A-Z])/g, ' $1').trim(),
+      `${data.value} ${data.unit}`,
+      `${data.min} - ${data.max} ${data.unit}`,
+      data.value >= data.min && data.value <= data.max ? 'In Range' : 'Out of Range'
+    ])
+
+    doc.autoTable({
+      startY: 100,
+      head: [['Test', 'Value', 'Normal Range', 'Status']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [66, 135, 245], textColor: [255, 255, 255] },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+      styles: { cellPadding: 5, fontSize: 10 }
+    })
+
+    // Add footer
+    const pageCount = doc.internal.getNumberOfPages()
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i)
+      doc.setFontSize(10)
+      doc.setTextColor(150)
+      doc.text('MedWell AI © 2024 | Empowering Health Through Innovation', 20, doc.internal.pageSize.height - 10)
+    }
+
+    // Save the PDF
+    doc.save(`${report.title.replace(/\s+/g, '_')}_Report.pdf`)
+  }, [])
+
   const ReportCard = useCallback(({ report, onClick, index }) => (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -107,19 +172,30 @@ export default function Reports() {
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to Reports
       </motion.button>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">{report.title}</h2>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleViewReport}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded flex items-center transition-colors duration-300"
-        >
-          <ExternalLink className="w-4 h-4 mr-2" />
-          View Full Report
-        </motion.button>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+        <h2 className="text-2xl font-bold mb-2 sm:mb-0">{report.title}</h2>
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => handleDownloadPDF(report)}
+            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded flex items-center justify-center transition-colors duration-300 text-sm"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download PDF
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleViewReport}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded flex items-center justify-center transition-colors duration-300 text-sm"
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
+            View Full Report
+          </motion.button>
+        </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div>
           <p className="text-sm text-gray-600">Report Date</p>
           <p className="font-semibold">{report.date}</p>
@@ -148,7 +224,7 @@ export default function Reports() {
             }
           }
         }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
         {Object.entries(report.elements).map(([name, data]) => {
           const isInRange = data.value >= data.min && data.value <= data.max
@@ -179,7 +255,7 @@ export default function Reports() {
         })}
       </motion.div>
     </motion.div>
-  ), [handleBackClick, handleViewReport])
+  ), [handleBackClick, handleViewReport, handleDownloadPDF])
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -206,7 +282,7 @@ export default function Reports() {
               <FileText className="w-8 h-8 mr-2" />
               Your Reports
             </h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {mockReports.map((report, index) => (
                 <ReportCard key={report.id} report={report} onClick={handleReportClick} index={index} />
               ))}
@@ -240,11 +316,14 @@ export default function Reports() {
             </motion.button>
           </div>
           <div className="flex-grow relative">
-            <iframe
-              src={`${selectedReport?.reportUrl.replace('/view', '/preview')}#view=FitH`}
-              title="Report PDF"
-              className="absolute inset-0 w-full h-full"
-            />
+            <object
+              data={selectedReport?.reportUrl.replace('/view', '/preview')}
+              type="application/pdf"
+              width="100%"
+              height="100%"
+            >
+              <p>Unable to display PDF file. <a href={selectedReport?.reportUrl} target="_blank" rel="noopener noreferrer">Download</a> instead.</p>
+            </object>
           </div>
         </motion.div>
       </Modal>
