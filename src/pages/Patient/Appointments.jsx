@@ -1,6 +1,4 @@
-'use client'
-
-import React, { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, momentLocalizer, Views } from 'react-big-calendar'
 import moment from 'moment'
@@ -17,7 +15,7 @@ const initialAppointments = [
     title: 'Annual Checkup',
     start: new Date(2024, 9, 15, 10, 0),
     end: new Date(2024, 9, 15, 11, 0),
-    doctor: 'Dr. Smith',
+    doctor: 'Nishikant',
     notes: 'Bring medical history',
     color: '#3b82f6'
   },
@@ -26,7 +24,7 @@ const initialAppointments = [
     title: 'Dental Cleaning',
     start: new Date(2024, 9, 18, 14, 30),
     end: new Date(2024, 9, 18, 15, 30),
-    doctor: 'Dr. Johnson',
+    doctor: 'Vivek',
     notes: 'Floss beforehand',
     color: '#10b981'
   },
@@ -35,7 +33,7 @@ const initialAppointments = [
     title: 'Eye Exam',
     start: new Date(2024, 9, 22, 11, 0),
     end: new Date(2024, 9, 22, 12, 0),
-    doctor: 'Dr. Lee',
+    doctor: 'Rehan',
     notes: 'Bring current glasses',
     color: '#f59e0b'
   }
