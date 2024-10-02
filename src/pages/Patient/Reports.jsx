@@ -8,14 +8,14 @@ import 'jspdf-autotable'
 // Set the app element for accessibility
 Modal.setAppElement('#root') // Adjust this if your app's root element has a different id
 
-// Mock data for demonstration (same as before)
+// Mock data for demonstration
 const mockReports = [
   {
     id: 1,
     title: 'Annual Checkup',
     date: '28 Sept, 2024',
     collectionDate: '25 Sept, 2024',
-    doctorName: 'Dr. Smith',
+    doctorName: 'Dr. Nishi',
     summary: 'Overall health is good. Calcium levels are slightly elevated.',
     elements: {
       calcium: { max: 10.2, min: 8.5, unit: 'mg/dL', value: 10.5 },
@@ -30,7 +30,7 @@ const mockReports = [
     title: 'Lipid Panel',
     date: '15 Oct, 2024',
     collectionDate: '12 Oct, 2024',
-    doctorName: 'Dr. Johnson',
+    doctorName: 'Dr. Rehan',
     summary: 'Cholesterol levels are within normal range.',
     elements: {
       totalCholesterol: { max: 200, min: 125, unit: 'mg/dL', value: 180 },
@@ -45,7 +45,7 @@ const mockReports = [
     title: "Nutrient Deficiency Panel",
     date: "15 Nov, 2024",
     collectionDate: "12 Nov, 2024",
-    doctorName: "Dr. Kumar",
+    doctorName: "Dr. Vivek",
     summary: "Several nutrient levels are below the normal range, indicating deficiencies in calcium, iron, and vitamin D.",
     elements: {
       calcium: { max: 10.5, min: 8.5, unit: "mg/dL", value: 7.9 },
@@ -70,8 +70,10 @@ export default function Reports() {
   }, [])
 
   const handleViewReport = useCallback(() => {
-    setIsModalOpen(true)
-  }, [])
+    if (selectedReport) {
+      setIsModalOpen(true)
+    }
+  }, [selectedReport])
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false)
@@ -80,58 +82,88 @@ export default function Reports() {
   const handleDownloadPDF = useCallback((report) => {
     const doc = new jsPDF()
 
-    // Set custom fonts
-    doc.setFont("helvetica", "bold")
+    // Add border
+    doc.rect(5, 5, 200, 287)
 
-    // Add title
-    doc.setFontSize(24)
-    doc.setTextColor(66, 135, 245)
-    doc.text(report.title, 20, 20)
+    // Add logo and quote
+    doc.setFontSize(28)
+    doc.setTextColor(128, 0, 128) // Purple color
+    doc.text("MEDWELL", 20, 25)
+    
+    doc.setFontSize(10)
+    doc.setTextColor(100, 100, 100) // Gray color
+    doc.text("Empowering Health Through Innovation", 20, 32)
 
-    // Add report details
-    doc.setFont("helvetica", "normal")
-    doc.setFontSize(12)
+    // Add decorative line under the quote
+    doc.setDrawColor(128, 0, 128) // Purple color
+    doc.line(20, 35, 100, 35)
+
+    // Add report title vertically
+    doc.setFontSize(16)
+    doc.setTextColor(128, 0, 128) // Purple color
+    doc.text("R E P O R T", 200, 40, null, 90)
+
+    // Add patient details with improved alignment
+    doc.setFontSize(10)
     doc.setTextColor(0, 0, 0)
-    doc.text(`Date: ${report.date}`, 20, 35)
-    doc.text(`Collection Date: ${report.collectionDate}`, 20, 42)
-    doc.text(`Doctor: ${report.doctorName}`, 20, 49)
+    const detailsX = 20
+    const valuesX = 50
+    doc.text("CID", detailsX, 45)
+    doc.text(`: ${report.id}`, valuesX, 45)
+    doc.text("Name", detailsX, 51)
+    doc.text(`: ${report.title}`, valuesX, 51)
+    doc.text("Age / Gender", detailsX, 57)
+    doc.text(": Not Available", valuesX, 57)
+    doc.text("Consulting Dr.", detailsX, 63)
+    doc.text(`: ${report.doctorName}`, valuesX, 63)
+    doc.text("Reg. Location", detailsX, 69)
+    doc.text(": Not Available", valuesX, 69)
+
+    // Add collection and reporting dates at the right end
+    const datesX = 140
+    doc.text(`Collected : ${report.collectionDate}`, datesX, 63)
+    doc.text(`Reported  : ${report.date}`, datesX, 69)
+
+    // Add horizontal line
+    doc.line(20, 75, 190, 75)
+
+    // Add report title
+    doc.setFontSize(14)
+    doc.setFont("helvetica", "bold")
+    doc.text(report.title, 20, 85)
 
     // Add summary
-    doc.setFont("helvetica", "bold")
-    doc.setFontSize(16)
-    doc.text('Summary', 20, 60)
     doc.setFont("helvetica", "normal")
-    doc.setFontSize(12)
+    doc.setFontSize(10)
     const splitSummary = doc.splitTextToSize(report.summary, 170)
-    doc.text(splitSummary, 20, 70)
+    doc.text(splitSummary, 20, 95)
 
     // Add detailed results
-    doc.setFont("helvetica", "bold")
-    doc.setFontSize(16)
-    doc.text('Detailed Results', 20, 90)
-
-    const tableData = Object.entries(report.elements).map(([name, data]) => [
-      name.replace(/([A-Z])/g, ' $1').trim(),
-      `${data.value} ${data.unit}`,
-      `${data.min} - ${data.max} ${data.unit}`,
-      data.value >= data.min && data.value <= data.max ? 'In Range' : 'Out of Range'
-    ])
+    const tableData = Object.entries(report.elements).map(([name, data]) => {
+      const isInRange = data.value >= data.min && data.value <= data.max
+      return [
+        name.replace(/([A-Z])/g, ' $1').trim(),
+        `${data.value} ${data.unit}`,
+        `${data.min} - ${data.max} ${data.unit}`,
+        { content: isInRange ? 'In Range' : 'Out of Range', styles: { fillColor: isInRange ? [220, 252, 231] : [254, 226, 226], textColor: isInRange ? [22, 101, 52] : [185, 28, 28] } }
+      ]
+    })
 
     doc.autoTable({
-      startY: 100,
+      startY: 105,
       head: [['Test', 'Value', 'Normal Range', 'Status']],
       body: tableData,
       theme: 'grid',
-      headStyles: { fillColor: [66, 135, 245], textColor: [255, 255, 255] },
-      alternateRowStyles: { fillColor: [240, 240, 240] },
-      styles: { cellPadding: 5, fontSize: 10 }
+      headStyles: { fillColor: [128, 0, 128], textColor: [255, 255, 255] },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      styles: { cellPadding: 5, fontSize: 8 }
     })
 
     // Add footer
     const pageCount = doc.internal.getNumberOfPages()
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i)
-      doc.setFontSize(10)
+      doc.setFontSize(8)
       doc.setTextColor(150)
       doc.text('MedWell AI © 2024 | Empowering Health Through Innovation', 20, doc.internal.pageSize.height - 10)
     }
@@ -232,10 +264,21 @@ export default function Reports() {
             <motion.div
               key={name}
               variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: { opacity: 1, y: 0 }
+                hidden: { opacity: 0, y: 20, scale: 0.9 },
+                visible: { 
+                  opacity: 1, 
+                  y: 0, 
+                  scale: 1,
+                  transition: {
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 10
+                  }
+                }
               }}
-              className={`p-4 rounded-lg ${isInRange ? 'bg-green-100' : 'bg-red-100'}`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`p-4 rounded-lg ${isInRange ? 'bg-green-100' : 'bg-red-100'} cursor-pointer`}
             >
               <h4 className="font-semibold mb-2 capitalize">{name.replace(/([A-Z])/g, ' $1').trim()}</h4>
               <p className="text-lg">
@@ -316,14 +359,17 @@ export default function Reports() {
             </motion.button>
           </div>
           <div className="flex-grow relative">
-            <object
-              data={selectedReport?.reportUrl.replace('/view', '/preview')}
-              type="application/pdf"
-              width="100%"
-              height="100%"
-            >
-              <p>Unable to display PDF file. <a href={selectedReport?.reportUrl} target="_blank" rel="noopener noreferrer">Download</a> instead.</p>
-            </object>
+            {selectedReport && (
+              <iframe
+                src={selectedReport?.reportUrl.replace('/view', '/preview')}
+                width="100%"
+                height="100%"
+                title="Full Report"
+                className="absolute inset-0"
+              >
+                <p>Your browser does not support iframes. <a href={selectedReport?.reportUrl} target="_blank" rel="noopener noreferrer">Open report in new tab</a></p>
+              </iframe>
+            )}
           </div>
         </motion.div>
       </Modal>
