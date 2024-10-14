@@ -44,7 +44,7 @@ Medwell-Frontend is a modern, user-friendly web application designed to help pat
    npm run dev
    ```
 
-4. Open your browser and navigate to `http://localhost:3000` to view the application.
+4. Open your browser and navigate to `http://localhost:5173` to view the application.
 
 ## Project Structure
 
