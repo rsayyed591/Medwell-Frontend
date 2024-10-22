@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useSpring, animated, config } from '@react-spring/web';
 
-export default function Loader() {
-  const [isLoading, setIsLoading] = useState(true);
+export default function Loader({ onLoadingComplete }) {
   const [text, setText] = useState('');
 
-  const fadeOut = useSpring({
-    opacity: isLoading ? 1 : 0,
+  const slideUp = useSpring({
+    from: { transform: 'translateY(0%)' },
+    to: { transform: 'translateY(-100%)' },
     config: { duration: 500 },
-    onRest: () => {
-      if (!isLoading) {
-        console.log('Loader has finished');
-      }
-    },
+    delay: 2500, // Delay the slide up animation
+    onRest: onLoadingComplete,
   });
 
   const logoAnimation = useSpring({
@@ -31,7 +28,6 @@ export default function Loader() {
         currentIndex++;
       } else {
         clearInterval(intervalId);
-        setTimeout(() => setIsLoading(false), 500); // Wait for 500ms before ending the loading state
       }
     }, 200); // Change letter every 200ms
 
@@ -39,9 +35,9 @@ export default function Loader() {
   }, []);
 
   return (
-    <animated.div style={fadeOut} className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-r from-[#2c5364] via-[#203a43] to-[#0f2027] z-50">
+    <animated.div style={slideUp} className="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-r from-[#2c5364] via-[#203a43] to-[#0f2027] z-50">
       <animated.div style={logoAnimation} className="mb-4">
-        <h1 className="text-white text-6xl font-bold tracking-wider">
+        <h1 className="text-white text-4xl sm:text-5xl md:text-6xl font-bold tracking-wider">
           {text}
         </h1>
       </animated.div>

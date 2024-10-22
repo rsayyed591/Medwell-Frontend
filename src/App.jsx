@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
-import './App.css';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Loader from './pages/components/Loader';
 import Navbar from './pages/components/Navbar';
 import Footer from './pages/components/Footer';
-import Loader from './pages/components/Loader';
 import Dashboard from './pages/Dashboard';
 import About from './pages/About';
 import Pricing from './pages/Pricing';
@@ -14,24 +13,18 @@ import { Login } from './pages/Login';
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Simulate some initialization process
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 3000); // Adjust this time as needed
-
-    return () => clearTimeout(timer);
-  }, []);
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {isLoading ? (
-        <Loader />
-      ) : (
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
+      <Loader onLoadingComplete={handleLoadingComplete} />
+      <div className={`transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
         <Router>
           <Layout />
         </Router>
-      )}
+      </div>
     </div>
   );
 }
