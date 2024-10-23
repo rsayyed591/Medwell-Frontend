@@ -1,54 +1,84 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { EyeIcon, EyeOffIcon, Heart, Stethoscope, UserPlus } from 'lucide-react'
-import { Link } from 'react-router-dom' // Adjust Link import as per your routing
-import { google_ngrok_url } from '../utils/global';
+import { google_ngrok_url, ngrok_url } from '../utils/global'
+
 export function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  useEffect(() => {
-    google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_KEY,
-      callback: handleCallbackResponse
-    });
-    google.accounts.id.renderButton(
-      document.getElementById("signInDiv"),
-      { theme: "outline", size: "large" }
-    );
-  }, []);
-  const handleCallbackResponse = (response) => {
-    const formData = new FormData();
-    formData.append("token", response.credential);
+  const [errorMessage, setErrorMessage] = useState('')
+  const navigate = useNavigate()
 
-    fetch(`${google_ngrok_url}/login/`, {
+  useEffect(() => {
+    const token=localStorage.getItem("Bearer")
+    if(token){
+      navigate("/Dashboard")
+    }
+    const initializeGoogleSignIn = () => {
+      if (window.google && window.google.accounts) {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_KEY,
+          callback: handleCallbackResponse
+        })
+        window.google.accounts.id.renderButton(
+          document.getElementById("signInDiv"),
+          { theme: "outline", size: "large" }
+        )
+      } else {
+        setTimeout(initializeGoogleSignIn, 100)
+      }
+    }
+
+    initializeGoogleSignIn()
+  }, [])
+
+  const handleCallbackResponse = (response) => {
+    const formData = new FormData()
+    formData.append("token", response.credential)
+
+    fetch(`${google_ngrok_url}/auth/google_login/`, {
       method: "POST",
       body: formData,  
     })
       .then(res => res.json())
       .then(data => {
-        console.log("Backend response: ", data);
-        localStorage.setItem("User", JSON.stringify(data));
+        console.log("Backend response: ", data)
+        localStorage.setItem("User", JSON.stringify(data))
+        navigate("/Dashboard")
       })
-      .catch(err => console.error("Error in Google login: ", err));
-  };
+      .catch(err => {
+        console.error("Error in Google login: ", err)
+        setErrorMessage("An error occurred during Google login. Please try again.")
+      })
+  }
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("email",email);
-    formData.append("password1",password);
+    e.preventDefault()
+    setErrorMessage('')
+    const formData = new FormData()
+    formData.append("email", email)
+    formData.append("password", password)
 
-    fetch(`${ngrok_url}/auth/register_user/`, {
+    fetch(`${ngrok_url}/auth/login_user/`, {
       method: "POST",
       body: formData,  
     })
       .then(res => res.json())
       .then(data => {
-        console.log("Backend response: ", data);
-        localStorage.setItem("Bearer", JSON.stringify(data.access_token));
+        console.log("Backend response: ", data)
+        if (data.mssg === 'Incorrct Credentials' && data.status === 0) {
+          setErrorMessage('Incorrect email or password. Please try again.')
+        } else {
+          localStorage.setItem("Bearer", data.access_token)
+          localStorage.setItem("User", JSON.stringify({ email: email }))
+          navigate("/Dashboard")
+        }
       })
-      .catch(err => console.error("Error in SignUp: ", err));
-    
+      .catch(err => {
+        console.error("Error in Login: ", err)
+        setErrorMessage("An error occurred. Please try again.")
+      })
   }
 
   return (
@@ -98,6 +128,9 @@ export function Login() {
               </div>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {errorMessage && (
+                <div className="text-red-500 text-sm text-center">{errorMessage}</div>
+              )}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
                 <input

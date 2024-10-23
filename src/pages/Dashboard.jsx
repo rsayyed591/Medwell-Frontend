@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Patient from './../../public/patient.png'
 import { User, Heart, FileText, PlusCircle, DollarSign, Calendar, Share2, ChevronRight, ChevronUp, ChevronDown, Menu, X, Activity, Droplet, Thermometer, Brain } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import Profile from './Patient/Profile'
 import HealthCheck from './Patient/HealthCheck'
 import Reports from './Patient/Reports'
@@ -36,7 +36,7 @@ export default function MedicalDashboard() {
     bloodType: "O+",
     allergies: "None",
   })
-
+  const navigate=useNavigate()
   const charts = [
     { label: "Heart Rate", color: "#ff6b6b", icon: Heart, data: defaultChartData.heartRate },
     { label: "Blood Pressure", color: "#4ecdc4", icon: Activity, data: defaultChartData.bloodPressure },
@@ -57,6 +57,10 @@ export default function MedicalDashboard() {
   ]
 
   useEffect(() => {
+    const user=localStorage.getItem("Bearer")
+    if(!user){
+      navigate("/login")
+    }
     setIsLoaded(true)
     const checkIfMobile = () => setIsMobile(window.innerWidth < 768)
     checkIfMobile()

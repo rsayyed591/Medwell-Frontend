@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
-import Stethoscope  from './../../public/Stethoscope.png'
-import {Link} from 'react-router-dom';
-import { ngrok_url } from '../utils/global';
-import { google_ngrok_url } from '../utils/global';
+import Stethoscope from './../../public/Stethoscope.png'
+import { ngrok_url, google_ngrok_url } from '../utils/global'
 
 export function SignUp() {
   const [fullName, setFullName] = useState('')
@@ -12,40 +11,77 @@ export function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showCPassword, setShowCPassword] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const navigate = useNavigate()
+
   useEffect(() => {
-    google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_KEY,
-      callback: handleCallbackResponse
-    });
-    google.accounts.id.renderButton(
-      document.getElementById("signInDiv"),
-      { theme: "outline", size: "large" }
-    );
-  }, []);
+    const token=localStorage.getItem("Bearer")
+    if(token){
+      navigate("/Dashboard")
+    }
+    const initializeGoogleSignIn = () => {
+      if (window.google && window.google.accounts) {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_KEY,
+          callback: handleCallbackResponse
+        })
+        window.google.accounts.id.renderButton(
+          document.getElementById("signInDiv"),
+          { theme: "outline", size: "large" }
+        )
+      } else {
+        setTimeout(initializeGoogleSignIn, 100)
+      }
+    }
+
+    initializeGoogleSignIn()
+  }, [])
 
   const handleCallbackResponse = (response) => {
-    const formData = new FormData();
-    formData.append("token", response.credential);
+    const formData = new FormData()
+    formData.append("token", response.credential)
 
-    fetch(`${google_ngrok_url}/login/`, {
+    fetch(`${google_ngrok_url}/auth/google_login`, {
       method: "POST",
       body: formData,  
     })
       .then(res => res.json())
       .then(data => {
-        console.log("Backend response: ", data);
-        localStorage.setItem("User", JSON.stringify(data));
+        console.log("Backend response: ", data)
+        localStorage.setItem("User", JSON.stringify(data))
+        navigate("/Dashboard")
       })
-      .catch(err => console.error("Error in Google login: ", err));
-  };
+      .catch(err => {
+        console.error("Error in Google login: ", err)
+        setErrorMessage("An error occurred during Google sign-up. Please try again.")
+      })
+  }
+
+  const validateForm = () => {
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match.")
+      return false
+    }
+    if (password.length < 8) {
+      setErrorMessage("Password must be at least 8 characters long.")
+      return false
+    }
+    return true
+  }
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("full_name",fullName);
-    formData.append("email",email);
-    formData.append("password1",password);
-    formData.append("password2",confirmPassword);
+    e.preventDefault()
+    setErrorMessage('')
+
+    if (!validateForm()) {
+      return
+    }
+
+    const formData = new FormData()
+    formData.append("email", email)
+    formData.append("password1", password)
+    formData.append("password2", confirmPassword)
+    formData.append("full_name", fullName)
 
     fetch(`${ngrok_url}/auth/register_user/`, {
       method: "POST",
@@ -53,11 +89,19 @@ export function SignUp() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log("Backend response: ", data);
-        localStorage.setItem("Bearer", JSON.stringify(data.access_token));
+        console.log("Backend response: ", data)
+        if (data.status === false) {
+          setErrorMessage(data.mssg)
+        } else {
+          localStorage.setItem("Bearer", data.access_token)
+          localStorage.setItem("User", JSON.stringify({ email: email, fullName: fullName }))
+          navigate("/Dashboard")
+        }
       })
-      .catch(err => console.error("Error in SignUp: ", err));
-    
+      .catch(err => {
+        console.error("Error in SignUp: ", err)
+        setErrorMessage("An error occurred during sign-up. Please try again.")
+      })
   }
 
   return (
@@ -107,6 +151,9 @@ export function SignUp() {
                 <span className="px-2 bg-white text-gray-500">OR</span>
               </div>
             </div>
+            {errorMessage && (
+              <div className="mb-4 text-red-500 text-sm text-center">{errorMessage}</div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="full-name" className="block text-sm font-medium text-gray-700 mb-1">Full Name:</label>

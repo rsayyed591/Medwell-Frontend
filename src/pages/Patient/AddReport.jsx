@@ -1,14 +1,17 @@
-import { useState, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, File, X } from 'lucide-react'
+import { Upload, File, X, Send } from 'lucide-react'
 import { Worker, Viewer } from '@react-pdf-viewer/core'
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout'
 import '@react-pdf-viewer/core/lib/styles/index.css'
 import '@react-pdf-viewer/default-layout/lib/styles/index.css'
+import { google_ngrok_url } from '../../utils/global'
 
 export default function AddReport() {
   const [uploadedFile, setUploadedFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadStatus, setUploadStatus] = useState(null)
   const fileInputRef = useRef(null)
   const defaultLayoutPluginInstance = defaultLayoutPlugin()
 
@@ -44,6 +47,7 @@ export default function AddReport() {
   const handleRemoveFile = () => {
     setUploadedFile(null)
     setPreviewUrl(null)
+    setUploadStatus(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -51,6 +55,50 @@ export default function AddReport() {
 
   const handleBrowseClick = () => {
     fileInputRef.current.click()
+  }
+
+  const handleUpload = async () => {
+    if (!uploadedFile) {
+      setUploadStatus('No file selected')
+      return
+    }
+
+    setIsUploading(true)
+    setUploadStatus('Uploading...')
+
+    const bearerToken = localStorage.getItem('Bearer')
+    if (!bearerToken) {
+      setUploadStatus('Authentication token not found')
+      setIsUploading(false)
+      return
+    }
+
+    const myHeaders = new Headers()
+    myHeaders.append("Authorization", `Bearer ${bearerToken}`)
+
+    const formdata = new FormData()
+    formdata.append("report", uploadedFile)
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: formdata,
+    }
+
+    try {
+      const response = await fetch(`${google_ngrok_url}/patient/send_report/`, requestOptions)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const result = await response.text()
+      console.log(result)
+      setUploadStatus('Upload successful')
+    } catch (error) {
+      console.error('Upload error:', error)
+      setUploadStatus('Upload failed')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   return (
@@ -126,6 +174,37 @@ export default function AddReport() {
               </motion.div>
             )}
           </AnimatePresence>
+          {uploadedFile && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mt-4"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleUpload}
+                disabled={isUploading}
+                className={`w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded transition-colors duration-300 flex items-center justify-center ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <Send className="w-5 h-5 mr-2" />
+                {isUploading ? 'Uploading...' : 'Send Report'}
+              </motion.button>
+            </motion.div>
+          )}
+          {uploadStatus && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className={`mt-4 p-2 rounded-lg text-center ${
+                uploadStatus === 'Upload successful' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}
+            >
+              {uploadStatus}
+            </motion.div>
+          )}
         </motion.div>
         <motion.div
           initial={{ x: 50, opacity: 0 }}
@@ -144,9 +223,9 @@ export default function AddReport() {
                 transition={{ duration: 0.3 }}
                 className="border rounded-lg overflow-hidden"
               >
-                {uploadedFile.type.startsWith('image/') ? (
+                {uploadedFile && uploadedFile.type.startsWith('image/') ? (
                   <img src={previewUrl} alt="Uploaded report" className="w-full h-auto" />
-                ) : uploadedFile.type === 'application/pdf' ? (
+                ) : uploadedFile && uploadedFile.type === 'application/pdf' ? (
                   <div className="h-[600px]">
                     <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
                       <Viewer
