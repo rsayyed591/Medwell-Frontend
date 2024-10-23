@@ -269,15 +269,19 @@ export default function Reports() {
               <Download className="w-4 h-4 mr-2" />
               Download PDF
             </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleViewReport}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded flex items-center justify-center transition-colors duration-300 text-sm"
-            >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              View Full Report
-            </motion.button>
+            {selectedReport && (
+            <a href={selectedReport.reportUrl} target="_blank" rel="noopener noreferrer">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleViewReport}
+                      className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded flex items-center justify-center transition-colors duration-300 text-sm"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      View Full Report
+                    </motion.button>
+            </a>
+          )}
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -413,44 +417,6 @@ export default function Reports() {
         )}
       </AnimatePresence>
       
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={closeModal}
-        contentLabel="View Full Report"
-        className="fixed inset-0 flex items-center justify-center"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-75"
-      >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ duration: 0.3 }}
-          className="bg-white rounded-lg w-11/12 h-5/6 max-w-4xl max-h-full flex flex-col"
-        >
-          <div className="flex justify-between items-center p-4 border-b">
-            <h2 className="text-2xl font-bold">Full Report: {selectedReport?.title}</h2>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={closeModal}
-              className="text-gray-500 hover:text-gray-700 transition-colors duration-300"
-            >
-              <X className="w-6 h-6" />
-            </motion.button>
-          </div>
-          <div className="flex-grow relative">
-            {selectedReport && (
-              <iframe
-                src="https://4d24-43-231-238-206.ngrok-free.app/media/user_reports/MyPathTest_16_1.pdf"
-                title="Full Report"
-                className="w-full h-full border-none"
-              >
-                <p>Your browser does not support iframes. <a href={selectedReport.reportUrl} target="_blank" rel="noopener noreferrer">Open report in new tab</a></p>
-              </iframe>
-            )}
-          </div>
-        </motion.div>
-      </Modal>
     </div>
   )
 }
