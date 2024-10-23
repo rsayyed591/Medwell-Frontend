@@ -84,7 +84,6 @@ export default function Reports() {
         }
         const result = await response.json()
         console.log(result) 
-        console.log(token)
         const formattedReports = result.reports.map(report => ({
           id: report.id,
           title: report.report_file.split("/")[3].split(".")[0] || 'Unknown Report Type',
