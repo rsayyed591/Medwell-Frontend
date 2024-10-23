@@ -44,7 +44,8 @@ export function Login() {
       .then(res => res.json())
       .then(data => {
         console.log("Backend response: ", data)
-        localStorage.setItem("User", JSON.stringify(data))
+        localStorage.setItem("Bearer", data.access_token)
+        console.log(localStorage.getItem("Bearer"))
         navigate("/Dashboard")
       })
       .catch(err => {

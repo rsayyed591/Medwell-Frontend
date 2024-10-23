@@ -66,6 +66,7 @@ export default function Reports() {
   useEffect(() => {
     const fetchReports = async () => {
       const token = localStorage.getItem("Bearer")
+      console.log(token)
       const myHeaders = new Headers();
       myHeaders.append("Authorization", "Bearer " + token);
       
@@ -79,9 +80,11 @@ export default function Reports() {
         const response = await fetch(`${google_ngrok_url}/patient/get_reports/`, requestOptions)
         if (!response.ok) {
           throw new Error('Network response was not ok')
+          
         }
         const result = await response.json()
         console.log(result) 
+        console.log(token)
         const formattedReports = result.reports.map(report => ({
           id: report.id,
           title: report.report_file.split("/")[3].split(".")[0] || 'Unknown Report Type',

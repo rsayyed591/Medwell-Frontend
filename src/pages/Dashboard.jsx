@@ -10,23 +10,18 @@ import AddReport from './Patient/AddReport'
 import ExpenseTracker from './Patient/ExpenseTracker'
 import Appointments from './Patient/Appointments'
 import ShareWithDoctor from './Patient/ShareWithDoctor'
-
-const defaultChartData = {
-  heartRate: [68, 72, 70, 75, 69, 71, 73, 76, 74, 72],
-  bloodPressure: [120, 118, 122, 119, 121, 123, 120, 118, 117, 119],
-  bloodSugar: [95, 100, 98, 102, 97, 99, 101, 96, 98, 100],
-  cholesterol: [180, 185, 178, 182, 179, 183, 181, 184, 180, 182],
-  bmi: [24.5, 24.3, 24.6, 24.4, 24.5, 24.7, 24.6, 24.5, 24.4, 24.6],
-  mentalHealth: [7, 8, 7, 9, 8, 7, 8, 9, 8, 7]
-}
+import { google_ngrok_url } from '../utils/global'
 
 export default function MedicalDashboard() {
   const [isLoaded, setIsLoaded] = useState(false)
+  const [chartData, setChartData] = useState({})
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('Health Check')
   const [isMobile, setIsMobile] = useState(false)
   const [isProfileExpanded, setIsProfileExpanded] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [patientInfo, setPatientInfo] = useState({
     name: "Vivek Chouhan",
     id: "12345",
@@ -36,14 +31,50 @@ export default function MedicalDashboard() {
     bloodType: "O+",
     allergies: "None",
   })
-  const navigate=useNavigate()
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      const token = localStorage.getItem("Bearer")
+      console.log(token)
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", "Bearer " + token);
+      
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify({"Checking":"OK"})
+      };
+
+      try {
+        const response = await fetch(`${google_ngrok_url}/patient/health_check/`, requestOptions)
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+        const result = await response.json()
+        setChartData(result.data || {})
+        console.log(result.data)
+        setIsLoading(false)
+      } catch (error) {
+        console.error('Error:', error)
+        setError(error.message || 'An unknown error occurred')
+        setIsLoading(false)
+      }
+    }
+    fetchReports()
+  }, [])
+
+  const navigate = useNavigate()
   const charts = [
-    { label: "Heart Rate", color: "#ff6b6b", icon: Heart, data: defaultChartData.heartRate },
-    { label: "Blood Pressure", color: "#4ecdc4", icon: Activity, data: defaultChartData.bloodPressure },
-    { label: "Blood Sugar", color: "#45aaf2", icon: Droplet, data: defaultChartData.bloodSugar },
-    { label: "Cholesterol", color: "#fed330", icon: Thermometer, data: defaultChartData.cholesterol },
-    { label: "BMI", color: "#26de81", icon: User, data: defaultChartData.bmi },
-    { label: "Mental Health", color: "#a55eea", icon: Brain, data: defaultChartData.mentalHealth }
+    { label: "Hemoglobin", color: "#ff6b6b", icon: Heart, data: chartData.hemoglobin || [] },
+    { label: "RBC Count", color: "#4ecdc4", icon: Activity, data: chartData.rbc_count || [] },
+    { label: "WBC Count", color: "#45aaf2", icon: Droplet, data: chartData.wbc_count || [] },
+    { label: "Platelet Count", color: "#fed330", icon: Thermometer, data: chartData.platelet_count || [] },
+    { label: "PCV", color: "#26de81", icon: User, data: chartData.pcv || [] },
+    { label: "Bilirubin", color: "#a55eea", icon: Brain, data: chartData.bilirubin || [] },
+    { label: "Proteins", color: "#fd9644", icon: Thermometer, data: chartData.proteins || [] },
+    { label: "Calcium", color: "#2bcbba", icon: User, data: chartData.calcium || [] },
+    { label: "Blood Urea", color: "#eb3b5a", icon: Brain, data: chartData.blood_urea || [] },
+    { label: "SR Cholesterol", color: "#778ca3", icon: Thermometer, data: chartData.sr_cholestrol || [] }
   ]
 
   const navItems = [
@@ -57,7 +88,7 @@ export default function MedicalDashboard() {
   ]
 
   useEffect(() => {
-    const user=localStorage.getItem("Bearer")
+    const user = localStorage.getItem("Bearer")
     if(!user){
       navigate("/login")
     }
