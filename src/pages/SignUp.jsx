@@ -41,14 +41,14 @@ export function SignUp() {
     const formData = new FormData()
     formData.append("token", response.credential)
 
-    fetch(`${google_ngrok_url}/auth/google_login`, {
+    fetch(`${google_ngrok_url}/auth/google_login/`, {
       method: "POST",
       body: formData,  
     })
       .then(res => res.json())
       .then(data => {
         console.log("Backend response: ", data)
-        localStorage.setItem("Bearer", data.access_token)
+        localStorage.setItem("Bearer", data.access)
         navigate("/Dashboard")
       })
       .catch(err => {

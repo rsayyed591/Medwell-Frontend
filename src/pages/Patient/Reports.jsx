@@ -67,6 +67,14 @@ export default function Reports() {
     const fetchReports = async () => {
       const token = localStorage.getItem("Bearer")
       console.log(token)
+      console.log("Token:", token) // Log the token to check its value
+
+      if (!token) {
+        console.error("No token found in localStorage")
+        setError("Authentication token not found. Please log in again.")
+        setIsLoading(false)
+        return
+      }
       const myHeaders = new Headers();
       myHeaders.append("Authorization", "Bearer " + token);
       
@@ -75,7 +83,7 @@ export default function Reports() {
         headers: myHeaders,
         body: JSON.stringify({"Checking":"OK"})
       };
-
+      setReports([...mockReports])
       try {
         const response = await fetch(`${google_ngrok_url}/patient/get_reports/`, requestOptions)
         if (!response.ok) {
@@ -96,7 +104,7 @@ export default function Reports() {
           reportType: report.report_type || 'Unknown',
           submittedAt: report.submitted_at || 'Submission date not available',
         }))
-        setReports([...mockReports, ...formattedReports])
+        setReports([...formattedReports])
         setIsLoading(false)
       } catch (error) {
         console.error('Error:', error)
@@ -380,9 +388,9 @@ export default function Reports() {
     return <div className="text-center mt-8">Loading...</div>
   }
 
-  if (error) {
-    return <div className="text-center mt-8 text-red-500">Error: {error}</div>
-  }
+  // if (error) {
+  //   return <div className="text-center mt-8 text-red-500">Error: {error}</div>
+  // }
 
   return (
     <div className="container mx-auto px-4 py-8">
