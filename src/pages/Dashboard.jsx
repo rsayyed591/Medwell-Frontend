@@ -89,9 +89,9 @@ export default function MedicalDashboard() {
 
   useEffect(() => {
     const user = localStorage.getItem("Bearer")
-    // if(!user){
-    //   navigate("/login")
-    // }
+    if(!user){
+      navigate("/login")
+    }
     setIsLoaded(true)
     const checkIfMobile = () => setIsMobile(window.innerWidth < 768)
     checkIfMobile()
