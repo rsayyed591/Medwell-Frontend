@@ -5,6 +5,8 @@ import Modal from 'react-modal'
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import { google_ngrok_url } from '../../utils/global'
+import axios from 'axios'
+
 const mockReports = [
   {
     id: 1,
@@ -66,7 +68,6 @@ export default function Reports() {
   useEffect(() => {
     const fetchReports = async () => {
       const token = localStorage.getItem("Bearer")
-      console.log(token)
       console.log("Token:", token) // Log the token to check its value
 
       if (!token) {
@@ -75,40 +76,42 @@ export default function Reports() {
         setIsLoading(false)
         return
       }
-      const myHeaders = new Headers();
-      myHeaders.append("Authorization", "Bearer " + token);
-      
-      const requestOptions = {
-        method: "POST",
-        headers: myHeaders,
-        body: JSON.stringify({"Checking":"OK"})
-      };
-      setReports([...mockReports])
+
       try {
-        const response = await fetch(`${google_ngrok_url}/patient/get_reports/`, requestOptions)
-        if (!response.ok) {
-          throw new Error('Network response was not ok')
-          
+        const response = await axios.post(
+          `${google_ngrok_url}/patient/get_reports/`,
+          { Checking: "OK" },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        console.log("API Response:", response.data)
+
+        if (response.data.reports && Array.isArray(response.data.reports)) {
+          const formattedReports = response.data.reports.map(report => ({
+            id: report.id,
+            title: report.report_file ? report.report_file.split("/")[3].split(".")[0] : 'Unknown Report Type',
+            date: report.date_of_report || 'Date not available',
+            collectionDate: report.date_of_collection || 'Collection date not available',
+            doctorName: report.doctor_name || 'Doctor name not available',
+            summary: report.summary || 'Summary not available',
+            elements: report.reportdetail?.report_data || {},
+            reportUrl: report.report_file ? `${google_ngrok_url}${report.report_file}` : '',
+            reportType: report.report_type || 'Unknown',
+            submittedAt: report.submitted_at || 'Submission date not available',
+          }))
+          setReports(formattedReports)
+        } else {
+          console.error("Invalid or empty reports data received:", response.data)
+          setError("No reports data available")
         }
-        const result = await response.json()
-        console.log(result) 
-        const formattedReports = result.reports.map(report => ({
-          id: report.id,
-          title: report.report_file.split("/")[3].split(".")[0] || 'Unknown Report Type',
-          date: report.date_of_report || 'Date not available',
-          collectionDate: report.date_of_collection || 'Collection date not available',
-          doctorName: report.doctor_name || 'Doctor name not available',
-          summary: report.summary || 'Summary not available',
-          elements: report.reportdetail?.report_data || {},
-          reportUrl: `${google_ngrok_url}${report.report_file}` || '',
-          reportType: report.report_type || 'Unknown',
-          submittedAt: report.submitted_at || 'Submission date not available',
-        }))
-        setReports([...formattedReports])
-        setIsLoading(false)
       } catch (error) {
         console.error('Error:', error)
-        setError(error.message || 'An unknown error occurred')
+        setError(error.response?.data?.message || error.message || 'An unknown error occurred')
+      } finally {
         setIsLoading(false)
       }
     }

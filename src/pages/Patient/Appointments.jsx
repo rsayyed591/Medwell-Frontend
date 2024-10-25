@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, momentLocalizer, Views } from 'react-big-calendar'
 import moment from 'moment'
@@ -31,8 +31,8 @@ const initialAppointments = [
   {
     id: 3,
     title: 'Eye Exam',
-    start: new Date(2024, 9, 22, 11, 0),
-    end: new Date(2024, 9, 22, 12, 0),
+    start: new Date(2024, 11, 22, 11, 0),
+    end: new Date(2024, 11, 22, 12, 0),
     doctor: 'Rehan',
     notes: 'Bring current glasses',
     color: '#f59e0b'
@@ -326,6 +326,7 @@ export default function Appointments() {
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
+              
               className="bg-white p-4 lg:p-6 rounded-lg shadow-xl w-full max-w-md"
             >
               <div className="flex justify-between items-center mb-4">

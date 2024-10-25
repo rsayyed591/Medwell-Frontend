@@ -2,39 +2,38 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Github, Linkedin } from "lucide-react";
 
-// Placeholder images - replace with actual team member images
-const placeholderImage = "/placeholder.svg?height=128&width=128";
 
 const teamMembers = [
-  {
-    name: "Dr. Emily Chen",
-    role: "Chief Medical Officer",
-    image: placeholderImage,
-    github: "https://github.com/dremilychenMD",
-    linkedin: "https://linkedin.com/in/dremilychenMD",
-  },
-  {
-    name: "Alex Johnson",
-    role: "AI Research Lead",
-    image: placeholderImage,
-    github: "https://github.com/alexjohnsonAI",
-    linkedin: "https://linkedin.com/in/alexjohnsonAI",
-  },
-  {
-    name: "Sarah Thompson",
-    role: "UX/UI Designer",
-    image: placeholderImage,
-    github: "https://github.com/sarahthompsonUX",
-    linkedin: "https://linkedin.com/in/sarahthompsonUX",
-  },
-  {
-    name: "Michael Lee",
-    role: "Data Scientist",
-    image: placeholderImage,
-    github: "https://github.com/michaelleedata",
-    linkedin: "https://linkedin.com/in/michaelleedata",
-  },
-];
+    {
+      name: "Vivek Chouhan",
+      role: "Backend Developer",
+      image: './../../public/Vivek.jpg',
+      github: "https://github.com/vivi",
+      linkedin: "https://linkedin.com/in/vivi",
+    },
+    {
+      name: "Nishikant Raut",
+      role: "FullStack Developer",
+      image: './../../public/Nishi.jpg',
+      github: "https://github.com/Nishikant00",
+      linkedin: "https://linkedin.com/in/nishi",
+    },
+    {
+      name: "Rehan Sayyed",
+      role: "FullStack Developer",
+      image: './../../public/Rehan.jpg',
+      github: "https://github.com/rsayyed591",
+      linkedin: "https://linkedin.com/in/rehan42",
+    },
+    {
+      name: "Rohit Deshmukh",
+      role: "UX Designer",
+      image: './../../public/Rohit.jpg',
+      github: "https://github.com/ardie",
+      linkedin: "https://linkedin.com/in/rohit",
+    },
+  ]
+  
 
 export default function About() {
   return (
