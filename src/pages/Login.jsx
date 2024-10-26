@@ -11,7 +11,7 @@ export function Login() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const token=localStorage.getItem("Bearer")
+    const token=localStorage.getItem("Token")
     if(token){
       navigate("/Dashboard")
     }
@@ -44,8 +44,8 @@ export function Login() {
       .then(res => res.json())
       .then(data => {
         console.log("Backend response: ", data)
-        localStorage.setItem("Bearer", data.access)
-        console.log(localStorage.getItem("Bearer"))
+        localStorage.setItem("Token", data.access)
+        console.log(localStorage.getItem("Token"))
         navigate("/Dashboard")
       })
       .catch(err => {
@@ -71,7 +71,7 @@ export function Login() {
         if (data.mssg === 'Incorrct Credentials' && data.status === 0) {
           setErrorMessage('Incorrect email or password. Please try again.')
         } else {
-          localStorage.setItem("Bearer", data.access_token)
+          localStorage.setItem("Token", data.access_token)
           localStorage.setItem("User", JSON.stringify({ email: email }))
           navigate("/Dashboard")
         }

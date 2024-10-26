@@ -34,7 +34,7 @@ export default function MedicalDashboard() {
 
   useEffect(() => {
     const fetchReports = async () => {
-      const token = localStorage.getItem("Bearer")
+      const token = localStorage.getItem("Token")
       console.log(token)
       const myHeaders = new Headers();
       myHeaders.append("Authorization", "Bearer " + token);
@@ -88,7 +88,7 @@ export default function MedicalDashboard() {
   ]
 
   useEffect(() => {
-    const user = localStorage.getItem("Bearer")
+    const user = localStorage.getItem("Token")
     // if(!user){
     //   navigate("/login")
     // }

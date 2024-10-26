@@ -15,7 +15,7 @@ export function SignUp() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const token=localStorage.getItem("Bearer")
+    const token=localStorage.getItem("Token")
     if(token){
       navigate("/Dashboard")
     }
@@ -48,7 +48,7 @@ export function SignUp() {
       .then(res => res.json())
       .then(data => {
         console.log("Backend response: ", data)
-        localStorage.setItem("Bearer", data.access)
+        localStorage.setItem("Token", data.access)
         navigate("/Dashboard")
       })
       .catch(err => {
@@ -93,7 +93,7 @@ export function SignUp() {
         if (data.status === false) {
           setErrorMessage(data.mssg)
         } else {
-          localStorage.setItem("Bearer", data.access_token)
+          localStorage.setItem("Token", data.access_token)
           localStorage.setItem("User", JSON.stringify({ email: email, fullName: fullName }))
           navigate("/Dashboard")
         }
