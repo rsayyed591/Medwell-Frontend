@@ -41,6 +41,7 @@ function Layout() {
           <Route path="/about" element={<About />} />        
           <Route path="/signup" element={<SignUp />} />        
           <Route path="/login" element={<Login />} />        
+          edit-profile
         </Routes>
       </main>
       <Footer/>

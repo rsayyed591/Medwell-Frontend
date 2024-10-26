@@ -23,13 +23,23 @@ export default function MedicalDashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [patientInfo, setPatientInfo] = useState({
-    name: "Vivek Chouhan",
-    id: "12345",
-    age: "45",
-    doctor: "Dr. Rohit Deshmukh",
-    nextAppointment: "15 Oct 2024",
-    bloodType: "O+",
-    allergies: "None",
+    "name": "Vivek Chouhan",
+    "age": 45,
+    "user": "vivek",
+    "phone_number": "123-456-7890",
+    "blood_group": "O+",
+    "height": "180 cm",
+    "weight": "75 kg",
+    "city": "Mumbai",
+    "country": "India",
+    "state": "Maharashtra",
+    "pin": "400010",
+    "profile_pic": "./../../public/Vivek.jpg",
+    "profile_qr": "/qr-codes/vivek-chouhan.png",
+    "aadhar_card": "4500 4500 2540",
+    "allergies": ["Peanuts", "Penicillin"],
+    "chronic_condition": "Hypertension",
+    "family_history": "Heart disease in paternal family"
   })
 
   useEffect(() => {

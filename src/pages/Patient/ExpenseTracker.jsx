@@ -1,19 +1,17 @@
-import { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import { format } from 'date-fns';
 import { ArrowLeft, DollarSign, PlusCircle, Trash2 } from 'lucide-react';
 
-const expenseTypes = ['Medicines', 'Tests', 'Doctor Fees', 'Admit Fees', 'Other'];
+const expenseTypes = ['Medicines', 'Doctor Fees', 'Reports'];
 
 const AddExpenseView = ({ onAddExpense, onBack }) => {
+  const [inputMethod, setInputMethod] = useState(null);
   const [newExpense, setNewExpense] = useState({
     type: '',
-    otherType: '',
     amount: '',
-    date: new Date(),
   });
+  const [naturalLanguageInput, setNaturalLanguageInput] = useState('');
 
   const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -24,30 +22,73 @@ const AddExpenseView = ({ onAddExpense, onBack }) => {
     setNewExpense((prev) => ({ ...prev, type: e.target.value }));
   }, []);
 
-  const handleDateChange = useCallback((date) => {
-    setNewExpense((prev) => ({ ...prev, date: date || new Date() }));
-  }, []);
+  const handleNaturalLanguageSubmit = () => {
+    // Here you would implement the logic to parse the natural language input
+    // For this example, we'll just create a simple expense object
+    const expenseToAdd = {
+      id: Date.now(),
+      type: 'Other',
+      amount: 0, // You would extract this from the natural language input
+      date: new Date(),
+    };
+    onAddExpense(expenseToAdd);
+    setInputMethod(null);
+  };
 
   const handleAddExpense = useCallback(() => {
-    if (!newExpense.type || !newExpense.amount || !newExpense.date) return;
+    if (!newExpense.type || !newExpense.amount) return;
 
     const expenseToAdd = {
       id: Date.now(),
-      type: newExpense.type === 'Other' ? newExpense.otherType : newExpense.type,
+      type: newExpense.type,
       amount: parseFloat(newExpense.amount),
-      date: newExpense.date,
+      date: new Date(),
     };
 
     onAddExpense(expenseToAdd);
-
-    // Reset form
-    setNewExpense({
-      type: '',
-      otherType: '',
-      amount: '',
-      date: new Date(),
-    });
+    setInputMethod(null);
   }, [newExpense, onAddExpense]);
+
+  if (!inputMethod) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold mb-4">How would you like to add the expense?</h2>
+        <button
+          onClick={() => setInputMethod('normal')}
+          className="w-full py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        >
+          Normal Input
+        </button>
+        <button
+          onClick={() => setInputMethod('natural')}
+          className="w-full py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600"
+        >
+          Natural Language Input
+        </button>
+      </div>
+    );
+  }
+
+  if (inputMethod === 'natural') {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold mb-4">Describe your expense</h2>
+        <textarea
+          value={naturalLanguageInput}
+          onChange={(e) => setNaturalLanguageInput(e.target.value)}
+          className="w-full p-2 border rounded-md"
+          rows={4}
+          placeholder="E.g., I spent 500 rupees on medicine yesterday"
+        />
+        <button
+          onClick={handleNaturalLanguageSubmit}
+          className="w-full py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600"
+        >
+          Add Expense
+        </button>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -78,28 +119,6 @@ const AddExpenseView = ({ onAddExpense, onBack }) => {
           </select>
         </div>
 
-        <AnimatePresence>
-          {newExpense.type === 'Other' && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <label htmlFor="otherType" className="block text-lg mb-2">Specify Other Expense</label>
-              <input
-                id="otherType"
-                name="otherType"
-                type='text'
-                value={newExpense.otherType}
-                onChange={handleInputChange}
-                placeholder="Enter expense type"
-                className="w-full text-lg py-3 px-4 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         <div>
           <label htmlFor="amount" className="block text-lg mb-2">Amount</label>
           <input
@@ -109,16 +128,6 @@ const AddExpenseView = ({ onAddExpense, onBack }) => {
             value={newExpense.amount}
             onChange={handleInputChange}
             placeholder="Enter amount"
-            className="w-full text-lg py-3 px-4 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-          />
-        </div>
-
-        <div>
-          <label className="block text-lg mb-2">Date</label>
-          <DatePicker
-            selected={newExpense.date}
-            onChange={handleDateChange}
-            maxDate={new Date()}
             className="w-full text-lg py-3 px-4 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
           />
         </div>
@@ -176,7 +185,7 @@ export default function ExpenseTracker() {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="bg-white p-6 sm:p-8 rounded-xl shadow-lg"
+        className="bg-white p-6 sm:p-8  rounded-xl shadow-lg"
       >
         <h2 className="text-2xl sm:text-3xl font-semibold mb-6 flex items-center">
           <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 mr-3 text-green-600" /> Total Expenses
