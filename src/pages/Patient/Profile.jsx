@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Edit, Heart, Clipboard, Calendar, MapPin, QrCode } from 'lucide-react'
 import { removeBackground } from '@imgly/background-removal'
 import Patient from './../../../public/Vivek.jpg'
@@ -9,7 +9,7 @@ export default function Profile({ patientInfo: initialPatientInfo, handleSave })
   const [profilePic, setProfilePic] = useState(initialPatientInfo.profile_pic || Patient)
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [patientInfo, setPatientInfo] = useState(initialPatientInfo)
-  const inputRef = useRef(null)
+  const [originalPatientInfo, setOriginalPatientInfo] = useState(initialPatientInfo)
 
   useEffect(() => {
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`imedwell.vercel.app/dashboard/user=${patientInfo.user}`)}`
@@ -32,13 +32,10 @@ export default function Profile({ patientInfo: initialPatientInfo, handleSave })
     return Array.isArray(arr) ? arr.join(separator) : arr || ''
   }
 
-  const handleInputChange = useCallback((e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target
     setPatientInfo((prev) => ({ ...prev, [name]: value }))
-    if (inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [])
+  }
 
   const handleFileChange = (e) => {
     const file = e.target.files[0]
@@ -81,7 +78,10 @@ export default function Profile({ patientInfo: initialPatientInfo, handleSave })
           <p className="text-gray-600 text-center mb-4">Age: {patientInfo.age}</p>
           <button 
             className="w-full flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
-            onClick={() => setIsEditMode(true)}
+            onClick={() => {
+              setOriginalPatientInfo(patientInfo)
+              setIsEditMode(true)
+            }}
           >
             <Edit className="w-4 h-4 mr-2" />
             Edit Profile
@@ -139,7 +139,16 @@ export default function Profile({ patientInfo: initialPatientInfo, handleSave })
     </div>
   )
 
-  const ProfileEdit = () => (
+  const ProfileEdit = () => {
+    const inputRefs = useRef({})
+
+    useEffect(() => {
+      // Focus the first input field when entering edit mode
+      if (inputRefs.current.name) {
+        inputRefs.current.name.focus()
+      }
+    }, [])
+    return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-6">Edit Profile</h2>
@@ -166,12 +175,12 @@ export default function Profile({ patientInfo: initialPatientInfo, handleSave })
           <div>
             <label className="block text-sm font-medium mb-1" htmlFor="name">Name</label>
             <input
-              ref={inputRef}
               type="text"
               id="name"
               name="name"
               value={patientInfo.name}
               onChange={handleInputChange}
+              ref={(el) => (inputRefs.current.name = el)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -315,7 +324,6 @@ export default function Profile({ patientInfo: initialPatientInfo, handleSave })
             />
           </div>
           <div>
-            
             <label className="block text-sm font-medium mb-1" htmlFor="country">Country</label>
             <input
               type="text"
@@ -342,7 +350,10 @@ export default function Profile({ patientInfo: initialPatientInfo, handleSave })
       <div className="flex justify-end space-x-4">
         <button
           type="button"
-          onClick={() => setIsEditMode(false)}
+          onClick={() => {
+            setPatientInfo(originalPatientInfo)
+            setIsEditMode(false)
+          }}
           className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
         >
           Cancel
@@ -355,11 +366,30 @@ export default function Profile({ patientInfo: initialPatientInfo, handleSave })
         </button>
       </div>
     </form>
-  )
+  )}
+
+  useEffect(() => {
+    if (isEditMode) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'auto'
+    }
+    return () => {
+      document.body.style.overflow = 'auto'
+    }
+  }, [isEditMode])
 
   return (
     <div className="max-w-7xl mx-auto mt-8 p-4 md:p-6">
-      {isEditMode ? <ProfileEdit /> : <ProfileDisplay />}
+      {isEditMode ? (
+        <div className="fixed inset-0 bg-white overflow-y-auto z-50">
+          <div className="max-w-3xl mx-auto py-8">
+            <ProfileEdit />
+          </div>
+        </div>
+      ) : (
+        <ProfileDisplay />
+      )}
       {showQR && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg">
