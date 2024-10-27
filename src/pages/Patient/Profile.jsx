@@ -78,7 +78,7 @@ export default function Profile({ patientInfo }) {
             </button>
           </div>
           <h2 className="text-2xl font-bold text-center mb-2">{localPatientInfo?.name}</h2>
-          <p className="text-gray-600 text-center mb-1">Email: {localPatientInfo?.email}</p>
+          <p className="text-gray-600 text-center mb-1">Email: {localPatientInfo?.user_info.email}</p>
           <p className="text-gray-600 text-center mb-1">{localPatientInfo?.phone_number}</p>
           <p className="text-gray-600 text-center mb-4">Age: {localPatientInfo?.age}</p>
           <button 
@@ -201,7 +201,7 @@ export default function Profile({ patientInfo }) {
                       type="email"
                       id="email"
                       name="email"
-                      value={localPatientInfo?.email || ''}
+                      value={localPatientInfo?.user_info.email || ''}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       disabled
