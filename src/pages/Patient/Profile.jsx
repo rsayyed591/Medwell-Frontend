@@ -3,43 +3,55 @@ import { Edit, Heart, Clipboard, Calendar, MapPin, QrCode } from 'lucide-react';
 import { removeBackground } from '@imgly/background-removal';
 import { useFetch } from '../components/useFetch';
 
+// Dummy data
+const dummyPatientInfo = {
+  name: "Vivek Chouhan",
+  user: "vivi_1234",
+  age: 35,
+  phone_number: "+1 (555) 123-4567",
+  blood_group: "O+",
+  height: "175 cm",
+  weight: "70 kg",
+  allergies: ["Peanuts", "Penicillin"],
+  aadhar_card: "1234 5678 9012",
+  chronic_condition: "None",
+  family_history: "Diabetes in paternal grandfather",
+  city: "New Vivek",
+  state: "New VVvek",
+  country: "USV",
+  pin: "10001",
+  profile_pic: "/Vivek.jpg"
+};
+
 export default function Profile() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showQR, setShowQR] = useState(false);
-  const [profilePic, setProfilePic] = useState(null);
+  const [profilePic, setProfilePic] = useState(dummyPatientInfo.profile_pic);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
-  const [patientInfo, setPatientInfo] = useState({});
-  const [originalPatientInfo, setOriginalPatientInfo] = useState({});
+  const [patientInfo, setPatientInfo] = useState(dummyPatientInfo);
+  const [originalPatientInfo, setOriginalPatientInfo] = useState(dummyPatientInfo);
   const { savePatientInfo, updateProfilePic, getPatientInfo, isLoading } = useFetch();
 
   useEffect(() => {
     const fetchPatientInfo = async () => {
       const data = await getPatientInfo();
-      if (data) {
+      if (data && Object.keys(data).length > 0) {
         setPatientInfo(data);
         setOriginalPatientInfo(data);
-        setProfilePic(data.profile_pic);
-      } else {
-        setPatientInfo({});
-        setOriginalPatientInfo({});
-        setProfilePic(null);
+        setProfilePic(data.profile_pic || dummyPatientInfo.profile_pic);
       }
     };
     fetchPatientInfo();
   }, [getPatientInfo]);
 
   useEffect(() => {
-    if (patientInfo.user) {
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`imedwell.vercel.app/dashboard/user=${patientInfo.user}`)}`;
-      setQrCodeUrl(qrUrl);
-    } else {
-      setQrCodeUrl('');
-    }
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`imedwell.vercel.app/dashboard/user=${patientInfo.user}`)}`;
+    setQrCodeUrl(qrUrl);
   }, [patientInfo.user]);
 
   useEffect(() => {
     const removeProfileBackground = async () => {
-      if (profilePic) {
+      if (profilePic && profilePic !== dummyPatientInfo.profile_pic) {
         try {
           const result = await removeBackground(profilePic);
           setProfilePic(result);
@@ -102,7 +114,7 @@ export default function Profile() {
         <div className="flex flex-col items-center">
           <div className="relative w-48 h-48 mb-4">
             <img 
-              src={profilePic || '/placeholder.svg?height=192&width=192'}
+              src={profilePic}
               alt="Patient" 
               className="w-full h-full object-cover rounded-full"
             />
@@ -113,10 +125,10 @@ export default function Profile() {
               <QrCode className="h-4 w-4" />
             </button>
           </div>
-          <h2 className="text-2xl font-bold text-center mb-2">{patientInfo.name || 'No Name'}</h2>
-          <p className="text-gray-600 text-center mb-1">User: {patientInfo.user || 'No User ID'}</p>
-          <p className="text-gray-600 text-center mb-1">{patientInfo.phone_number || 'No Phone Number'}</p>
-          <p className="text-gray-600 text-center mb-4">Age: {patientInfo.age || 'N/A'}</p>
+          <h2 className="text-2xl font-bold text-center mb-2">{patientInfo.name}</h2>
+          <p className="text-gray-600 text-center mb-1">User: {patientInfo.user}</p>
+          <p className="text-gray-600 text-center mb-1">{patientInfo.phone_number}</p>
+          <p className="text-gray-600 text-center mb-4">Age: {patientInfo.age}</p>
           <button 
             className="w-full flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
             onClick={() => setIsEditMode(true)}
@@ -133,11 +145,11 @@ export default function Profile() {
             General
           </h3>
           <div className="space-y-2">
-            <p><span className="font-semibold">Blood Group:</span> {patientInfo.blood_group || 'Not specified'}</p>
-            <p><span className="font-semibold">Height:</span> {patientInfo.height || 'Not specified'}</p>
-            <p><span className="font-semibold">Weight:</span> {patientInfo.weight || 'Not specified'}</p>
-            <p><span className="font-semibold">Allergies:</span> {safeJoin(patientInfo.allergies) || 'None'}</p>
-            <p><span className="font-semibold">Aadhar Card:</span> {patientInfo.aadhar_card || 'Not provided'}</p>
+            <p><span className="font-semibold">Blood Group:</span> {patientInfo.blood_group}</p>
+            <p><span className="font-semibold">Height:</span> {patientInfo.height}</p>
+            <p><span className="font-semibold">Weight:</span> {patientInfo.weight}</p>
+            <p><span className="font-semibold">Allergies:</span> {safeJoin(patientInfo.allergies)}</p>
+            <p><span className="font-semibold">Aadhar Card:</span> {patientInfo.aadhar_card}</p>
           </div>
         </div>
         <div className="bg-white rounded-lg shadow-lg p-6">
@@ -146,8 +158,8 @@ export default function Profile() {
             Medical History
           </h3>
           <div className="space-y-2">
-            <p><span className="font-semibold">Chronic Conditions:</span> {patientInfo.chronic_condition || 'None reported'}</p>
-            <p><span className="font-semibold">Family History:</span> {patientInfo.family_history || 'Not provided'}</p>
+            <p><span className="font-semibold">Chronic Conditions:</span> {patientInfo.chronic_condition}</p>
+            <p><span className="font-semibold">Family History:</span> {patientInfo.family_history}</p>
           </div>
         </div>
         <div className="bg-white rounded-lg shadow-lg p-6">
@@ -167,10 +179,10 @@ export default function Profile() {
             Location
           </h3>
           <div className="space-y-2">
-            <p><span className="font-semibold">City:</span> {patientInfo.city || 'Not specified'}</p>
-            <p><span className="font-semibold">State:</span> {patientInfo.state || 'Not specified'}</p>
-            <p><span className="font-semibold">Country:</span> {patientInfo.country || 'Not specified'}</p>
-            <p><span className="font-semibold">PIN:</span> {patientInfo.pin || 'Not specified'}</p>
+            <p><span className="font-semibold">City:</span> {patientInfo.city}</p>
+            <p><span className="font-semibold">State:</span> {patientInfo.state}</p>
+            <p><span className="font-semibold">Country:</span> {patientInfo.country}</p>
+            <p><span className="font-semibold">PIN:</span> {patientInfo.pin}</p>
           </div>
         </div>
       </div>
@@ -193,7 +205,7 @@ export default function Profile() {
           <div className="flex flex-col items-center mb-6">
             <div className="relative w-48 h-48 mb-4">
               <img 
-                src={profilePic || '/placeholder.svg?height=192&width=192'}
+                src={profilePic}
                 alt="Profile" 
                 className="w-full h-full rounded-full object-cover"
               />
@@ -216,7 +228,7 @@ export default function Profile() {
                 type="text"
                 id="name"
                 name="name"
-                value={patientInfo.name || ''}
+                value={patientInfo.name}
                 onChange={handleInputChange}
                 ref={(el) => (inputRefs.current.name = el)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -228,7 +240,7 @@ export default function Profile() {
                 type="number"
                 id="age"
                 name="age"
-                value={patientInfo.age || ''}
+                value={patientInfo.age}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -239,7 +251,7 @@ export default function Profile() {
                 type="text"
                 id="user"
                 name="user"
-                value={patientInfo.user || ''}
+                value={patientInfo.user}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -250,7 +262,7 @@ export default function Profile() {
                 type="tel"
                 id="phone_number"
                 name="phone_number"
-                value={patientInfo.phone_number || ''}
+                value={patientInfo.phone_number}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -261,7 +273,7 @@ export default function Profile() {
                 type="text"
                 id="blood_group"
                 name="blood_group"
-                value={patientInfo.blood_group || ''}
+                value={patientInfo.blood_group}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -272,7 +284,7 @@ export default function Profile() {
                 type="text"
                 id="height"
                 name="height"
-                value={patientInfo.height || ''}
+                value={patientInfo.height}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -283,7 +295,7 @@ export default function Profile() {
                 type="text"
                 id="weight"
                 name="weight"
-                value={patientInfo.weight || ''}
+                value={patientInfo.weight}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -310,19 +322,19 @@ export default function Profile() {
                 type="text"
                 id="aadhar_card"
                 name="aadhar_card"
-                value={patientInfo.aadhar_card || ''}
+                
+                value={patientInfo.aadhar_card}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-          
           </div>
           <div className="mt-6">
             <label className="block text-sm font-medium mb-1" htmlFor="chronic_condition">Chronic Conditions</label>
             <textarea
               id="chronic_condition"
               name="chronic_condition"
-              value={patientInfo.chronic_condition || ''}
+              value={patientInfo.chronic_condition}
               onChange={handleInputChange}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -333,7 +345,7 @@ export default function Profile() {
             <textarea
               id="family_history"
               name="family_history"
-              value={patientInfo.family_history || ''}
+              value={patientInfo.family_history}
               onChange={handleInputChange}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -346,7 +358,7 @@ export default function Profile() {
                 type="text"
                 id="city"
                 name="city"
-                value={patientInfo.city || ''}
+                value={patientInfo.city}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -357,7 +369,7 @@ export default function Profile() {
                 type="text"
                 id="state"
                 name="state"
-                value={patientInfo.state || ''}
+                value={patientInfo.state}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -368,7 +380,7 @@ export default function Profile() {
                 type="text"
                 id="country"
                 name="country"
-                value={patientInfo.country || ''}
+                value={patientInfo.country}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -379,7 +391,7 @@ export default function Profile() {
                 type="text"
                 id="pin"
                 name="pin"
-                value={patientInfo.pin || ''}
+                value={patientInfo.pin}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -426,13 +438,7 @@ export default function Profile() {
       {showQR && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg">
-            {qrCodeUrl ? (
-              <img src={qrCodeUrl} alt="QR Code" className="w-64 h-64" />
-            ) : (
-              <div className="w-64 h-64 flex items-center justify-center text-gray-500">
-                No QR Code available
-              </div>
-            )}
+            <img src={qrCodeUrl} alt="QR Code" className="w-64 h-64" />
             <button
               className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
               onClick={() => setShowQR(false)}
