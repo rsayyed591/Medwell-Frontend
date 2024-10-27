@@ -109,7 +109,7 @@ export default function AddReport() {
       transition={{ duration: 0.5 }}
       className="container mx-auto px-4 py-8"
     >
-      <h1 className="text-3xl font-bold mb-6">Add Report</h1>
+      {/* <h1 className="text-3xl font-bold mb-6">Add Report</h1> */}
       <div className="flex flex-col lg:flex-row gap-8">
         <motion.div
           initial={{ x: -50, opacity: 0 }}

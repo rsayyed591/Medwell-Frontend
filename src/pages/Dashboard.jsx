@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Patient from './../../public/patient.png'
-import { User, Heart, FileText, PlusCircle, DollarSign, Calendar, Share2, ChevronRight, ChevronUp, ChevronDown, Menu, X, Activity, Droplet, Thermometer, Brain } from 'lucide-react'
+import { Home, User, Heart, FileText, PlusCircle, DollarSign, Calendar, Share2, ChevronRight, ChevronUp, ChevronDown, Menu, X, Activity, Droplet, Thermometer, Brain } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import Profile from './Patient/Profile'
@@ -8,6 +8,7 @@ import HealthCheck from './Patient/HealthCheck'
 import Reports from './Patient/Reports'
 import AddReport from './Patient/AddReport'
 import ExpenseTracker from './Patient/ExpenseTracker'
+import PatientDashboard from './Patient/PatientDashboard'
 import Appointments from './Patient/Appointments'
 import ShareWithDoctor from './Patient/ShareWithDoctor'
 import { google_ngrok_url } from '../utils/global'
@@ -16,7 +17,7 @@ export default function MedicalDashboard() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [chartData, setChartData] = useState({})
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState('Health Check')
+  const [activeSection, setActiveSection] = useState('Dashboard')
   const [isMobile, setIsMobile] = useState(false)
   const [isProfileExpanded, setIsProfileExpanded] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
@@ -42,6 +43,12 @@ export default function MedicalDashboard() {
     "family_history": "Heart disease in paternal family"
   })
 
+  // New state variables
+  const [expenseData, setExpenseData] = useState({ overall_expense: 0 });
+  const [appointmentData, setAppointmentData] = useState({ doctor: 'N/A', date: 'N/A' });
+  const [healthData, setHealthData] = useState({ wbc_count: [], hemoglobin: [] });
+  const [reportsData, setReportsData] = useState([]);
+
   useEffect(() => {
     const fetchReports = async () => {
       const token = localStorage.getItem("Token")
@@ -62,6 +69,7 @@ export default function MedicalDashboard() {
         }
         const result = await response.json()
         setChartData(result.data || {})
+        setHealthData(result.data || { wbc_count: [], hemoglobin: [] });
         console.log(result.data)
         setIsLoading(false)
       } catch (error) {
@@ -89,6 +97,7 @@ export default function MedicalDashboard() {
 
   const navItems = [
     { label: "Profile", icon: User },
+    { label: "Dashboard", icon: Home},
     { label: "Health Check", icon: Heart },
     { label: "Reports", icon: FileText },
     { label: "Add Report", icon: PlusCircle },
@@ -99,9 +108,6 @@ export default function MedicalDashboard() {
 
   useEffect(() => {
     const user = localStorage.getItem("Token")
-    // if(!user){
-    //   navigate("/login")
-    // }
     setIsLoaded(true)
     const checkIfMobile = () => setIsMobile(window.innerWidth < 768)
     checkIfMobile()
@@ -125,6 +131,14 @@ export default function MedicalDashboard() {
 
   const renderContent = () => {
     switch (activeSection) {
+      case 'Dashboard':
+        return <PatientDashboard 
+          profileData={patientInfo}
+          expenseData={expenseData}
+          appointmentData={appointmentData}
+          healthData={healthData}
+          reportsData={reportsData}
+        />
       case 'Profile':
         return <Profile 
           patientInfo={patientInfo} 

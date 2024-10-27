@@ -362,7 +362,7 @@ export default function ExpenseTracker() {
       transition={{ duration: 0.3 }}
       className="space-y-8"
     >
-      <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">Expense Tracker</h1>
+      {/* <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">Expense Tracker</h1> */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <motion.div
           initial={{ y: 20, opacity: 0 }}
