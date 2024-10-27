@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react'
 import { Edit, Heart, Clipboard, Calendar, MapPin, QrCode } from 'lucide-react'
 import { removeBackground } from '@imgly/background-removal'
 import { google_ngrok_url } from '../../utils/global'
-
+import { useFetch } from '../components/useFetch'
 export default function Profile({ patientInfo }) {
   const [isEditMode, setIsEditMode] = useState(false)
   const [showQR, setShowQR] = useState(false)
   const [profilePic, setProfilePic] = useState(google_ngrok_url+patientInfo?.profile_pic || '/Vivek.jpg')
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [localPatientInfo, setLocalPatientInfo] = useState(patientInfo)
-
+  const { savePatientInfo } = useFetch()
   useEffect(() => {
     setLocalPatientInfo(patientInfo)
   }, [patientInfo])
@@ -55,8 +55,8 @@ export default function Profile({ patientInfo }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    // Here you would typically send the updated info  to the server
     console.log('Updated patient info:', localPatientInfo)
+    await savePatientInfo(localPatientInfo)
     setIsEditMode(false)
   }
 
