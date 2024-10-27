@@ -157,7 +157,7 @@ const ExpenseDetailsModal = ({ expense, onClose, onDelete }) => (
 
 export default function ExpenseTracker() {
   const [expenseData, setExpenseData] = useState({
-    overall_expense: "20500",
+    overall_expense: "26500",
     expenses: [
       {
         expense_type: "reports",
@@ -371,7 +371,7 @@ export default function ExpenseTracker() {
           className="bg-white p-6 sm:p-8 rounded-xl shadow-lg"
         >
           <h2 className="text-2xl sm:text-3xl font-semibold mb-6 flex items-center">
-            <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 mr-3 text-green-600" /> Total Expenses
+            <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 mr-3  text-green-600" /> Total Expenses
           </h2>
           <p className="text-4xl sm:text-5xl font-bold text-green-600">₹{parseFloat(expenseData.overall_expense).toFixed(2)}</p>
         </motion.div>
@@ -446,23 +446,23 @@ export default function ExpenseTracker() {
             </table>
           </div>
         </div>
-          <div className="flex flex-col space-y-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowAddExpense('normal')}
-              className="flex items-center justify-center text-lg py-3 px-6 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-300"
-            >
-              <PlusCircle className="w-6 h-6 mr-2" /> Add Expense
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowAddExpense('natural')}
-              className="flex items-center justify-center text-lg py-3 px-6 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-300"
-            >
-              <MessageSquare className="w-6 h-6 mr-2" /> Add Expense in Natural Language
-            </motion.button>
+        <div className="flex flex-col space-y-4">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowAddExpense('normal')}
+            className="flex items-center justify-center text-lg py-3 px-6 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-300"
+          >
+            <PlusCircle className="w-6 h-6 mr-2" /> Add Expense
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowAddExpense('natural')}
+            className="flex items-center justify-center text-lg py-3 px-6 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-300"
+          >
+            <MessageSquare className="w-6 h-6 mr-2" /> Add Expense in Natural Language
+          </motion.button>
           {selectedExpense && !showMobileModal && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -512,13 +512,12 @@ export default function ExpenseTracker() {
           <h3 className="text-xl font-semibold mb-4">Cumulative Expenses</h3>
           <Line data={cumulativeExpenseData} />
         </div>
-        </div>
+      </div>
     </motion.div>
-  ), [expenseData, selectedExpense, paginatedExpenses, currentPage, totalPages, handleDeleteExpense, showMobileModal]);
-
+  ), [expenseData, selectedExpense, paginatedExpenses, currentPage, totalPages, handleDeleteExpense, showMobileModal, expenseChartData, expenseTrendData, expenseTypeData, monthlyExpenseData, averageExpenseData, cumulativeExpenseData]);
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-8 bg-gray-100">
+    <div className="max-w-[1400px] w-full mx-auto p-2 sm:p-4 md:p-6 lg:p-8 bg-gray-100">
       <AnimatePresence mode="wait">
         {showAddExpense ? (
           <AddExpenseView 
