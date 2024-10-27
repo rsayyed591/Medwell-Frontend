@@ -13,6 +13,54 @@ import Appointments from './Patient/Appointments'
 import ShareWithDoctor from './Patient/ShareWithDoctor'
 import { useFetch } from './components/useFetch'
 
+const mockReports = [
+  {
+    id: 1,
+    title: 'Annual Checkup',
+    date: '28 Sept, 2024',
+    collectionDate: '25 Sept, 2024',
+    doctorName: 'Dr. Nishi',
+    summary: 'Overall health is good. Calcium levels are slightly elevated.',
+    elements: {
+      calcium: { max: 10.2, min: 8.5, unit: 'mg/dL', value: 10.5 },
+      hemoglobin: { max: 17.5, min: 13.5, unit: 'g/dL', value: 14.5 },
+      redBloodCells: { max: 5.9, min: 4.5, unit: 'million/µL', value: 5.2 },
+      whiteBloodCells: { max: 11000, min: 4500, unit: '/µL', value: 7500 },
+    },
+    reportUrl: 'https://drive.google.com/file/d/1XvgQ7lpsXazqMiH7dRiRs4prRbyjTEy4/view?usp=sharing',
+  },
+  {
+    id: 2,
+    title: 'Lipid Panel',
+    date: '15 Oct, 2024',
+    collectionDate: '12 Oct, 2024',
+    doctorName: 'Dr. Rehan',
+    summary: 'Cholesterol levels are within normal range.',
+    elements: {
+      totalCholesterol: { max: 200, min: 125, unit: 'mg/dL', value: 180 },
+      ldlCholesterol: { max: 130, min: 0, unit: 'mg/dL', value: 100 },
+      hdlCholesterol: { max: 60, min: 40, unit: 'mg/dL', value: 50 },
+      triglycerides: { max: 150, min: 0, unit: 'mg/dL', value: 120 },
+    },
+    reportUrl: 'https://drive.google.com/file/d/1XvgQ7lpsXazqMiH7dRiRs4prRbyjTEy4/view?usp=sharing',
+  },
+  {
+    id: 3,
+    title: "Nutrient Deficiency Panel",
+    date: "15 Nov, 2024",
+    collectionDate: "12 Nov, 2024",
+    doctorName: "Dr. Vivek",
+    summary: "Several nutrient levels are below the normal range, indicating deficiencies in calcium, iron, and vitamin D.",
+    elements: {
+      calcium: { max: 10.5, min: 8.5, unit: "mg/dL", value: 7.9 },
+      iron: { max: 170, min: 60, unit: "µg/dL", value: 50 },
+      vitaminD: { max: 100, min: 30, unit: "ng/mL", value: 20 },
+      magnesium: { max: 2.6, min: 1.8, unit: "mg/dL", value: 1.6 }
+    },
+    reportUrl: 'https://drive.google.com/file/d/1XvgQ7lpsXazqMiH7dRiRs4prRbyjTEy4/view?usp=sharing',
+  },
+]
+
 export default function MedicalDashboard() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [chartData, setChartData] = useState({})
@@ -52,7 +100,7 @@ export default function MedicalDashboard() {
         })
 
         const reportsResult = await fetchReports()
-        if (reportsResult && reportsResult.reports && Array.isArray(reportsResult.reports)) {
+        if (reportsResult && reportsResult.reports && Array.isArray(reportsResult.reports) && reportsResult.reports.length > 0) {
           const formattedReports = reportsResult.reports.map(report => ({
             id: report.id,
             title: report.report_file ? report.report_file.split("/")[3].split(".")[0] : 'Unknown Report Type',
@@ -65,14 +113,16 @@ export default function MedicalDashboard() {
             reportType: report.report_type || 'Unknown',
             submittedAt: report.submitted_at || 'Submission date not available',
           }))
-          setReports(formattedReports)
+          setReports(formattedReports,...mockReports)
         } else {
-          console.error("Invalid or empty reports data received:", reportsResult)
+          console.log("No reports data received from API, using mock data")
+          setReports(mockReports)
         }
 
         setIsLoaded(true)
       } catch (error) {
         console.error('Error fetching data:', error)
+        setReports(mockReports)
       }
     }
     fetchAllData()
@@ -257,7 +307,11 @@ export default function MedicalDashboard() {
         {isLoading ? (
           <div className="text-center">Loading...</div>
         ) : error ? (
-          <div className="text-center text-red-500">Error: {error}</div>
+          <div>
+          <div className="text-center text-red-500">Error: {error}
+          </div>
+         { renderContent()}
+          </div>
         ) : (
           renderContent()
         )}

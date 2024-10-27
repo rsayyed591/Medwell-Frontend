@@ -28,11 +28,10 @@ const AddExpenseView = ({ onAddExpense, onBack, inputMethod }) => {
   }, []);
 
   const handleNaturalLanguageSubmit = () => {
-    // Here you would implement the logic to parse the natural language input
-    // For this example, we'll just create a simple expense object
+
     const expenseToAdd = {
       expense_type: 'other',
-      amount: '0', // You would extract this from the natural language input
+      amount: '0', 
       date: format(new Date(), 'yyyy-MM-dd'),
     };
     onAddExpense(expenseToAdd);
