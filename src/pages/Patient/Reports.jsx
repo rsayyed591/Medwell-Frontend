@@ -67,8 +67,8 @@ export default function Reports() {
 
   useEffect(() => {
     const fetchReports = async () => {
-      const token = localStorage.getItem("Bearer")
-      console.log("Token:", token) // Log the token to check its value
+      const token = localStorage.getItem("Token")
+      console.log("Token:", token)
 
       if (!token) {
         console.error("No token found in localStorage")
