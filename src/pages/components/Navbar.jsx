@@ -18,7 +18,7 @@ export default function Navbar() {
     { name: 'About', link: '/about' },
   ]
   useEffect(()=>{
-    const token = localStorage.getItem('Bearer')
+    const token = localStorage.getItem('Token')
     if (token){
         setIsLoggedIn(true)
     }
@@ -51,7 +51,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem('User')
-    localStorage.removeItem('Bearer')
+    localStorage.removeItem('Token')
     setIsLoggedIn(false)
     navigate('/login')
   }

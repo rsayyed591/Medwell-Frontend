@@ -13,6 +13,7 @@ import {
   Legend,
 } from 'chart.js';
 import HealthCheck from './HealthCheck';
+import { google_ngrok_url } from '../../utils/global';
 
 ChartJS.register(
   CategoryScale,
@@ -29,7 +30,7 @@ export default function PatientDashboard({ profileData, expenseData, appointment
   const handleHealthCheck = () => {
     setShowHealthCheck(prev => !prev);
   };
-  
+  console.log(profileData)
   const [plateletData, setPlateletData] = useState({
     labels: [],
     datasets: [
@@ -70,7 +71,7 @@ export default function PatientDashboard({ profileData, expenseData, appointment
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div className="col-span-1 md:col-span-2 lg:col-span-3 bg-purple-500 text-white p-6 rounded-lg flex flex-col md:flex-row items-center justify-between">
+      <div className="col-span-1 md:col-span-2 lg:col-span-3 bg-blue-500 text-white p-6 rounded-lg flex flex-col md:flex-row items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-2">Welcome to Medwell !</h1>
           <p className="mb-4">Here, some random words</p>
@@ -87,13 +88,13 @@ export default function PatientDashboard({ profileData, expenseData, appointment
       <BoxWrapper className="col-span-1 md:col-span-2 lg:col-span-1 flex flex-col items-center justify-center">
         <h2 className="text-xl font-semibold mb-2">Profile</h2>
         <div className="flex flex-col items-center">
-          <img src={profileData.profile_pic || "/placeholder.svg?height=100&width=100"} alt={profileData.name} className="w-20 h-20 rounded-full mb-2" />
+          <img src={google_ngrok_url+profileData.profile_pic || "/Vivek.jpg"} alt={profileData.name} className="w-20 h-20 rounded-full mb-2" />
           <p className="font-medium">{profileData.name}</p>
           <p className="text-sm text-gray-600">Age: {profileData.age}</p>
         </div>
       </BoxWrapper>
 
-      <BoxWrapper className="col-span-1 md:col-span-1 lg:col-span-1 bg-purple-100">
+      <BoxWrapper className="col-span-1 md:col-span-1 lg:col-span-1 bg-blue-100">
         <h2 className="text-lg font-semibold mb-2">Total Expenses</h2>
         <p className="text-3xl font-bold text-green-500">Rs. {expenseData.overall_expense}</p>
       </BoxWrapper>

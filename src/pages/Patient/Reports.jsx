@@ -1,123 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, FileText, AlertCircle, ExternalLink, X, Download } from 'lucide-react'
-import Modal from 'react-modal'
+import { ArrowLeft, FileText, AlertCircle, ExternalLink, Download } from 'lucide-react'
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
-import { google_ngrok_url } from '../../utils/global'
-import axios from 'axios'
 
-const mockReports = [
-  {
-    id: 1,
-    title: 'Annual Checkup',
-    date: '28 Sept, 2024',
-    collectionDate: '25 Sept, 2024',
-    doctorName: 'Dr. Nishi',
-    summary: 'Overall health is good. Calcium levels are slightly elevated.',
-    elements: {
-      calcium: { max: 10.2, min: 8.5, unit: 'mg/dL', value: 10.5 },
-      hemoglobin: { max: 17.5, min: 13.5, unit: 'g/dL', value: 14.5 },
-      redBloodCells: { max: 5.9, min: 4.5, unit: 'million/µL', value: 5.2 },
-      whiteBloodCells: { max: 11000, min: 4500, unit: '/µL', value: 7500 },
-    },
-    reportUrl: 'https://drive.google.com/file/d/1XvgQ7lpsXazqMiH7dRiRs4prRbyjTEy4/view?usp=sharing',
-  },
-  {
-    id: 2,
-    title: 'Lipid Panel',
-    date: '15 Oct, 2024',
-    collectionDate: '12 Oct, 2024',
-    doctorName: 'Dr. Rehan',
-    summary: 'Cholesterol levels are within normal range.',
-    elements: {
-      totalCholesterol: { max: 200, min: 125, unit: 'mg/dL', value: 180 },
-      ldlCholesterol: { max: 130, min: 0, unit: 'mg/dL', value: 100 },
-      hdlCholesterol: { max: 60, min: 40, unit: 'mg/dL', value: 50 },
-      triglycerides: { max: 150, min: 0, unit: 'mg/dL', value: 120 },
-    },
-    reportUrl: 'https://drive.google.com/file/d/1XvgQ7lpsXazqMiH7dRiRs4prRbyjTEy4/view?usp=sharing',
-  },
-  {
-    id: 3,
-    title: "Nutrient Deficiency Panel",
-    date: "15 Nov, 2024",
-    collectionDate: "12 Nov, 2024",
-    doctorName: "Dr. Vivek",
-    summary: "Several nutrient levels are below the normal range, indicating deficiencies in calcium, iron, and vitamin D.",
-    elements: {
-      calcium: { max: 10.5, min: 8.5, unit: "mg/dL", value: 7.9 },
-      iron: { max: 170, min: 60, unit: "µg/dL", value: 50 },
-      vitaminD: { max: 100, min: 30, unit: "ng/mL", value: 20 },
-      magnesium: { max: 2.6, min: 1.8, unit: "mg/dL", value: 1.6 }
-    },
-    reportUrl: 'https://drive.google.com/file/d/1XvgQ7lpsXazqMiH7dRiRs4prRbyjTEy4/view?usp=sharing',
-  },  
-]
-
-// Set the app element for accessibility
-Modal.setAppElement('#root') // Adjust this if your app's root element has a different id
-
-export default function Reports() {
-  const [reports, setReports] = useState([])
+export default function Reports({ reports }) {
   const [selectedReport, setSelectedReport] = useState(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    const fetchReports = async () => {
-      const token = localStorage.getItem("Token")
-      console.log("Token:", token)
-
-      if (!token) {
-        console.error("No token found in localStorage")
-        setError("Authentication token not found. Please log in again.")
-        setIsLoading(false)
-        return
-      }
-
-      try {
-        const response = await axios.post(
-          `${google_ngrok_url}/patient/get_reports/`,
-          { Checking: "OK" },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-
-        console.log("API Response:", response.data)
-
-        if (response.data.reports && Array.isArray(response.data.reports)) {
-          const formattedReports = response.data.reports.map(report => ({
-            id: report.id,
-            title: report.report_file ? report.report_file.split("/")[3].split(".")[0] : 'Unknown Report Type',
-            date: report.date_of_report || 'Date not available',
-            collectionDate: report.date_of_collection || 'Collection date not available',
-            doctorName: report.doctor_name || 'Doctor name not available',
-            summary: report.summary || 'Summary not available',
-            elements: report.reportdetail?.report_data || {},
-            reportUrl: report.report_file ? `${google_ngrok_url}${report.report_file}` : '',
-            reportType: report.report_type || 'Unknown',
-            submittedAt: report.submitted_at || 'Submission date not available',
-          }))
-          setReports(formattedReports)
-        } else {
-          console.error("Invalid or empty reports data received:", response.data)
-          setError("No reports data available")
-        }
-      } catch (error) {
-        console.error('Error:', error)
-        setError(error.response?.data?.message || error.message || 'An unknown error occurred')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchReports()
-  }, [])
 
   const handleReportClick = useCallback((report) => {
     setSelectedReport(report)
@@ -128,15 +16,10 @@ export default function Reports() {
   }, [])
 
   const handleViewReport = useCallback(() => {
-    if (selectedReport) {
-      setIsModalOpen(true)
+    if (selectedReport && selectedReport.reportUrl) {
+      window.open(selectedReport.reportUrl, '_blank')
     }
-    console.log(selectedReport?.reportUrl)
   }, [selectedReport])
-
-  const closeModal = useCallback(() => {
-    setIsModalOpen(false)
-  }, [])
 
   const handleDownloadPDF = useCallback((report) => {
     const doc = new jsPDF()
@@ -282,19 +165,17 @@ export default function Reports() {
               <Download className="w-4 h-4 mr-2" />
               Download PDF
             </motion.button>
-            {selectedReport && (
-            <a href={selectedReport.reportUrl} target="_blank" rel="noopener noreferrer">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleViewReport}
-                      className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded flex items-center justify-center transition-colors duration-300 text-sm"
-                    >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      View Full Report
-                    </motion.button>
-            </a>
-          )}
+            {report.reportUrl && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleViewReport}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded flex items-center justify-center transition-colors duration-300 text-sm"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                View Full Report
+              </motion.button>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -387,14 +268,6 @@ export default function Reports() {
     )
   }, [handleBackClick, handleViewReport, handleDownloadPDF])
 
-  if (isLoading) {
-    return <div className="text-center mt-8">Loading...</div>
-  }
-
-  // if (error) {
-  //   return <div className="text-center mt-8 text-red-500">Error: {error}</div>
-  // }
-
   return (
     <div className="container mx-auto px-4 py-8">
       <AnimatePresence mode="wait">
@@ -407,7 +280,6 @@ export default function Reports() {
             transition={{ duration: 0.3 }}
           >
             <DetailedReport report={selectedReport} />
-          
           </motion.div>
         ) : (
           <motion.div
@@ -429,7 +301,6 @@ export default function Reports() {
           </motion.div>
         )}
       </AnimatePresence>
-      
     </div>
   )
 }

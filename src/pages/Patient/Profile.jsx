@@ -1,112 +1,64 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Edit, Heart, Clipboard, Calendar, MapPin, QrCode } from 'lucide-react';
-import { removeBackground } from '@imgly/background-removal';
-import { useFetch } from '../components/useFetch';
+import React, { useState, useEffect } from 'react'
+import { Edit, Heart, Clipboard, Calendar, MapPin, QrCode } from 'lucide-react'
+import { removeBackground } from '@imgly/background-removal'
+import { google_ngrok_url } from '../../utils/global'
 
-// Dummy data
-const dummyPatientInfo = {
-  name: "Vivek Chouhan",
-  user: "vivi_1234",
-  age: 35,
-  phone_number: "+1 (555) 123-4567",
-  blood_group: "O+",
-  height: "175 cm",
-  weight: "70 kg",
-  allergies: ["Peanuts", "Penicillin"],
-  aadhar_card: "1234 5678 9012",
-  chronic_condition: "None",
-  family_history: "Diabetes in paternal grandfather",
-  city: "New Vivek",
-  state: "New VVvek",
-  country: "USV",
-  pin: "10001",
-  profile_pic: "/Vivek.jpg"
-};
-
-export default function Profile() {
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [showQR, setShowQR] = useState(false);
-  const [profilePic, setProfilePic] = useState(dummyPatientInfo.profile_pic);
-  const [qrCodeUrl, setQrCodeUrl] = useState('');
-  const [patientInfo, setPatientInfo] = useState(dummyPatientInfo);
-  const [originalPatientInfo, setOriginalPatientInfo] = useState(dummyPatientInfo);
-  const { savePatientInfo, updateProfilePic, getPatientInfo, isLoading } = useFetch();
+export default function Profile({ patientInfo }) {
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [showQR, setShowQR] = useState(false)
+  const [profilePic, setProfilePic] = useState(google_ngrok_url+patientInfo?.profile_pic || '/Vivek.jpg')
+  const [qrCodeUrl, setQrCodeUrl] = useState('')
+  const [localPatientInfo, setLocalPatientInfo] = useState(patientInfo)
 
   useEffect(() => {
-    const fetchPatientInfo = async () => {
-      const data = await getPatientInfo();
-      if (data && Object.keys(data).length > 0) {
-        setPatientInfo(data);
-        setOriginalPatientInfo(data);
-        setProfilePic(data.profile_pic || dummyPatientInfo.profile_pic);
-      }
-    };
-    fetchPatientInfo();
-  }, [getPatientInfo]);
+    setLocalPatientInfo(patientInfo)
+  }, [patientInfo])
 
   useEffect(() => {
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`imedwell.vercel.app/dashboard/user=${patientInfo.user}`)}`;
-    setQrCodeUrl(qrUrl);
-  }, [patientInfo.user]);
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`imedwell.vercel.app/dashboard/user=${localPatientInfo?.user}`)}`;
+    setQrCodeUrl(qrUrl)
+  }, [localPatientInfo?.user])
 
   useEffect(() => {
     const removeProfileBackground = async () => {
-      if (profilePic && profilePic !== dummyPatientInfo.profile_pic) {
+      if (profilePic && profilePic !== '/Vivek.jpg') {
         try {
-          const result = await removeBackground(profilePic);
-          setProfilePic(result);
+          const result = await removeBackground(profilePic)
+          setProfilePic(URL.createObjectURL(result))
         } catch (error) {
-          console.error('Error removing background:', error);
+          console.error('Error removing background:', error)
         }
       }
-    };
-    removeProfileBackground();
-  }, [profilePic]);
+    }
+    removeProfileBackground()
+  }, [profilePic])
 
   const safeJoin = (arr, separator = ', ') => {
-    return Array.isArray(arr) ? arr.join(separator) : arr || '';
-  };
+    return Array.isArray(arr) ? arr.join(separator) : arr || ''
+  }
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setPatientInfo((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setLocalPatientInfo((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleFileChange = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files[0]
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        setProfilePic(reader.result);
-        const formData = new FormData();
-        formData.append('profile_pic', file);
-        const result = await updateProfilePic(formData);
-        if (result) {
-          console.log('Profile picture updated successfully');
-        }
-      };
-      reader.readAsDataURL(file);
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setProfilePic(reader.result)
+      }
+      reader.readAsDataURL(file)
     }
-  };
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const changedFields = {};
-    Object.keys(patientInfo).forEach(key => {
-      if (patientInfo[key] !== originalPatientInfo[key]) {
-        changedFields[key] = patientInfo[key];
-      }
-    });
-    
-    if (Object.keys(changedFields).length > 0) {
-      const result = await savePatientInfo(changedFields);
-      if (result) {
-        setOriginalPatientInfo(patientInfo);
-        console.log('Patient info updated successfully');
-      }
-    }
-    setIsEditMode(false);
-  };
+    e.preventDefault()
+    // Here you would typically send the updated info  to the server
+    console.log('Updated patient info:', localPatientInfo)
+    setIsEditMode(false)
+  }
 
   const ProfileDisplay = () => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -125,10 +77,10 @@ export default function Profile() {
               <QrCode className="h-4 w-4" />
             </button>
           </div>
-          <h2 className="text-2xl font-bold text-center mb-2">{patientInfo.name}</h2>
-          <p className="text-gray-600 text-center mb-1">User: {patientInfo.user}</p>
-          <p className="text-gray-600 text-center mb-1">{patientInfo.phone_number}</p>
-          <p className="text-gray-600 text-center mb-4">Age: {patientInfo.age}</p>
+          <h2 className="text-2xl font-bold text-center mb-2">{localPatientInfo?.name}</h2>
+          <p className="text-gray-600 text-center mb-1">Email: {localPatientInfo?.email}</p>
+          <p className="text-gray-600 text-center mb-1">{localPatientInfo?.phone_number}</p>
+          <p className="text-gray-600 text-center mb-4">Age: {localPatientInfo?.age}</p>
           <button 
             className="w-full flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
             onClick={() => setIsEditMode(true)}
@@ -145,11 +97,11 @@ export default function Profile() {
             General
           </h3>
           <div className="space-y-2">
-            <p><span className="font-semibold">Blood Group:</span> {patientInfo.blood_group}</p>
-            <p><span className="font-semibold">Height:</span> {patientInfo.height}</p>
-            <p><span className="font-semibold">Weight:</span> {patientInfo.weight}</p>
-            <p><span className="font-semibold">Allergies:</span> {safeJoin(patientInfo.allergies)}</p>
-            <p><span className="font-semibold">Aadhar Card:</span> {patientInfo.aadhar_card}</p>
+            <p><span className="font-semibold">Blood Group:</span> {localPatientInfo?.blood_group}</p>
+            <p><span className="font-semibold">Height:</span> {localPatientInfo?.height}</p>
+            <p><span className="font-semibold">Weight:</span> {localPatientInfo?.weight}</p>
+            <p><span className="font-semibold">Allergies:</span> {safeJoin(localPatientInfo?.allergies)}</p>
+            <p><span className="font-semibold">Aadhar Card:</span> {localPatientInfo?.aadhar_card}</p>
           </div>
         </div>
         <div className="bg-white rounded-lg shadow-lg p-6">
@@ -158,8 +110,8 @@ export default function Profile() {
             Medical History
           </h3>
           <div className="space-y-2">
-            <p><span className="font-semibold">Chronic Conditions:</span> {patientInfo.chronic_condition}</p>
-            <p><span className="font-semibold">Family History:</span> {patientInfo.family_history}</p>
+            <p><span className="font-semibold">Chronic Conditions:</span> {localPatientInfo?.chronic_condition}</p>
+            <p><span className="font-semibold">Family History:</span> {localPatientInfo?.family_history}</p>
           </div>
         </div>
         <div className="bg-white rounded-lg shadow-lg p-6">
@@ -179,236 +131,235 @@ export default function Profile() {
             Location
           </h3>
           <div className="space-y-2">
-            <p><span className="font-semibold">City:</span> {patientInfo.city}</p>
-            <p><span className="font-semibold">State:</span> {patientInfo.state}</p>
-            <p><span className="font-semibold">Country:</span> {patientInfo.country}</p>
-            <p><span className="font-semibold">PIN:</span> {patientInfo.pin}</p>
+            <p><span className="font-semibold">City:</span> {localPatientInfo?.city}</p>
+            <p><span className="font-semibold">State:</span> {localPatientInfo?.state}</p>
+            <p><span className="font-semibold">Country:</span> {localPatientInfo?.country}</p>
+            <p><span className="font-semibold">PIN:</span> {localPatientInfo?.pin}</p>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 
-  const ProfileEdit = () => {
-    const inputRefs = useRef({});
+  if (!localPatientInfo) {
+    return <div className="text-center mt-8">Loading...</div>
+  }
 
-    useEffect(() => {
-      if (inputRefs.current.name) {
-        inputRefs.current.name.focus();
-      }
-    }, []);
-
-    return (
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-bold mb-6">Edit Profile</h2>
-          <div className="flex flex-col items-center mb-6">
-            <div className="relative w-48 h-48 mb-4">
-              <img 
-                src={profilePic}
-                alt="Profile" 
-                className="w-full h-full rounded-full object-cover"
-              />
-              <label htmlFor="profile_pic" className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 cursor-pointer">
-                <Edit className="h-4 w-4" />
-              </label>
-              <input
-                type="file"
-                id="profile_pic"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="name">Name</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={patientInfo.name}
-                onChange={handleInputChange}
-                ref={(el) => (inputRefs.current.name = el)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="age">Age</label>
-              <input
-                type="number"
-                id="age"
-                name="age"
-                value={patientInfo.age}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="user">User</label>
-              <input
-                type="text"
-                id="user"
-                name="user"
-                value={patientInfo.user}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="phone_number">Phone Number</label>
-              <input
-                type="tel"
-                id="phone_number"
-                name="phone_number"
-                value={patientInfo.phone_number}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="blood_group">Blood Group</label>
-              <input
-                type="text"
-                id="blood_group"
-                name="blood_group"
-                value={patientInfo.blood_group}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="height">Height</label>
-              <input
-                type="text"
-                id="height"
-                name="height"
-                value={patientInfo.height}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="weight">Weight</label>
-              <input
-                type="text"
-                id="weight"
-                name="weight"
-                value={patientInfo.weight}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="allergies">Allergies</label>
-              <input
-                type="text"
-                id="allergies"
-                name="allergies"
-                value={safeJoin(patientInfo.allergies)}
-                onChange={(e) => handleInputChange({
-                  target: {
-                    name: 'allergies',
-                    value: e.target.value.split(',').map(item => item.trim())
-                  }
-                })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="aadhar_card">Aadhar Card</label>
-              <input
-                type="text"
-                id="aadhar_card"
-                name="aadhar_card"
+  return (
+    <div className="max-w-7xl mx-auto mt-8 p-4 md:p-6">
+      {isEditMode ? (
+        <div className="fixed inset-0 bg-white overflow-y-auto z-50">
+          <div className="max-w-3xl mx-auto py-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <h2 className="text-2xl font-bold mb-6">Edit Profile</h2>
+                <div className="flex flex-col items-center mb-6">
+                  <div className="relative w-48 h-48 mb-4">
+                    <img 
+                      src={profilePic}
+                      alt="Profile" 
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                    <label htmlFor="profile_pic" className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 cursor-pointer">
+                      <Edit className="h-4 w-4" />
+                    </label>
+                    <input
+                      type="file"
+                      id="profile_pic"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="name">Name</label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={localPatientInfo?.name || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="age">Age</label>
+                    <input
+                      type="number"
+                      id="age"
+                      name="age"
+                      value={localPatientInfo?.age || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="email">Email</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={localPatientInfo?.email || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      disabled
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="phone_number">Phone Number</label>
+                    <input
+                      type="tel"
+                      id="phone_number"
+                      name="phone_number"
+                      value={localPatientInfo?.phone_number || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="blood_group">Blood Group</label>
+                    <input
+                      type="text"
+                      id="blood_group"
+                      name="blood_group"
+                      value={localPatientInfo?.blood_group || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="height">Height</label>
+                    <input
+                      type="text"
+                      id="height"
+                      name="height"
+                      value={localPatientInfo?.height || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="weight">Weight</label>
+                    <input
+                      type="text"
+                      id="weight"
+                      name="weight"
+                      value={localPatientInfo?.weight || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="allergies">Allergies</label>
+                    <input
+                      type="text"
+                      id="allergies"
+                      name="allergies"
+                      value={safeJoin(localPatientInfo?.allergies)}
+                      onChange={(e) => handleInputChange({
+                        target: {
+                          name: 'allergies',
+                          value: e.target.value.split(',').map(item => item.trim())
+                        }
+                      })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="aadhar_card">Aadhar Card</label>
+                    <input
+                      type="text"
+                      id="aadhar_card"
+                      name="aadhar_card"
+                      value={localPatientInfo?.aadhar_card || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                <div className="mt-6">
+                  <label className="block text-sm font-medium mb-1" htmlFor="chronic_condition">Chronic Conditions</label>
+                  <textarea
+                    id="chronic_condition"
+                    name="chronic_condition"
+                    value={localPatientInfo?.chronic_condition || ''}
+                    onChange={handleInputChange}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="mt-6">
+                  <label className="block text-sm font-medium mb-1" htmlFor="family_history">Family History</label>
+                  <textarea
+                    id="family_history"
+                    name="family_history"
+                    value={localPatientInfo?.family_history || ''}
+                    onChange={handleInputChange}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="city">City</label>
+                    <input
+                      type="text"
+                      id="city"
+                      name="city"
+                      value={localPatientInfo?.city || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="state">State</label>
+                    <input
+                      type="text"
+                      id="state"
+                      name="state"
+                      value={localPatientInfo?.state || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="country">Country</label>
+                    <input
+                      type="text"
+                      id="country"
+                      name="country"
+                      value={localPatientInfo?.country || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="pin">PIN</label>
+                    <input
+                      type="text"
+                      id="pin"
+                      name="pin"
+                      value={localPatientInfo?.pin || ''}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocalPatientInfo(patientInfo);
+                    setIsEditMode(false);
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
                 
-                value={patientInfo.aadhar_card}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-          <div className="mt-6">
-            <label className="block text-sm font-medium mb-1" htmlFor="chronic_condition">Chronic Conditions</label>
-            <textarea
-              id="chronic_condition"
-              name="chronic_condition"
-              value={patientInfo.chronic_condition}
-              onChange={handleInputChange}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="mt-6">
-            <label className="block text-sm font-medium mb-1" htmlFor="family_history">Family History</label>
-            <textarea
-              id="family_history"
-              name="family_history"
-              value={patientInfo.family_history}
-              onChange={handleInputChange}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="city">City</label>
-              <input
-                type="text"
-                id="city"
-                name="city"
-                value={patientInfo.city}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="state">State</label>
-              <input
-                type="text"
-                id="state"
-                name="state"
-                value={patientInfo.state}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="country">Country</label>
-              <input
-                type="text"
-                id="country"
-                name="country"
-                value={patientInfo.country}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="pin">PIN</label>
-              <input
-                type="text"
-                id="pin"
-                name="pin"
-                value={patientInfo.pin}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            onClick={() => {
-              setPatientInfo(originalPatientInfo);
-              setIsEditMode(false);
-            }}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-          >
-            Cancel
-          </button>
           <button
             type="submit"
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
@@ -417,19 +368,6 @@ export default function Profile() {
           </button>
         </div>
       </form>
-    );
-  };
-
-  if (isLoading) {
-    return <div className="text-center mt-8">Loading...</div>;
-  }
-
-  return (
-    <div className="max-w-7xl mx-auto mt-8 p-4 md:p-6">
-      {isEditMode ? (
-        <div className="fixed inset-0 bg-white overflow-y-auto z-50">
-          <div className="max-w-3xl mx-auto py-8">
-            <ProfileEdit />
           </div>
         </div>
       ) : (

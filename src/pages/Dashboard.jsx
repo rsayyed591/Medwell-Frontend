@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Patient from './../../public/patient.png'
 import { Home, User, Heart, FileText, PlusCircle, DollarSign, Calendar, Share2, ChevronRight, ChevronUp, ChevronDown, Menu, X, Activity, Droplet, Thermometer, Brain } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Profile from './Patient/Profile'
 import HealthCheck from './Patient/HealthCheck'
 import Reports from './Patient/Reports'
@@ -11,7 +11,7 @@ import ExpenseTracker from './Patient/ExpenseTracker'
 import PatientDashboard from './Patient/PatientDashboard'
 import Appointments from './Patient/Appointments'
 import ShareWithDoctor from './Patient/ShareWithDoctor'
-import { google_ngrok_url } from '../utils/global'
+import { useFetch } from './components/useFetch'
 
 export default function MedicalDashboard() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -20,67 +20,64 @@ export default function MedicalDashboard() {
   const [activeSection, setActiveSection] = useState('Dashboard')
   const [isMobile, setIsMobile] = useState(false)
   const [isProfileExpanded, setIsProfileExpanded] = useState(false)
-  const [isEditMode, setIsEditMode] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [patientInfo, setPatientInfo] = useState({
-    "name": "Vivek Chouhan",
-    "age": 45,
-    "user": "vivek",
-    "phone_number": "123-456-7890",
-    "blood_group": "O+",
-    "height": "180 cm",
-    "weight": "75 kg",
-    "city": "Mumbai",
-    "country": "India",
-    "state": "Maharashtra",
-    "pin": "400010",
-    "profile_pic": "./../../public/Vivek.jpg",
-    "profile_qr": "/qr-codes/vivek-chouhan.png",
-    "aadhar_card": "4500 4500 2540",
-    "allergies": ["Peanuts", "Penicillin"],
-    "chronic_condition": "Hypertension",
-    "family_history": "Heart disease in paternal family"
-  })
+  const { isLoading, error, fetchHealthCheck, getPatientInfo, fetchReports } = useFetch()
+  const [patientInfo, setPatientInfo] = useState({profile_pic:"/Vivek.jpg"})
 
-  // New state variables
-  const [expenseData, setExpenseData] = useState({ overall_expense: 0 });
-  const [appointmentData, setAppointmentData] = useState({ doctor: 'N/A', date: 'N/A' });
-  const [healthData, setHealthData] = useState({ wbc_count: [], hemoglobin: [] });
-  const [reportsData, setReportsData] = useState([]);
+  const [expenseData, setExpenseData] = useState({ overall_expense: 0 })
+  const [appointmentData, setAppointmentData] = useState({ doctor: 'N/A', date: 'N/A' })
+  const [healthData, setHealthData] = useState({ wbc_count: [], hemoglobin: [] })
+  const [reports, setReports] = useState([])
 
   useEffect(() => {
-    const fetchReports = async () => {
-      const token = localStorage.getItem("Token")
-      console.log(token)
-      const myHeaders = new Headers();
-      myHeaders.append("Authorization", "Bearer " + token);
-      
-      const requestOptions = {
-        method: "POST",
-        headers: myHeaders,
-        body: JSON.stringify({"Checking":"OK"})
-      };
-
+    const fetchAllData = async () => {
       try {
-        const response = await fetch(`${google_ngrok_url}/patient/health_check/`, requestOptions)
-        if (!response.ok) {
-          throw new Error('Network response was not ok')
+        const healthCheckResult = await fetchHealthCheck()
+        setChartData(healthCheckResult.data || {})
+        
+        const patientInfoResult = await getPatientInfo()
+        setPatientInfo(patientInfoResult || {
+          name: 'John Doe',
+          id: 'P12345',
+          age: 30,
+          blood_group: 'O+',
+          allergies: ['Peanuts', 'Penicillin'],
+          profile_pic:"/Vivek.jpg"
+        })
+        
+        setExpenseData({ overall_expense: 1000 })
+        setAppointmentData({ doctor: 'Dr. Smith', date: '2024-03-15' })
+        setHealthData({
+          wbc_count: [4.5, 5.0, 4.8],
+          hemoglobin: [14.2, 14.5, 14.0]
+        })
+
+        const reportsResult = await fetchReports()
+        if (reportsResult && reportsResult.reports && Array.isArray(reportsResult.reports)) {
+          const formattedReports = reportsResult.reports.map(report => ({
+            id: report.id,
+            title: report.report_file ? report.report_file.split("/")[3].split(".")[0] : 'Unknown Report Type',
+            date: report.date_of_report || 'Date not available',
+            collectionDate: report.date_of_collection || 'Collection date not available',
+            doctorName: report.doctor_name || 'Doctor name not available',
+            summary: report.summary || 'Summary not available',
+            elements: report.reportdetail?.report_data || {},
+            reportUrl: report.report_file || '',
+            reportType: report.report_type || 'Unknown',
+            submittedAt: report.submitted_at || 'Submission date not available',
+          }))
+          setReports(formattedReports)
+        } else {
+          console.error("Invalid or empty reports data received:", reportsResult)
         }
-        const result = await response.json()
-        setChartData(result.data || {})
-        setHealthData(result.data || { wbc_count: [], hemoglobin: [] });
-        console.log(result.data)
-        setIsLoading(false)
+
+        setIsLoaded(true)
       } catch (error) {
-        console.error('Error:', error)
-        setError(error.message || 'An unknown error occurred')
-        setIsLoading(false)
+        console.error('Error fetching data:', error)
       }
     }
-    fetchReports()
-  }, [])
-
+    fetchAllData()
+  }, [fetchHealthCheck, getPatientInfo, fetchReports])
+  
   const navigate = useNavigate()
   const charts = [
     { label: "Hemoglobin", color: "#ff6b6b", icon: Heart, data: chartData.hemoglobin || [] },
@@ -119,16 +116,6 @@ export default function MedicalDashboard() {
     setIsSidebarOpen(!isSidebarOpen)
   }
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setPatientInfo(prev => ({ ...prev, [name]: value }))
-  }
-
-  const handleSave = () => {
-    console.log('Updated patient info:', patientInfo)
-    setIsEditMode(false)
-  }
-
   const renderContent = () => {
     switch (activeSection) {
       case 'Dashboard':
@@ -137,20 +124,14 @@ export default function MedicalDashboard() {
           expenseData={expenseData}
           appointmentData={appointmentData}
           healthData={healthData}
-          reportsData={reportsData}
+          reportsData={reports}
         />
       case 'Profile':
-        return <Profile 
-          patientInfo={patientInfo} 
-          isEditMode={isEditMode} 
-          setIsEditMode={setIsEditMode} 
-          handleInputChange={handleInputChange} 
-          handleSave={handleSave} 
-        />
+        return <Profile patientInfo={patientInfo} />
       case 'Health Check':
         return <HealthCheck isLoaded={isLoaded} charts={charts} />
       case 'Reports':
-        return <Reports />
+        return <Reports reports={reports} />
       case 'Add Report':
         return <AddReport />
       case 'Expense Tracker':
@@ -173,8 +154,8 @@ export default function MedicalDashboard() {
         <div className="flex items-center">
           <img src={Patient} alt="Patient" className="w-12 h-12 rounded-full mr-3" />
           <div>
-            <h2 className="text-lg font-bold text-gray-800">{patientInfo.name}</h2>
-            <p className="text-sm text-gray-600">Patient ID: {patientInfo.id}</p>
+            <h2 className="text-lg font-bold text-gray-800">{patientInfo?.name || 'John Doe'}</h2>
+            <p className="text-sm text-gray-600">Patient ID: {patientInfo?.id || 'P12345'}</p>
           </div>
         </div>
         {isProfileExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -188,11 +169,9 @@ export default function MedicalDashboard() {
             transition={{ duration: 0.3 }}
             className="text-sm space-y-2 mb-4"
           >
-            <p><strong>Age:</strong> {patientInfo.age}</p>
-            <p><strong>Doctor:</strong> {patientInfo.doctor}</p>
-            <p><strong>Next Appointment:</strong> {patientInfo.nextAppointment}</p>
-            <p><strong>Blood Type:</strong> {patientInfo.bloodType}</p>
-            <p><strong>Allergies:</strong> {patientInfo.allergies}</p>
+            <p><strong>Age:</strong> {patientInfo?.age || 30}</p>
+            <p><strong>Blood Type:</strong> {patientInfo?.blood_group || 'O+'}</p>
+            <p><strong>Allergies:</strong> {patientInfo?.allergies?.join(', ') || 'None'}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -275,7 +254,13 @@ export default function MedicalDashboard() {
           )}
         </div>
 
-        {renderContent()}
+        {isLoading ? (
+          <div className="text-center">Loading...</div>
+        ) : error ? (
+          <div className="text-center text-red-500">Error: {error}</div>
+        ) : (
+          renderContent()
+        )}
       </div>
 
       {isMobile && isSidebarOpen && (

@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { google_ngrok_url } from '../../utils/global';
 
-const BASE_URL = google_ngrok_url
+const BASE_URL = google_ngrok_url;
 
 export const useFetch = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -76,7 +76,44 @@ export const useFetch = () => {
   }, []);
 
   const getPatientInfo = useCallback(async () => {
-    return apiCall('/patient/get_info/', 'GET');
+    return apiCall('/patient/get_info/', 'POST', {"Checking":"OK"});
+  }, [apiCall]);
+
+  const fetchReports = useCallback(async () => {
+    return apiCall('/patient/get_reports/', 'POST', {"Checking":"OK"});
+  }, [apiCall]);
+
+  const sendReport = useCallback(async (reportFile) => {
+    const token = getToken();
+    if (!token) {
+      setError('No authentication token found');
+      return null;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append("report", reportFile);
+
+    try {
+      const response = await axios.post(`${BASE_URL}/patient/send_report/`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'An error occurred');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const fetchHealthCheck = useCallback(async () => {
+    return apiCall('/patient/health_check/', 'POST', {"Checking":"OK"});
   }, [apiCall]);
 
   return {
@@ -85,5 +122,8 @@ export const useFetch = () => {
     savePatientInfo,
     updateProfilePic,
     getPatientInfo,
+    fetchReports,
+    sendReport,
+    fetchHealthCheck,
   };
 };
