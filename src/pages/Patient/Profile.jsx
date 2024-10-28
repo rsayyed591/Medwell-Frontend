@@ -1,61 +1,68 @@
-import React, { useState, useEffect } from 'react'
-import { Edit, Heart, Clipboard, Calendar, MapPin, QrCode } from 'lucide-react'
-import { google_ngrok_url } from '../../utils/global'
-import { useFetch } from '../components/useFetch'
+import React, { useState, useEffect, useCallback } from 'react';
+import { Edit, Heart, Clipboard, Calendar, MapPin, QrCode } from 'lucide-react';
+import { debounce } from 'lodash';
+import { google_ngrok_url } from '../../utils/global';
+import { useFetch } from '../components/useFetch';
 
 export default function Profile({ patientInfo }) {
-  const [isEditMode, setIsEditMode] = useState(false)
-  const [showQR, setShowQR] = useState(false)
-  const [profilePic, setProfilePic] = useState(google_ngrok_url+patientInfo.profile_pic || '/Vivek.jpg')
-  const [qrCodeUrl, setQrCodeUrl] = useState('')
-  const [localPatientInfo, setLocalPatientInfo] = useState(patientInfo)
-  const { savePatientInfo, updateProfilePic } = useFetch()
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+  const [profilePic, setProfilePic] = useState(google_ngrok_url + patientInfo.profile_pic || '/Vivek.jpg');
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [localPatientInfo, setLocalPatientInfo] = useState(patientInfo);
+  const { savePatientInfo, updateProfilePic } = useFetch();
 
   useEffect(() => {
-    setLocalPatientInfo(patientInfo)
-  }, [patientInfo])
-  console.log(profilePic)
-  useEffect(() => {
-    const qrUrl = google_ngrok_url + localPatientInfo.profile_qr
-    setQrCodeUrl(qrUrl)
-  }, [localPatientInfo.profile_qr])
+    setLocalPatientInfo(patientInfo);
+  }, [patientInfo]);
 
-  // const safeJoin = (arr, separator = ', ') => {
-  //   return Array.isArray(arr) ? arr.join(separator) : arr || ''
-  // }
+  useEffect(() => {
+    const qrUrl = google_ngrok_url + localPatientInfo.profile_qr;
+    setQrCodeUrl(qrUrl);
+  }, [localPatientInfo.profile_qr]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     if (name === 'chronic_condition' || name === 'family_history') {
-      setLocalPatientInfo((prev) => ({ ...prev, [name]: value.split(',').map(item => item.trim()) }))
+      setLocalPatientInfo((prev) => ({ ...prev, [name]: value.split(',').map(item => item.trim()) }));
     } else {
-      setLocalPatientInfo((prev) => ({ ...prev, [name]: value }))
+      setLocalPatientInfo((prev) => ({ ...prev, [name]: value }));
     }
-  }
+  };
 
   const handleFileChange = async (e) => {
-    const file = e.target.files[0]
-    setProfilePic(file)
-  }
+    const file = e.target.files[0];
+    setProfilePic(file);
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     
-    const dataToSend = { ...localPatientInfo }
+    const dataToSend = { ...localPatientInfo };
     
-    dataToSend.chronic_condition = Array.isArray(dataToSend.chronic_condition) 
-      ? dataToSend.chronic_condition 
-      : dataToSend.chronic_condition.split(',').map(item => item.trim())
-    
-    dataToSend.family_history = Array.isArray(dataToSend.family_history)
-      ? dataToSend.family_history
-      : dataToSend.family_history.split(',').map(item => item.trim())
+    ['chronic_condition', 'family_history'].forEach(field => {
+      if (typeof dataToSend[field] === 'string') {
+        dataToSend[field] = dataToSend[field].split(',').map(item => item.trim());
+      }
+    });
 
-    console.log('Updated patient info:', dataToSend)
-    await savePatientInfo(dataToSend)
-    await updateProfilePic(profilePic)
-    setIsEditMode(false)
-  }
+    console.log('Updated patient info:', dataToSend);
+    
+    try {
+      // Send patient info
+      await savePatientInfo(dataToSend);
+      
+      // Send profile picture separately if it has been updated
+      if (profilePic instanceof File) {
+        await updateProfilePic(profilePic);
+      }
+      
+      setIsEditMode(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      // Handle error (e.g., show error message to user)
+    }
+  };
 
   const ProfileDisplay = () => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -136,10 +143,10 @@ export default function Profile({ patientInfo }) {
         </div>
       </div>
     </div>
-  )
+  );
 
   if (!localPatientInfo) {
-    return <div className="text-center mt-8">Loading...</div>
+    return <div className="text-center mt-8">Loading...</div>;
   }
 
   return (
@@ -177,7 +184,7 @@ export default function Profile({ patientInfo }) {
                       id="name"
                       name="name"
                       value={localPatientInfo?.name || ''}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -188,7 +195,7 @@ export default function Profile({ patientInfo }) {
                       id="age"
                       name="age"
                       value={localPatientInfo?.age || ''}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -210,7 +217,7 @@ export default function Profile({ patientInfo }) {
                       id="phone_number"
                       name="phone_number"
                       value={localPatientInfo?.phone_number || ''}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -221,7 +228,7 @@ export default function Profile({ patientInfo }) {
                       id="blood_group"
                       name="blood_group"
                       value={localPatientInfo?.blood_group || ''}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -232,7 +239,7 @@ export default function Profile({ patientInfo }) {
                       id="height"
                       name="height"
                       value={localPatientInfo?.height || ''}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -243,7 +250,7 @@ export default function Profile({ patientInfo }) {
                       id="weight"
                       name="weight"
                       value={localPatientInfo?.weight || ''}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -254,12 +261,7 @@ export default function Profile({ patientInfo }) {
                       id="allergies"
                       name="allergies"
                       value={localPatientInfo?.allergies}
-                      onChange={(e) => handleInputChange({
-                        target: {
-                          name: 'allergies',
-                          value: e.target.value.split(',').map(item => item.trim())
-                        }
-                      })}
+                      onChange={(e) => handleInputChange(e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -270,7 +272,7 @@ export default function Profile({ patientInfo }) {
                       id="aadhar_card"
                       name="aadhar_card"
                       value={localPatientInfo?.aadhar_card || ''}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -283,10 +285,10 @@ export default function Profile({ patientInfo }) {
                     value={Array.isArray(localPatientInfo?.chronic_condition) ? localPatientInfo.chronic_condition.join(', ') : localPatientInfo?.chronic_condition || ''}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2  focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <div className="mt-6">
+                <div  className="mt-6">
                   <label className="block text-sm font-medium mb-1" htmlFor="family_history">Family History</label>
                   <textarea
                     id="family_history"
@@ -305,7 +307,7 @@ export default function Profile({ patientInfo }) {
                       id="city"
                       name="city"
                       value={localPatientInfo?.city || ''}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -316,7 +318,7 @@ export default function Profile({ patientInfo }) {
                       id="state"
                       name="state"
                       value={localPatientInfo?.state || ''}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -327,7 +329,7 @@ export default function Profile({ patientInfo }) {
                       id="country"
                       name="country"
                       value={localPatientInfo?.country || ''}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -338,7 +340,7 @@ export default function Profile({ patientInfo }) {
                       id="pin"
                       name="pin"
                       value={localPatientInfo?.pin || ''}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
