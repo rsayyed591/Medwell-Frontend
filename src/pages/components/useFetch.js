@@ -49,7 +49,7 @@ export const useFetch = () => {
     return apiCall('/patient/update_info/', 'POST', patientData);
   }, [apiCall]);
 
-  const updateProfilePic = useCallback(async (formData) => {
+  const updateProfilePic = useCallback(async (profilePic) => {
     const token = getToken();
     if (!token) {
       setError('No authentication token found');
@@ -58,7 +58,9 @@ export const useFetch = () => {
 
     setIsLoading(true);
     setError(null);
-
+    const formData=new FormData()
+    formData.append("profile_pic",profilePic)
+    console.log(formData.get("profile_pic"))
     try {
       const response = await axios.post(`${BASE_URL}/patient/update_profile_pic/`, formData, {
         headers: {

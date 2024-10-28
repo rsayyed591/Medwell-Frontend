@@ -92,7 +92,7 @@ export default function MedicalDashboard() {
         
         const patientInfoResult = await getPatientInfo()
         setPatientInfo(patientInfoResult)
-        
+        console.log(patientInfoResult)
         setExpenseData({ overall_expense: 1000 })
         setAppointmentData({ doctor: 'Dr. Smith', date: '2024-03-15' })
         setHealthData({

@@ -1,62 +1,59 @@
 import React, { useState, useEffect } from 'react'
 import { Edit, Heart, Clipboard, Calendar, MapPin, QrCode } from 'lucide-react'
-import { removeBackground } from '@imgly/background-removal'
 import { google_ngrok_url } from '../../utils/global'
 import { useFetch } from '../components/useFetch'
+
 export default function Profile({ patientInfo }) {
   const [isEditMode, setIsEditMode] = useState(false)
   const [showQR, setShowQR] = useState(false)
-  const [profilePic, setProfilePic] = useState(google_ngrok_url+patientInfo?.profile_pic || '/Vivek.jpg')
+  const [profilePic, setProfilePic] = useState(google_ngrok_url+patientInfo.profile_pic || '/Vivek.jpg')
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [localPatientInfo, setLocalPatientInfo] = useState(patientInfo)
-  const { savePatientInfo } = useFetch()
+  const { savePatientInfo, updateProfilePic } = useFetch()
+
   useEffect(() => {
     setLocalPatientInfo(patientInfo)
   }, [patientInfo])
-
+  console.log(profilePic)
   useEffect(() => {
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`imedwell.vercel.app/dashboard/user=${localPatientInfo?.user}`)}`;
+    const qrUrl = google_ngrok_url + localPatientInfo.profile_qr
     setQrCodeUrl(qrUrl)
-  }, [localPatientInfo?.user])
+  }, [localPatientInfo.profile_qr])
 
-  useEffect(() => {
-    const removeProfileBackground = async () => {
-      if (profilePic && profilePic !== '/Vivek.jpg') {
-        try {
-          const result = await removeBackground(profilePic)
-          setProfilePic(URL.createObjectURL(result))
-        } catch (error) {
-          console.error('Error removing background:', error)
-        }
-      }
-    }
-    removeProfileBackground()
-  }, [profilePic])
-
-  const safeJoin = (arr, separator = ', ') => {
-    return Array.isArray(arr) ? arr.join(separator) : arr || ''
-  }
+  // const safeJoin = (arr, separator = ', ') => {
+  //   return Array.isArray(arr) ? arr.join(separator) : arr || ''
+  // }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setLocalPatientInfo((prev) => ({ ...prev, [name]: value }))
+    if (name === 'chronic_condition' || name === 'family_history') {
+      setLocalPatientInfo((prev) => ({ ...prev, [name]: value.split(',').map(item => item.trim()) }))
+    } else {
+      setLocalPatientInfo((prev) => ({ ...prev, [name]: value }))
+    }
   }
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setProfilePic(reader.result)
-      }
-      reader.readAsDataURL(file)
-    }
+    setProfilePic(file)
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Updated patient info:', localPatientInfo)
-    await savePatientInfo(localPatientInfo)
+    
+    const dataToSend = { ...localPatientInfo }
+    
+    dataToSend.chronic_condition = Array.isArray(dataToSend.chronic_condition) 
+      ? dataToSend.chronic_condition 
+      : dataToSend.chronic_condition.split(',').map(item => item.trim())
+    
+    dataToSend.family_history = Array.isArray(dataToSend.family_history)
+      ? dataToSend.family_history
+      : dataToSend.family_history.split(',').map(item => item.trim())
+
+    console.log('Updated patient info:', dataToSend)
+    await savePatientInfo(dataToSend)
+    await updateProfilePic(profilePic)
     setIsEditMode(false)
   }
 
@@ -100,7 +97,7 @@ export default function Profile({ patientInfo }) {
             <p><span className="font-semibold">Blood Group:</span> {localPatientInfo?.blood_group}</p>
             <p><span className="font-semibold">Height:</span> {localPatientInfo?.height}</p>
             <p><span className="font-semibold">Weight:</span> {localPatientInfo?.weight}</p>
-            <p><span className="font-semibold">Allergies:</span> {safeJoin(localPatientInfo?.allergies)}</p>
+            <p><span className="font-semibold">Allergies:</span> {localPatientInfo?.allergies}</p>
             <p><span className="font-semibold">Aadhar Card:</span> {localPatientInfo?.aadhar_card}</p>
           </div>
         </div>
@@ -202,7 +199,6 @@ export default function Profile({ patientInfo }) {
                       id="email"
                       name="email"
                       value={localPatientInfo?.user_info.email || ''}
-                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       disabled
                     />
@@ -257,7 +253,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="allergies"
                       name="allergies"
-                      value={safeJoin(localPatientInfo?.allergies)}
+                      value={localPatientInfo?.allergies}
                       onChange={(e) => handleInputChange({
                         target: {
                           name: 'allergies',
@@ -284,10 +280,10 @@ export default function Profile({ patientInfo }) {
                   <textarea
                     id="chronic_condition"
                     name="chronic_condition"
-                    value={localPatientInfo?.chronic_condition || ''}
+                    value={Array.isArray(localPatientInfo?.chronic_condition) ? localPatientInfo.chronic_condition.join(', ') : localPatientInfo?.chronic_condition || ''}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2  focus:ring-blue-500"
                   />
                 </div>
                 <div className="mt-6">
@@ -295,7 +291,7 @@ export default function Profile({ patientInfo }) {
                   <textarea
                     id="family_history"
                     name="family_history"
-                    value={localPatientInfo?.family_history || ''}
+                    value={Array.isArray(localPatientInfo?.family_history) ? localPatientInfo.family_history.join(', ') : localPatientInfo?.family_history || ''}
                     onChange={handleInputChange}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -359,15 +355,14 @@ export default function Profile({ patientInfo }) {
                 >
                   Cancel
                 </button>
-                
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-          >
-            Save Changes
-          </button>
-        </div>
-      </form>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       ) : (
