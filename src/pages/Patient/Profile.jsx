@@ -8,19 +8,15 @@ export default function Profile({ patientInfo }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [profilePic, setProfilePic] = useState(google_ngrok_url + patientInfo.profile_pic || '/Vivek.jpg');
-  const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [localPatientInfo, setLocalPatientInfo] = useState(patientInfo);
+  const [qrCodeUrl, setQrCodeUrl] = useState(google_ngrok_url + localPatientInfo.profile_qr);
   const { savePatientInfo, updateProfilePic } = useFetch();
 
   useEffect(() => {
     setLocalPatientInfo(patientInfo);
   }, [patientInfo]);
 
-  useEffect(() => {
-    const qrUrl = google_ngrok_url + localPatientInfo.profile_qr;
-    setQrCodeUrl(qrUrl);
-  }, [localPatientInfo.profile_qr]);
-
+  console.log(qrCodeUrl)
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === 'chronic_condition' || name === 'family_history') {
@@ -49,10 +45,8 @@ export default function Profile({ patientInfo }) {
     console.log('Updated patient info:', dataToSend);
     
     try {
-      // Send patient info
       await savePatientInfo(dataToSend);
       
-      // Send profile picture separately if it has been updated
       if (profilePic instanceof File) {
         await updateProfilePic(profilePic);
       }
@@ -60,7 +54,6 @@ export default function Profile({ patientInfo }) {
       setIsEditMode(false);
     } catch (error) {
       console.error('Error updating profile:', error);
-      // Handle error (e.g., show error message to user)
     }
   };
 
