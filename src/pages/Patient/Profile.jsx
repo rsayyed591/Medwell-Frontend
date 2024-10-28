@@ -9,14 +9,30 @@ export default function Profile({ patientInfo }) {
   const [showQR, setShowQR] = useState(false);
   const [profilePic, setProfilePic] = useState(google_ngrok_url + patientInfo.profile_pic || '/Vivek.jpg');
   const [localPatientInfo, setLocalPatientInfo] = useState(patientInfo);
-  const [qrCodeUrl, setQrCodeUrl] = useState(google_ngrok_url + localPatientInfo.profile_qr);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [qrError, setQrError] = useState(null);
   const { savePatientInfo, updateProfilePic } = useFetch();
 
   useEffect(() => {
     setLocalPatientInfo(patientInfo);
+    if (patientInfo && patientInfo.profile_qr) {
+      const fullQrUrl = google_ngrok_url + patientInfo.profile_qr;
+      setQrCodeUrl(fullQrUrl);
+      console.log('QR Code URL:', fullQrUrl);
+    } else {
+      console.warn('No QR code URL available in patient info');
+    }
   }, [patientInfo]);
 
-  console.log(qrCodeUrl)
+  const handleQrCodeLoad = () => {
+    console.log('QR code image loaded successfully');
+  };
+
+  const handleQrCodeError = (error) => {
+    console.error('Error loading QR code image:', error);
+    setQrError('Failed to load QR code image');
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === 'chronic_condition' || name === 'family_history') {
@@ -28,7 +44,7 @@ export default function Profile({ patientInfo }) {
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    setProfilePic(file);
+    setProfilePic(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
@@ -69,7 +85,10 @@ export default function Profile({ patientInfo }) {
             />
             <button
               className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors duration-200"
-              onClick={() => setShowQR(true)}
+              onClick={() => {
+                console.log('Opening QR code modal');
+                setShowQR(true);
+              }}
             >
               <QrCode className="h-4 w-4" />
             </button>
@@ -278,10 +297,11 @@ export default function Profile({ patientInfo }) {
                     value={Array.isArray(localPatientInfo?.chronic_condition) ? localPatientInfo.chronic_condition.join(', ') : localPatientInfo?.chronic_condition || ''}
                     onChange={handleInputChange}
                     rows={3}
+                    
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <div  className="mt-6">
+                <div className="mt-6">
                   <label className="block text-sm font-medium mb-1" htmlFor="family_history">Family History</label>
                   <textarea
                     id="family_history"
@@ -366,10 +386,29 @@ export default function Profile({ patientInfo }) {
       {showQR && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg">
-            <img src={qrCodeUrl} alt="QR Code" className="w-64 h-64" />
+            {qrCodeUrl ? (
+              <img 
+                src={qrCodeUrl} 
+                alt="QR Code" 
+                className="w-64 h-64" 
+                onLoad={handleQrCodeLoad}
+                onError={handleQrCodeError}
+              />
+            ) : (
+              <div className="w-64 h-64 flex items-center justify-center text-red-500">
+                No QR code available
+              </div>
+            )}
+            {qrError && (
+              <p className="text-red-500 mt-2">{qrError}</p>
+            )}
             <button
               className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              onClick={() => setShowQR(false)}
+              onClick={() => {
+                console.log('Closing QR code modal');
+                setShowQR(false);
+                setQrError(null);
+              }}
             >
               Close
             </button>
