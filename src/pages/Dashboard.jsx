@@ -69,7 +69,15 @@ export default function MedicalDashboard() {
   const [isMobile, setIsMobile] = useState(false)
   const [isProfileExpanded, setIsProfileExpanded] = useState(false)
   const { isLoading, error, fetchHealthCheck, getPatientInfo, fetchReports } = useFetch()
-  const [patientInfo, setPatientInfo] = useState({profile_pic:"/Vivek.jpg"})
+  const [patientInfo, setPatientInfo] = useState({
+    name: 'John Doe',
+    id: 'P12345',
+    age: 30,
+    blood_group: 'O+',
+    allergies: ['Peanuts', 'Penicillin'],
+    profile_pic:"/Vivek.jpg",
+    user_info:{email:'123@gmail.com'}
+  })
 
   const [expenseData, setExpenseData] = useState({ overall_expense: 0 })
   const [appointmentData, setAppointmentData] = useState({ doctor: 'N/A', date: 'N/A' })
@@ -83,14 +91,7 @@ export default function MedicalDashboard() {
         setChartData(healthCheckResult.data || {})
         
         const patientInfoResult = await getPatientInfo()
-        setPatientInfo(patientInfoResult || {
-          name: 'John Doe',
-          id: 'P12345',
-          age: 30,
-          blood_group: 'O+',
-          allergies: ['Peanuts', 'Penicillin'],
-          profile_pic:"/Vivek.jpg"
-        })
+        setPatientInfo(patientInfoResult)
         
         setExpenseData({ overall_expense: 1000 })
         setAppointmentData({ doctor: 'Dr. Smith', date: '2024-03-15' })
