@@ -11,7 +11,7 @@ import PatientDashboard from './Patient/PatientDashboard'
 import Appointments from './Patient/Appointments'
 import ShareWithDoctor from './Patient/ShareWithDoctor'
 import { useFetch } from './components/useFetch'
-
+import Chat from "./components/Chat"
 const mockReports = [
   {
     id: 1,
@@ -323,6 +323,7 @@ export default function MedicalDashboard() {
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
+      <Chat/>
     </div>
   )
 }
