@@ -1,11 +1,10 @@
-import BG from './../../public/hero.jpg';
 import { motion } from 'framer-motion';
 
 export default function Hero() {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       <img
-        src={BG}
+        src="/hero.jpg"
         alt="Medical background"
         className="absolute inset-0 h-full w-full object-cover filter"
         // className="absolute inset-0 h-full w-full object-cover filter blur-sm"

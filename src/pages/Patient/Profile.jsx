@@ -18,41 +18,40 @@ export default function Profile({ patientInfo }) {
     if (patientInfo && patientInfo.profile_qr) {
       const fullQrUrl = google_ngrok_url + patientInfo.profile_qr;
       setQrCodeUrl(fullQrUrl);
+      console.log(qrCodeUrl)
     }
     if (patientInfo && patientInfo.profile_pic) {
       const profile_pic = google_ngrok_url + patientInfo.profile_pic;
       setProfilePic(profile_pic);
+      console.log(profilePic)
     }
-  }, [patientInfo]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'chronic_condition' || name === 'family_history') {
-      setLocalPatientInfo((prev) => ({ 
-        ...prev, 
-        [name]: value.split(',').map(item => item.trim()).filter(Boolean)
-      }));
-    } else {
-      setLocalPatientInfo((prev) => ({ ...prev, [name]: value }));
-    }
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const dataToSend = { ...localPatientInfo };
+    const formData = new FormData(e.target);
+    const updatedData = {};
     
-    ['chronic_condition', 'family_history'].forEach(field => {
-      if (typeof dataToSend[field] === 'string') {
-        dataToSend[field] = dataToSend[field].split(',').map(item => item.trim());
+    for (let [key, value] of formData.entries()) {
+      if (key === 'chronic_conditions' || key === 'family_history' || key === 'allergies') {
+        value = value.split(',').map(item => item.trim()).filter(Boolean);
       }
-    });
+      if (JSON.stringify(value) !== JSON.stringify(localPatientInfo[key])) {
+        updatedData[key] = value;
+      }
+    }
 
-    try {
-      await savePatientInfo(dataToSend);
+    if (Object.keys(updatedData).length > 0) {
+      try {
+        await savePatientInfo(updatedData);
+        setLocalPatientInfo(prev => ({ ...prev, ...updatedData }));
+        setIsEditMode(false);
+      } catch (error) {
+        console.error('Error updating profile:', error);
+      }
+    } else {
       setIsEditMode(false);
-    } catch (error) {
-      console.error('Error updating profile:', error);
     }
   };
 
@@ -124,7 +123,7 @@ export default function Profile({ patientInfo }) {
             Medical History
           </h3>
           <div className="space-y-2">
-            <p><span className="font-semibold">Chronic Conditions:</span> {localPatientInfo?.chronic_condition}</p>
+            <p><span className="font-semibold">Chronic Conditions:</span> {localPatientInfo?.chronic_conditions}</p>
             <p><span className="font-semibold">Family History:</span> {localPatientInfo?.family_history}</p>
           </div>
         </div>
@@ -185,8 +184,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="name"
                       name="name"
-                      value={localPatientInfo?.name || ''}
-                      onChange={handleInputChange}
+                      defaultValue={localPatientInfo?.name || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -196,21 +194,18 @@ export default function Profile({ patientInfo }) {
                       type="number"
                       id="age"
                       name="age"
-                      value={localPatientInfo?.age || ''}
-                      onChange={handleInputChange}
+                      defaultValue={localPatientInfo?.age || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="email">Email</label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={localPatientInfo?.user_info.email || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      disabled
-                    />
+                     <div
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 text-sm"
+                    aria-label="Email address"
+                  >
+                  {localPatientInfo?.user_info.email || ''}
+                  </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="phone_number">Phone Number</label>
@@ -218,8 +213,7 @@ export default function Profile({ patientInfo }) {
                       type="tel"
                       id="phone_number"
                       name="phone_number"
-                      value={localPatientInfo?.phone_number || ''}
-                      onChange={handleInputChange}
+                      defaultValue={localPatientInfo?.phone_number || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -229,8 +223,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="blood_group"
                       name="blood_group"
-                      value={localPatientInfo?.blood_group || ''}
-                      onChange={handleInputChange}
+                      defaultValue={localPatientInfo?.blood_group || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -240,10 +233,10 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="height"
                       name="height"
-                      value={localPatientInfo?.height || ''}
-                      onChange={handleInputChange}
+                      defaultValue={localPatientInfo?.height || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
+                  
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="weight">Weight</label>
@@ -251,8 +244,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="weight"
                       name="weight"
-                      value={localPatientInfo?.weight || ''}
-                      onChange={handleInputChange}
+                      defaultValue={localPatientInfo?.weight || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -262,8 +254,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="allergies"
                       name="allergies"
-                      value={localPatientInfo?.allergies || ''}
-                      onChange={handleInputChange}
+                      defaultValue={localPatientInfo?.allergies || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -273,19 +264,19 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="aadhar_card"
                       name="aadhar_card"
-                      value={localPatientInfo?.aadhar_card}
-                      onChange={handleInputChange}
+                      defaultValue={localPatientInfo?.aadhar_card || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
                 <div className="mt-6">
-                  <label className="block text-sm font-medium mb-1" htmlFor="chronic_condition">Chronic Conditions</label>
+                  <label className="block text-sm font-medium mb-1" htmlFor="chronic_conditions">Chronic Conditions</label>
                   <textarea
-                    id="chronic_condition"
-                    name="chronic_condition"
-                    value={localPatientInfo.chronic_condition}
-                    onChange={handleInputChange}
+                    id="chronic_conditions"
+                    name="chronic_conditions"
+                    defaultValue={Array.isArray(localPatientInfo?.chronic_conditions) 
+                      ? localPatientInfo.chronic_conditions.join(', ') 
+                      : localPatientInfo?.chronic_conditions || ''}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter conditions separated by commas"
@@ -296,10 +287,11 @@ export default function Profile({ patientInfo }) {
                   <textarea
                     id="family_history"
                     name="family_history"
-                    value={localPatientInfo.family_history || ''}
-                    onChange={handleInputChange}
+                    defaultValue={Array.isArray(localPatientInfo?.family_history) 
+                      ? localPatientInfo.family_history.join(', ') 
+                      : localPatientInfo?.family_history || ''}
                     rows={3}
-                    className="w-full px-3  py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter family history items separated by commas"
                   />
                 </div>
@@ -310,8 +302,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="city"
                       name="city"
-                      value={localPatientInfo?.city || ''}
-                      onChange={handleInputChange}
+                      defaultValue={localPatientInfo?.city || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -321,8 +312,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="state"
                       name="state"
-                      value={localPatientInfo?.state || ''}
-                      onChange={handleInputChange}
+                      defaultValue={localPatientInfo?.state || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -332,8 +322,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="country"
                       name="country"
-                      value={localPatientInfo?.country || ''}
-                      onChange={handleInputChange}
+                      defaultValue={localPatientInfo?.country || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -343,8 +332,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="pin"
                       name="pin"
-                      value={localPatientInfo?.pin || ''}
-                      onChange={handleInputChange}
+                      defaultValue={localPatientInfo?.pin || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -353,10 +341,7 @@ export default function Profile({ patientInfo }) {
               <div className="flex justify-end space-x-4">
                 <button
                   type="button"
-                  onClick={() => {
-                    setLocalPatientInfo(patientInfo);
-                    setIsEditMode(false);
-                  }}
+                  onClick={() => setIsEditMode(false)}
                   className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
                   Cancel

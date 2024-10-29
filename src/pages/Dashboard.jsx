@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import Patient from './../../public/patient.png'
 import { Home, User, Heart, FileText, PlusCircle, DollarSign, Calendar, Share2, ChevronRight, ChevronUp, ChevronDown, Menu, X, Activity, Droplet, Thermometer, Brain } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
@@ -203,7 +202,7 @@ export default function MedicalDashboard() {
         className="w-full flex items-center justify-between mb-4"
       >
         <div className="flex items-center">
-          <img src={Patient} alt="Patient" className="w-12 h-12 rounded-full mr-3" />
+          <img src="/patient.png" alt="Patient" className="w-12 h-12 rounded-full mr-3" />
           <div>
             <h2 className="text-lg font-bold text-gray-800">{patientInfo?.name || 'John Doe'}</h2>
             <p className="text-sm text-gray-600">Patient ID: {patientInfo?.id || 'P12345'}</p>
@@ -256,7 +255,7 @@ export default function MedicalDashboard() {
               {isSidebarOpen ? (
                 <Link to="/" className="text-2xl font-bold">MedWell</Link>
               ) : (
-                <img src={Patient} alt="Patient" className="w-10 h-8 rounded-full" />
+                <img src="/patient.png" alt="Patient" className="w-10 h-8 rounded-full" />
               )}
               {(isMobile || isSidebarOpen) && (
                 <button
