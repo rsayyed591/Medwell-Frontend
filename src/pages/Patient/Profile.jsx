@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Edit, Heart, Clipboard, Calendar, MapPin, QrCode } from 'lucide-react';
-import { debounce } from 'lodash';
 import { google_ngrok_url } from '../../utils/global';
 import { useFetch } from '../components/useFetch';
 
 export default function Profile({ patientInfo }) {
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditPicMode, setIsEditPicMode] = useState(false);
   const [showQR, setShowQR] = useState(false);
-  const [profilePic, setProfilePic] = useState(google_ngrok_url + patientInfo.profile_pic || '/Vivek.jpg');
+  const [profilePic, setProfilePic] = useState('/Vivek.jpg');
   const [localPatientInfo, setLocalPatientInfo] = useState(patientInfo);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [qrError, setQrError] = useState(null);
@@ -18,33 +18,23 @@ export default function Profile({ patientInfo }) {
     if (patientInfo && patientInfo.profile_qr) {
       const fullQrUrl = google_ngrok_url + patientInfo.profile_qr;
       setQrCodeUrl(fullQrUrl);
-      console.log('QR Code URL:', fullQrUrl);
-    } else {
-      console.warn('No QR code URL available in patient info');
+    }
+    if (patientInfo && patientInfo.profile_pic) {
+      const profile_pic = google_ngrok_url + patientInfo.profile_pic;
+      setProfilePic(profile_pic);
     }
   }, [patientInfo]);
-
-  const handleQrCodeLoad = () => {
-    console.log('QR code image loaded successfully');
-  };
-
-  const handleQrCodeError = (error) => {
-    console.error('Error loading QR code image:', error);
-    setQrError('Failed to load QR code image');
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === 'chronic_condition' || name === 'family_history') {
-      setLocalPatientInfo((prev) => ({ ...prev, [name]: value.split(',').map(item => item.trim()) }));
+      setLocalPatientInfo((prev) => ({ 
+        ...prev, 
+        [name]: value.split(',').map(item => item.trim()).filter(Boolean)
+      }));
     } else {
       setLocalPatientInfo((prev) => ({ ...prev, [name]: value }));
     }
-  };
-
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    setProfilePic(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
@@ -58,18 +48,23 @@ export default function Profile({ patientInfo }) {
       }
     });
 
-    console.log('Updated patient info:', dataToSend);
-    
     try {
       await savePatientInfo(dataToSend);
-      
-      if (profilePic instanceof File) {
-        await updateProfilePic(profilePic);
-      }
-      
       setIsEditMode(false);
     } catch (error) {
       console.error('Error updating profile:', error);
+    }
+  };
+
+  const handleProfilePicSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (profilePic instanceof File) {
+        await updateProfilePic(profilePic);
+      }
+      setIsEditPicMode(false);
+    } catch (error) {
+      console.error('Error updating profile picture:', error);
     }
   };
 
@@ -85,12 +80,15 @@ export default function Profile({ patientInfo }) {
             />
             <button
               className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors duration-200"
-              onClick={() => {
-                console.log('Opening QR code modal');
-                setShowQR(true);
-              }}
+              onClick={() => setShowQR(true)}
             >
               <QrCode className="h-4 w-4" />
+            </button>
+            <button
+              className="absolute top-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors duration-200"
+              onClick={() => setIsEditPicMode(true)}
+            >
+              <Edit className="h-4 w-4" />
             </button>
           </div>
           <h2 className="text-2xl font-bold text-center mb-2">{localPatientInfo?.name}</h2>
@@ -157,6 +155,17 @@ export default function Profile({ patientInfo }) {
     </div>
   );
 
+  const [selectedFileName, setSelectedFileName] = useState('No file chosen');
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfilePic(file);
+      setSelectedFileName(URL.createObjectURL(file));
+      console.log(profilePic)
+    }
+  };
+
   if (!localPatientInfo) {
     return <div className="text-center mt-8">Loading...</div>;
   }
@@ -169,25 +178,6 @@ export default function Profile({ patientInfo }) {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="bg-white rounded-lg shadow-lg p-6">
                 <h2 className="text-2xl font-bold mb-6">Edit Profile</h2>
-                <div className="flex flex-col items-center mb-6">
-                  <div className="relative w-48 h-48 mb-4">
-                    <img 
-                      src={profilePic}
-                      alt="Profile" 
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                    <label htmlFor="profile_pic" className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 cursor-pointer">
-                      <Edit className="h-4 w-4" />
-                    </label>
-                    <input
-                      type="file"
-                      id="profile_pic"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                  </div>
-                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="name">Name</label>
@@ -196,7 +186,7 @@ export default function Profile({ patientInfo }) {
                       id="name"
                       name="name"
                       value={localPatientInfo?.name || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -207,7 +197,7 @@ export default function Profile({ patientInfo }) {
                       id="age"
                       name="age"
                       value={localPatientInfo?.age || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -229,7 +219,7 @@ export default function Profile({ patientInfo }) {
                       id="phone_number"
                       name="phone_number"
                       value={localPatientInfo?.phone_number || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -240,7 +230,7 @@ export default function Profile({ patientInfo }) {
                       id="blood_group"
                       name="blood_group"
                       value={localPatientInfo?.blood_group || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -251,7 +241,7 @@ export default function Profile({ patientInfo }) {
                       id="height"
                       name="height"
                       value={localPatientInfo?.height || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -262,7 +252,7 @@ export default function Profile({ patientInfo }) {
                       id="weight"
                       name="weight"
                       value={localPatientInfo?.weight || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -272,8 +262,8 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="allergies"
                       name="allergies"
-                      value={localPatientInfo?.allergies}
-                      onChange={(e) => handleInputChange(e)}
+                      value={localPatientInfo?.allergies || ''}
+                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -283,8 +273,8 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="aadhar_card"
                       name="aadhar_card"
-                      value={localPatientInfo?.aadhar_card || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      value={localPatientInfo?.aadhar_card}
+                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -294,11 +284,11 @@ export default function Profile({ patientInfo }) {
                   <textarea
                     id="chronic_condition"
                     name="chronic_condition"
-                    value={Array.isArray(localPatientInfo?.chronic_condition) ? localPatientInfo.chronic_condition.join(', ') : localPatientInfo?.chronic_condition || ''}
+                    value={localPatientInfo.chronic_condition}
                     onChange={handleInputChange}
                     rows={3}
-                    
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter conditions separated by commas"
                   />
                 </div>
                 <div className="mt-6">
@@ -306,10 +296,11 @@ export default function Profile({ patientInfo }) {
                   <textarea
                     id="family_history"
                     name="family_history"
-                    value={Array.isArray(localPatientInfo?.family_history) ? localPatientInfo.family_history.join(', ') : localPatientInfo?.family_history || ''}
+                    value={localPatientInfo.family_history || ''}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3  py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter family history items separated by commas"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -320,7 +311,7 @@ export default function Profile({ patientInfo }) {
                       id="city"
                       name="city"
                       value={localPatientInfo?.city || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -331,7 +322,7 @@ export default function Profile({ patientInfo }) {
                       id="state"
                       name="state"
                       value={localPatientInfo?.state || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -342,7 +333,7 @@ export default function Profile({ patientInfo }) {
                       id="country"
                       name="country"
                       value={localPatientInfo?.country || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -353,7 +344,7 @@ export default function Profile({ patientInfo }) {
                       id="pin"
                       name="pin"
                       value={localPatientInfo?.pin || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -383,6 +374,51 @@ export default function Profile({ patientInfo }) {
       ) : (
         <ProfileDisplay />
       )}
+      {isEditPicMode && 
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4">Update Profile Picture</h2>
+            <form onSubmit={handleProfilePicSubmit}>
+              <div className="mb-4">
+                <label htmlFor="profile_pic" className="block text-sm font-medium mb-2">
+                  Choose new profile picture
+                </label>
+                <div className="flex flex-col space-y-4 items-center">
+                  <label
+                    htmlFor="profile_pic"
+                    className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200"
+                  >
+                    Choose File
+                  </label>
+                  <input
+                    type="file"
+                    id="profile_pic"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <span className="ml-3 text-sm text-gray-600"><img src={selectedFileName} alt="File" /></span>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setIsEditPicMode(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
       {showQR && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg">
@@ -391,8 +427,11 @@ export default function Profile({ patientInfo }) {
                 src={qrCodeUrl} 
                 alt="QR Code" 
                 className="w-64 h-64" 
-                onLoad={handleQrCodeLoad}
-                onError={handleQrCodeError}
+                onLoad={() => console.log('QR code image loaded successfully')}
+                onError={(error) => {
+                  console.error('Error loading QR code image:', error);
+                  setQrError('Failed to load QR code image');
+                }}
               />
             ) : (
               <div className="w-64 h-64 flex items-center justify-center text-red-500">
@@ -405,7 +444,6 @@ export default function Profile({ patientInfo }) {
             <button
               className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
               onClick={() => {
-                console.log('Closing QR code modal');
                 setShowQR(false);
                 setQrError(null);
               }}
