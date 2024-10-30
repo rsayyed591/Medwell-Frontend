@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Activity, Calendar, FileText, Lock, MessageCircle, DollarSign } from 'lucide-react';
@@ -41,12 +41,60 @@ const Box3D = ({ children, className }) => (
   </div>
 );
 
-export default function LandingPage() {
+const RollingTestimonials = ({ testimonials }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <div className="overflow-hidden" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+      <motion.div
+        className="flex"
+        animate={{ x: isHovered ? 0 : [0, -100 + '%'] }}
+        transition={{
+          x: {
+            repeat: Infinity,
+            repeatType: "loop",
+            duration: 12,
+            ease: "linear",
+          },
+        }}
+      >
+        {testimonials.concat(testimonials).map((testimonial, index) => (
+          <motion.div
+            key={index}
+            className="w-[300px] sm:w-[500px] flex-shrink-0 px-4 mb-8"
+            whileHover={{ scale: 1.02 }}
+          >
+            <Box3D className="h-full">
+              <div className="h-full flex flex-col justify-between">
+                <p className="text-gray-600 text-base sm:text-lg mb-4">{testimonial.comment}</p>
+                <cite className="block text-right font-semibold">- {testimonial.author}</cite>
+              </div>
+            </Box3D>
+          </motion.div>
+        ))}
+      </motion.div>
+    </div>
+  );
+};
+
+export default function Hero() {
+  const testimonials = [
+    { comment: "The health tips provided here have been life-changing!", author: "Vivek" },
+    { comment: "The articles here are clear and incredibly informative. I trust the advice!", author: "Nishi" },
+    { comment: "I've learned so much about preventive care from this site. It's my go-to source.", author: "Rehan" },
+    { comment: "Great insights on mental health—easy to understand and implement.", author: "Rohit" },
+    { comment: "This site explains complex medical issues in a simple way. Highly recommended!", author: "Azlaan" },
+    { comment: "As a fitness enthusiast, the nutrition guides here have been a game-changer.", author: "Shah" },
+    { comment: "The expert advice on this platform has improved my family's health choices.", author: "Lavanya" },
+    { comment: "The in-depth analysis on medical trends is impressive and reliable.", author: "Bilal" },
+    { comment: "I appreciate how the site covers all aspects of health and wellness.", author: "Affan" }
+  ];
+
   return (
     <div className="font-sans text-gray-800">
       <section className="relative h-screen w-full overflow-hidden">
         <img
-          src="/hero.jpg"
+          src="./hero.jpg"
           alt="Medical background"
           className="absolute inset-0 h-full w-full object-cover filter"
         />
@@ -125,19 +173,9 @@ export default function LandingPage() {
         </div>
       </AnimatedSection>
 
-      <AnimatedSection className="py-20 bg-white text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-8">What Our Users Say</h2>
-        <div className="flex flex-wrap justify-center gap-8 px-4">
-          {[
-            { quote: "Andheri mai auto nahi hai", author: "Vivek" },
-            { quote: "Nabila", author: "Nishi" }
-          ].map((testimonial, index) => (
-            <Box3D key={index} className="w-full sm:w-64">
-              <p className="text-gray-600">"{testimonial.quote}"</p>
-              <cite className="block mt-2 font-semibold">- {testimonial.author}</cite>
-            </Box3D>
-          ))}
-        </div>
+      <AnimatedSection className="py-20 bg-white">
+        <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">What Our Users Say</h2>
+        <RollingTestimonials testimonials={testimonials} />
       </AnimatedSection>
 
       <AnimatedSection className="py-20 bg-blue-50 text-center">

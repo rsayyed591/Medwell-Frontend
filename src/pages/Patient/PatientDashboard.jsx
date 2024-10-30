@@ -72,7 +72,7 @@ export default function PatientDashboard({ profileData, expenseData, appointment
   return (
     <div className="bg-gray-100 p-2 sm:p-4 rounded-xl"> {/* Update 1 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"> {/* Update 2 */}
-        <div className="sm:col-span-2 lg:col-span-3 bg-[#8A2BE2] text-white p-4 sm:p-6 rounded-xl flex flex-col sm:flex-row items-center justify-between relative overflow-hidden min-h-[200px] sm:min-h-[250px]"> {/* Update 3 */}
+        <div className="sm:col-span-2 lg:col-span-3 bg-blue-500 text-white p-4 sm:p-6 rounded-xl flex flex-col sm:flex-row items-center justify-between relative overflow-hidden min-h-[200px] sm:min-h-[250px]"> {/* Update 3 */}
           <div className="z-10 mb-4 sm:mb-0 relative">
             <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome to Medwell !</h2>
             <p className="mb-4">Here, some random words</p>
