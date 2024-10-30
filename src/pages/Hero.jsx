@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Activity, Calendar, FileText, Lock, MessageCircle, DollarSign } from 'lucide-react';
@@ -42,34 +42,94 @@ const Box3D = ({ children, className }) => (
 );
 
 const RollingTestimonials = ({ testimonials }) => {
-  const [isHovered, setIsHovered] = useState(false);
+  const [width, setWidth] = useState(0);
+  const containerRef = useRef(null);
+  const controls = useAnimation();
+  
+  useEffect(() => {
+    if (containerRef.current) {
+      // Calculate the width of a single set of testimonials
+      const scrollWidth = containerRef.current.scrollWidth / 2;
+      setWidth(scrollWidth);
+    }
+  }, [testimonials]);
 
-  return (
-    <div className="overflow-hidden" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-      <motion.div
-        className="flex"
-        animate={{ x: isHovered ? 0 : [0, -100 + '%'] }}
-        transition={{
+  useEffect(() => {
+    if (width > 0) {
+      // Start the continuous animation
+      controls.start({
+        x: -width,
+        transition: {
           x: {
             repeat: Infinity,
             repeatType: "loop",
-            duration: 12,
-            ease: "linear",
-          },
-        }}
+            duration: 20,
+            ease: "linear"
+          }
+        }
+      });
+    }
+  }, [controls, width]);
+
+  const handleDrag = (_, info) => {
+    controls.stop();
+    controls.set({ x: info.point.x % -width });
+  };
+
+  const handleDragEnd = (_, info) => {
+    const velocity = info.velocity.x;
+    const currentPosition = info.point.x % -width;
+    
+    controls.start({
+      x: [currentPosition, -width],
+      transition: {
+        x: {
+          type: "spring",
+          stiffness: 400,
+          damping: 40,
+          restDelta: 0.001,
+          restSpeed: 0.001,
+        }
+      }
+    }).then(() => {
+      controls.set({ x: 0 });
+      controls.start({
+        x: -width,
+        transition: {
+          x: {
+            repeat: Infinity,
+            repeatType: "loop",
+            duration: 15,
+            ease: "linear"
+          }
+        }
+      });
+    });
+  };
+
+  return (
+    <div className="overflow-hidden" ref={containerRef}>
+      <motion.div
+        className="flex"
+        animate={controls}
+        drag="x"
+        dragConstraints={{ left: -width, right: 0 }}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
+        style={{ touchAction: "none" }}
       >
-        {testimonials.concat(testimonials).map((testimonial, index) => (
+        {[...testimonials, ...testimonials].map((testimonial, index) => (
           <motion.div
             key={index}
             className="w-[300px] sm:w-[500px] flex-shrink-0 px-4 mb-8"
             whileHover={{ scale: 1.02 }}
           >
-            <Box3D className="h-full">
+            <div className="bg-white rounded-lg shadow-lg p-6 h-full">
               <div className="h-full flex flex-col justify-between">
                 <p className="text-gray-600 text-base sm:text-lg mb-4">{testimonial.comment}</p>
                 <cite className="block text-right font-semibold">- {testimonial.author}</cite>
               </div>
-            </Box3D>
+            </div>
           </motion.div>
         ))}
       </motion.div>
