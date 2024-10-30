@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
-import Stethoscope from './../../public/Stethoscope.png'
+
 import { ngrok_url, google_ngrok_url } from '../utils/global'
 
 export function SignUp() {
@@ -118,7 +118,7 @@ export function SignUp() {
                 <div className="absolute inset-0 bg-blue-200 rounded-full"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <img
-                    src={Stethoscope}
+                    src="/Stethoscope.png"
                     alt="Stethoscope"
                     width={200}
                     height={200}

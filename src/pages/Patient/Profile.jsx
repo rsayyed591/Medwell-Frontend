@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Edit, Heart, Clipboard, Calendar, MapPin, QrCode } from 'lucide-react';
-import { debounce } from 'lodash';
 import { google_ngrok_url } from '../../utils/global';
 import { useFetch } from '../components/useFetch';
 
 export default function Profile({ patientInfo }) {
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditPicMode, setIsEditPicMode] = useState(false);
   const [showQR, setShowQR] = useState(false);
-  const [profilePic, setProfilePic] = useState(google_ngrok_url + patientInfo.profile_pic || '/Vivek.jpg');
+  const [profilePic, setProfilePic] = useState('/Vivek.jpg');
   const [localPatientInfo, setLocalPatientInfo] = useState(patientInfo);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [qrError, setQrError] = useState(null);
@@ -18,58 +18,52 @@ export default function Profile({ patientInfo }) {
     if (patientInfo && patientInfo.profile_qr) {
       const fullQrUrl = google_ngrok_url + patientInfo.profile_qr;
       setQrCodeUrl(fullQrUrl);
-      console.log('QR Code URL:', fullQrUrl);
-    } else {
-      console.warn('No QR code URL available in patient info');
+      console.log(qrCodeUrl)
     }
-  }, [patientInfo]);
-
-  const handleQrCodeLoad = () => {
-    console.log('QR code image loaded successfully');
-  };
-
-  const handleQrCodeError = (error) => {
-    console.error('Error loading QR code image:', error);
-    setQrError('Failed to load QR code image');
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'chronic_condition' || name === 'family_history') {
-      setLocalPatientInfo((prev) => ({ ...prev, [name]: value.split(',').map(item => item.trim()) }));
-    } else {
-      setLocalPatientInfo((prev) => ({ ...prev, [name]: value }));
+    if (patientInfo && patientInfo.profile_pic) {
+      const profile_pic = google_ngrok_url + patientInfo.profile_pic;
+      setProfilePic(profile_pic);
+      console.log(profilePic)
     }
-  };
-
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    setProfilePic(URL.createObjectURL(file));
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const dataToSend = { ...localPatientInfo };
+    const formData = new FormData(e.target);
+    const updatedData = {};
     
-    ['chronic_condition', 'family_history'].forEach(field => {
-      if (typeof dataToSend[field] === 'string') {
-        dataToSend[field] = dataToSend[field].split(',').map(item => item.trim());
+    for (let [key, value] of formData.entries()) {
+      if (key === 'chronic_conditions' || key === 'family_history' || key === 'allergies') {
+        value = value.split(',').map(item => item.trim()).filter(Boolean);
       }
-    });
+      if (JSON.stringify(value) !== JSON.stringify(localPatientInfo[key])) {
+        updatedData[key] = value;
+      }
+    }
 
-    console.log('Updated patient info:', dataToSend);
-    
+    if (Object.keys(updatedData).length > 0) {
+      try {
+        await savePatientInfo(updatedData);
+        setLocalPatientInfo(prev => ({ ...prev, ...updatedData }));
+        setIsEditMode(false);
+      } catch (error) {
+        console.error('Error updating profile:', error);
+      }
+    } else {
+      setIsEditMode(false);
+    }
+  };
+
+  const handleProfilePicSubmit = async (e) => {
+    e.preventDefault();
     try {
-      await savePatientInfo(dataToSend);
-      
       if (profilePic instanceof File) {
         await updateProfilePic(profilePic);
       }
-      
-      setIsEditMode(false);
+      setIsEditPicMode(false);
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('Error updating profile picture:', error);
     }
   };
 
@@ -85,12 +79,15 @@ export default function Profile({ patientInfo }) {
             />
             <button
               className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors duration-200"
-              onClick={() => {
-                console.log('Opening QR code modal');
-                setShowQR(true);
-              }}
+              onClick={() => setShowQR(true)}
             >
               <QrCode className="h-4 w-4" />
+            </button>
+            <button
+              className="absolute top-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors duration-200"
+              onClick={() => setIsEditPicMode(true)}
+            >
+              <Edit className="h-4 w-4" />
             </button>
           </div>
           <h2 className="text-2xl font-bold text-center mb-2">{localPatientInfo?.name}</h2>
@@ -126,7 +123,7 @@ export default function Profile({ patientInfo }) {
             Medical History
           </h3>
           <div className="space-y-2">
-            <p><span className="font-semibold">Chronic Conditions:</span> {localPatientInfo?.chronic_condition}</p>
+            <p><span className="font-semibold">Chronic Conditions:</span> {localPatientInfo?.chronic_conditions}</p>
             <p><span className="font-semibold">Family History:</span> {localPatientInfo?.family_history}</p>
           </div>
         </div>
@@ -157,6 +154,17 @@ export default function Profile({ patientInfo }) {
     </div>
   );
 
+  const [selectedFileName, setSelectedFileName] = useState('No file chosen');
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfilePic(file);
+      setSelectedFileName(URL.createObjectURL(file));
+      console.log(profilePic)
+    }
+  };
+
   if (!localPatientInfo) {
     return <div className="text-center mt-8">Loading...</div>;
   }
@@ -169,25 +177,6 @@ export default function Profile({ patientInfo }) {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="bg-white rounded-lg shadow-lg p-6">
                 <h2 className="text-2xl font-bold mb-6">Edit Profile</h2>
-                <div className="flex flex-col items-center mb-6">
-                  <div className="relative w-48 h-48 mb-4">
-                    <img 
-                      src={profilePic}
-                      alt="Profile" 
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                    <label htmlFor="profile_pic" className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 cursor-pointer">
-                      <Edit className="h-4 w-4" />
-                    </label>
-                    <input
-                      type="file"
-                      id="profile_pic"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                  </div>
-                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="name">Name</label>
@@ -195,8 +184,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="name"
                       name="name"
-                      value={localPatientInfo?.name || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      defaultValue={localPatientInfo?.name || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -206,21 +194,18 @@ export default function Profile({ patientInfo }) {
                       type="number"
                       id="age"
                       name="age"
-                      value={localPatientInfo?.age || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      defaultValue={localPatientInfo?.age || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="email">Email</label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={localPatientInfo?.user_info.email || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      disabled
-                    />
+                     <div
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 text-sm"
+                    aria-label="Email address"
+                  >
+                  {localPatientInfo?.user_info.email || ''}
+                  </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="phone_number">Phone Number</label>
@@ -228,8 +213,7 @@ export default function Profile({ patientInfo }) {
                       type="tel"
                       id="phone_number"
                       name="phone_number"
-                      value={localPatientInfo?.phone_number || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      defaultValue={localPatientInfo?.phone_number || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -239,8 +223,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="blood_group"
                       name="blood_group"
-                      value={localPatientInfo?.blood_group || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      defaultValue={localPatientInfo?.blood_group || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -250,10 +233,10 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="height"
                       name="height"
-                      value={localPatientInfo?.height || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      defaultValue={localPatientInfo?.height || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
+                  
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="weight">Weight</label>
@@ -261,8 +244,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="weight"
                       name="weight"
-                      value={localPatientInfo?.weight || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      defaultValue={localPatientInfo?.weight || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -272,8 +254,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="allergies"
                       name="allergies"
-                      value={localPatientInfo?.allergies}
-                      onChange={(e) => handleInputChange(e)}
+                      defaultValue={localPatientInfo?.allergies || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -283,22 +264,22 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="aadhar_card"
                       name="aadhar_card"
-                      value={localPatientInfo?.aadhar_card || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      defaultValue={localPatientInfo?.aadhar_card || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
                 <div className="mt-6">
-                  <label className="block text-sm font-medium mb-1" htmlFor="chronic_condition">Chronic Conditions</label>
+                  <label className="block text-sm font-medium mb-1" htmlFor="chronic_conditions">Chronic Conditions</label>
                   <textarea
-                    id="chronic_condition"
-                    name="chronic_condition"
-                    value={Array.isArray(localPatientInfo?.chronic_condition) ? localPatientInfo.chronic_condition.join(', ') : localPatientInfo?.chronic_condition || ''}
-                    onChange={handleInputChange}
+                    id="chronic_conditions"
+                    name="chronic_conditions"
+                    defaultValue={Array.isArray(localPatientInfo?.chronic_conditions) 
+                      ? localPatientInfo.chronic_conditions.join(', ') 
+                      : localPatientInfo?.chronic_conditions || ''}
                     rows={3}
-                    
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter conditions separated by commas"
                   />
                 </div>
                 <div className="mt-6">
@@ -306,10 +287,12 @@ export default function Profile({ patientInfo }) {
                   <textarea
                     id="family_history"
                     name="family_history"
-                    value={Array.isArray(localPatientInfo?.family_history) ? localPatientInfo.family_history.join(', ') : localPatientInfo?.family_history || ''}
-                    onChange={handleInputChange}
+                    defaultValue={Array.isArray(localPatientInfo?.family_history) 
+                      ? localPatientInfo.family_history.join(', ') 
+                      : localPatientInfo?.family_history || ''}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter family history items separated by commas"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -319,8 +302,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="city"
                       name="city"
-                      value={localPatientInfo?.city || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      defaultValue={localPatientInfo?.city || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -330,8 +312,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="state"
                       name="state"
-                      value={localPatientInfo?.state || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      defaultValue={localPatientInfo?.state || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -341,8 +322,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="country"
                       name="country"
-                      value={localPatientInfo?.country || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      defaultValue={localPatientInfo?.country || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -352,8 +332,7 @@ export default function Profile({ patientInfo }) {
                       type="text"
                       id="pin"
                       name="pin"
-                      value={localPatientInfo?.pin || ''}
-                      onChange={(e) => handleInputChange(e)}
+                      defaultValue={localPatientInfo?.pin || ''}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -362,10 +341,7 @@ export default function Profile({ patientInfo }) {
               <div className="flex justify-end space-x-4">
                 <button
                   type="button"
-                  onClick={() => {
-                    setLocalPatientInfo(patientInfo);
-                    setIsEditMode(false);
-                  }}
+                  onClick={() => setIsEditMode(false)}
                   className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
                   Cancel
@@ -383,6 +359,51 @@ export default function Profile({ patientInfo }) {
       ) : (
         <ProfileDisplay />
       )}
+      {isEditPicMode && 
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4">Update Profile Picture</h2>
+            <form onSubmit={handleProfilePicSubmit}>
+              <div className="mb-4">
+                <label htmlFor="profile_pic" className="block text-sm font-medium mb-2">
+                  Choose new profile picture
+                </label>
+                <div className="flex flex-col space-y-4 items-center">
+                  <label
+                    htmlFor="profile_pic"
+                    className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200"
+                  >
+                    Choose File
+                  </label>
+                  <input
+                    type="file"
+                    id="profile_pic"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <span className="ml-3 text-sm text-gray-600"><img src={selectedFileName} alt="File" /></span>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setIsEditPicMode(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
       {showQR && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg">
@@ -391,8 +412,11 @@ export default function Profile({ patientInfo }) {
                 src={qrCodeUrl} 
                 alt="QR Code" 
                 className="w-64 h-64" 
-                onLoad={handleQrCodeLoad}
-                onError={handleQrCodeError}
+                onLoad={() => console.log('QR code image loaded successfully')}
+                onError={(error) => {
+                  console.error('Error loading QR code image:', error);
+                  setQrError('Failed to load QR code image');
+                }}
               />
             ) : (
               <div className="w-64 h-64 flex items-center justify-center text-red-500">
@@ -405,7 +429,6 @@ export default function Profile({ patientInfo }) {
             <button
               className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
               onClick={() => {
-                console.log('Closing QR code modal');
                 setShowQR(false);
                 setQrError(null);
               }}
