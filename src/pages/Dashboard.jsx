@@ -323,7 +323,7 @@ export default function MedicalDashboard() {
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
-      <Chat/>
+    <Chat/>
     </div>
   )
 }

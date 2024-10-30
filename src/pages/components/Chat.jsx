@@ -1,105 +1,75 @@
-import React, { useState, useRef, useEffect } from 'react'
-import axios from 'axios'
-import { Bot, Send, X } from 'lucide-react'
-import { google_ngrok_url } from '../../utils/global';
+'use client'
+
+import React, { useState, useEffect, useRef } from 'react'
+import { Bot, X } from 'lucide-react'
+
 export default function Chat() {
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState([])
-  const [inputValue, setInputValue] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const messagesEndRef = useRef(null)
-
-  const API_URL = `${google_ngrok_url}/query/`
+  const [iframeLoaded, setIframeLoaded] = useState(false)
+  const chatRef = useRef(null)
 
   const toggleChat = () => setIsOpen(!isOpen)
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        setIframeLoaded(true)
+      }, 1000) 
+
+      return () => clearTimeout(timer)
+    } else {
+      setIframeLoaded(false)
+    }
+  }, [isOpen])
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!inputValue.trim()) return
-    const token=localStorage.getItem("Token")
-
-    const userMessage = { text: inputValue, isUser: true }
-    setMessages((prev) => [...prev, userMessage])
-    setInputValue('')
-    setIsLoading(true)
-
-    try {
-      const response = await axios.post(API_URL, { question: inputValue },{headers:{
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      }})
-      const botMessage = { text: response.data.data, isUser: false }
-      setMessages((prev) => [...prev, botMessage])
-    } catch (error) {
-      console.error('Error:', error)
-      const errorMessage = { text: 'Sorry, there was an error processing your request.', isUser: false }
-      setMessages((prev) => [...prev, errorMessage])
-    } finally {
-      setIsLoading(false)
+    const handleClickOutside = (event) => {
+      if (chatRef.current && !chatRef.current.contains(event.target)) {
+        setIsOpen(false)
+      }
     }
-  }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 right-4 z-50" ref={chatRef}>
       {isOpen ? (
-        <div className="bg-white rounded-lg shadow-xl w-80 h-96 flex flex-col">
-          <div className="bg-primary text-primary-foreground p-4 rounded-t-lg flex justify-between items-center">
-            <h3 className="font-semibold">Chat</h3>
-            <button onClick={toggleChat} className="text-primary-foreground hover:text-gray-200">
+        <div className="bg-blue-400 rounded-lg shadow-xl w-[350px] h-[430px] flex flex-col overflow-hidden">
+          <div className="bg-primary text-primary-foreground p-2 flex justify-end items-center">
+            <button 
+              onClick={toggleChat} 
+              className="text-primary-foreground hover:text-gray-200"
+              aria-label="Close chat"
+            >
               <X size={20} />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[70%] rounded-lg p-2 ${
-                    message.isUser
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-gray-200 text-gray-800'
-                  }`}
-                >
-                  {message.text}
-                </div>
+          <div className="flex-1 relative">
+            {!iframeLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
+            )}
+            <iframe
+              allow="microphone;"
+              width="100%"
+              height="100%"
+              src={import.meta.env.VITE_DIALOGFLOW_KEY}
+              className={`w-full h-full ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onLoad={() => setIframeLoaded(true)}
+              title="Dialogflow Chat"
+            ></iframe>
           </div>
-          <form onSubmit={handleSubmit} className="p-4 border-t">
-            <div className="flex items-center">
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-1 border rounded-l-md p-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                disabled={isLoading}
-              />
-              <button
-                type="submit"
-                className="bg-primary text-primary-foreground p-2 rounded-r-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary"
-                disabled={isLoading}
-              >
-                <Send size={20} />
-              </button>
-            </div>
-          </form>
         </div>
       ) : (
         <button
           onClick={toggleChat}
           className="bg-blue-500 text-white rounded-full p-3 shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          aria-label="Open chat"
         >
           <Bot size={24} />
         </button>
