@@ -58,7 +58,7 @@ export default function Chat() {
               allow="microphone;"
               width="100%"
               height="100%"
-              src={import.meta.env.VITE_DIALOGFLOW_KEY}
+              src="https://console.dialogflow.com/api-client/demo/embedded/23f22ced-19cc-4886-832d-3f7ca260a6c6"
               className={`w-full h-full ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setIframeLoaded(true)}
               title="Dialogflow Chat"

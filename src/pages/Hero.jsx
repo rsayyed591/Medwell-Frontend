@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Activity, Calendar, FileText, Lock, MessageCircle, DollarSign } from 'lucide-react';
-import BG from './../../public/hero.jpg';
 
 const AnimatedSection = ({ children, className }) => {
   const controls = useAnimation();
@@ -47,7 +46,7 @@ export default function LandingPage() {
     <div className="font-sans text-gray-800">
       <section className="relative h-screen w-full overflow-hidden">
         <img
-          src={BG}
+          src="/hero.jpg"
           alt="Medical background"
           className="absolute inset-0 h-full w-full object-cover filter"
         />
