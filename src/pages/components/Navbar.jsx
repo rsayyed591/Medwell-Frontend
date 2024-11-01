@@ -3,12 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Bars3BottomRightIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import { LogOut } from 'lucide-react'
 
-
 export default function Navbar() {
-    
   const [isOpen, setIsOpen] = useState(false)
   const [navBackground, setNavBackground] = useState('bg-transparent')
-  const [ isLoggedIn, setIsLoggedIn ] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const navigate = useNavigate()
 
   const Links = [
@@ -17,14 +15,15 @@ export default function Navbar() {
     { name: 'Pricing', link: '/pricing' },
     { name: 'About', link: '/about' },
   ]
-  useEffect(()=>{
-    const token = localStorage.getItem('Token')
-    if (token){
-        setIsLoggedIn(true)
-    }
-  })
+
   useEffect(() => {
-    
+    const token = localStorage.getItem('Token')
+    if (token) {
+      setIsLoggedIn(true)
+    }
+  }, [])
+
+  useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
         setNavBackground('bg-white shadow-md')
@@ -53,13 +52,12 @@ export default function Navbar() {
     localStorage.removeItem('User')
     localStorage.removeItem('Token')
     setIsLoggedIn(false)
-    navigate('/login')
+    navigate('/')
   }
 
   return (
     <nav className={`w-full fixed top-0 left-0 z-50 transition-all duration-300 ${navBackground}`}>
       <div className="container mx-auto px-4 py-4 md:flex md:justify-between md:items-center">
-        {/* logo */}
         <div className="flex justify-between items-center">
           <Link to="/" className="text-2xl font-bold">
             <span className='text-gray-700'>Med</span><span className='text-gray-900'>Well</span>
@@ -79,7 +77,6 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Links */}
         <div
           className={`${
             isOpen ? 'block' : 'hidden'
@@ -108,26 +105,15 @@ export default function Navbar() {
                 </button>
               </li>
             ) : (
-              <>
-                <li className="my-3 md:my-0">
-                  <Link
-                    to="/signup"
-                    className="text-gray-700 hover:text-gray-900 transition duration-300"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Sign Up
-                  </Link>
-                </li>
-                <li className="my-3 md:my-0">
-                  <Link
-                    to="/login"
-                    className="text-gray-700 hover:text-gray-900 transition duration-300"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Log In
-                  </Link>
-                </li>
-              </>
+              <li className="my-3 md:my-0">
+                <Link
+                  to="/"
+                  className="text-gray-700 hover:text-gray-900 transition duration-300"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Login
+                </Link>
+              </li>
             )}
           </ul>
         </div>
