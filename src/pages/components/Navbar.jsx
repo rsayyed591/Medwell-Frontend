@@ -49,7 +49,6 @@ export default function Navbar() {
   }, [isOpen])
 
   const handleLogout = () => {
-    localStorage.removeItem('User')
     localStorage.removeItem('Token')
     setIsLoggedIn(false)
     navigate('/')
@@ -107,7 +106,7 @@ export default function Navbar() {
             ) : (
               <li className="my-3 md:my-0">
                 <Link
-                  to="/"
+                  to="/auth"
                   className="text-gray-700 hover:text-gray-900 transition duration-300"
                   onClick={() => setIsOpen(false)}
                 >

@@ -9,7 +9,7 @@ import Pricing from './pages/Pricing'
 import Hero from './pages/Hero'
 import { SignUp } from './pages/Auth/SignUp'
 import { Login } from './pages/Auth/Login'
-import UserSelection from './pages/UserSelect'
+import UserSelect from './pages/UserSelect'
 import { DoctorLogin } from './pages/Auth/DoctorLogin'
 import { DoctorSignUp } from './pages/Auth/DoctorSignup'
 import { HospitalLogin } from './pages/Auth/HospitalLogin'
@@ -40,8 +40,8 @@ function Layout() {
       <Navbar />
       <main className="flex-grow pt-16">
         <Routes>
-          <Route path="/" element={<UserSelection />} />
-          <Route path="/hero" element={<Hero />} />
+          <Route path="/" element={<Hero />} />
+          <Route path="/auth" element={<UserSelect />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/about" element={<About />} />
