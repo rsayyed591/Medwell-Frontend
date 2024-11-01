@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { ArrowLeft, DollarSign, PlusCircle, Trash2, MessageSquare, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, BarElement } from 'chart.js';
 import { Pie, Line, Bar } from 'react-chartjs-2';
-
+import CombinedChat from "../Chatbots/CombinedChat"
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, BarElement);
 
 const expenseTypes = ['reports', 'doctor', 'medicines'];
@@ -572,6 +572,7 @@ export default function ExpenseTracker() {
           </motion.div>
         </motion.div>
       )}
+      <CombinedChat/>
     </div>
   );
 }

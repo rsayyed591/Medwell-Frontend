@@ -6,7 +6,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { PlusCircle, X, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'
-import Chat from "../components/Chat"
+import Chat from "../Chatbots/Chat"
 
 const localizer = momentLocalizer(moment)
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Edit, Heart, Clipboard, Calendar, MapPin, QrCode } from 'lucide-react';
 import { google_ngrok_url } from '../../utils/global';
 import { useFetch } from '../components/useFetch';
-import Chat from "../components/Chat"
+import Chat from "../Chatbots/Chat"
 
 export default function Profile({ patientInfo }) {
   const [isEditMode, setIsEditMode] = useState(false);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, Droplet, DollarSign, Calendar } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
-import Chat from "../components/Chat"
+import Chat from "../Chatbots/Chat"
 
 import {
   Chart as ChartJS,
