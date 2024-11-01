@@ -6,6 +6,7 @@ import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout'
 import '@react-pdf-viewer/core/lib/styles/index.css'
 import '@react-pdf-viewer/default-layout/lib/styles/index.css'
 import { google_ngrok_url } from '../../utils/global'
+import Chat from "../components/Chat"
 
 export default function AddReport() {
   const [uploadedFile, setUploadedFile] = useState(null)
@@ -254,6 +255,8 @@ export default function AddReport() {
             )}
           </AnimatePresence>
         </motion.div>
+    <Chat/>
+
       </div>
     </motion.div>
   )

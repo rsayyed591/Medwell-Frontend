@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, Droplet, DollarSign, Calendar } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
+import Chat from "../components/Chat"
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -156,6 +158,8 @@ export default function PatientDashboard({ profileData, expenseData, appointment
         </BoxWrapper>
       </div>
       {showHealthCheck && <HealthCheck healthData={healthData} />}
+    <Chat/>
+
     </div>
   );
 }
