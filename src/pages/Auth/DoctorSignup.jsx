@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { EyeIcon, EyeOffIcon } from 'lucide-react'
+import { EyeIcon, EyeOffIcon, Mail, Lock, Phone } from 'lucide-react'
 import { ngrok_url, google_ngrok_url } from '../../utils/global'
 
 export function DoctorSignUp() {
-  const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [showCPassword, setShowCPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     const token = localStorage.getItem("Token")
@@ -26,7 +33,7 @@ export function DoctorSignUp() {
         })
         window.google.accounts.id.renderButton(
           document.getElementById("signInDiv"),
-          { theme: "outline", size: "large" }
+          { theme: "outline", size: "large", width: isMobile ? 300 : 400 }
         )
       } else {
         setTimeout(initializeGoogleSignIn, 100)
@@ -34,7 +41,7 @@ export function DoctorSignUp() {
     }
 
     initializeGoogleSignIn()
-  }, [])
+  }, [navigate, isMobile])
 
   const handleCallbackResponse = (response) => {
     const formData = new FormData()
@@ -46,41 +53,27 @@ export function DoctorSignUp() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log("Backend response: ", data)
         localStorage.setItem("Token", data.access)
         navigate("/Dashboard")
       })
-      .catch(err => {
-        console.error("Error in Google login: ", err)
+      .catch(() => {
         setErrorMessage("An error occurred during Google sign-up. Please try again.")
       })
-  }
-
-  const validateForm = () => {
-    if (password !== confirmPassword) {
-      setErrorMessage("Passwords do not match.")
-      return false
-    }
-    if (password.length < 8) {
-      setErrorMessage("Password must be at least 8 characters long.")
-      return false
-    }
-    return true
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
     setErrorMessage('')
 
-    if (!validateForm()) {
+    if (password.length < 8) {
+      setErrorMessage("Password must be at least 8 characters long.")
       return
     }
 
     const formData = new FormData()
     formData.append("email", email)
-    formData.append("password1", password)
-    formData.append("password2", confirmPassword)
-    formData.append("full_name", fullName)
+    formData.append("password", password)
+    formData.append("phone", phone)
 
     fetch(`${ngrok_url}/auth/register_userdoctor/`, {
       method: "POST",
@@ -88,128 +81,222 @@ export function DoctorSignUp() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log("Backend response: ", data)
         if (data.status === false) {
           setErrorMessage(data.mssg)
         } else {
           localStorage.setItem("Token", data.access_token)
-          localStorage.setItem("User", JSON.stringify({ email: email, fullName: fullName, role: 'doctor' }))
+          localStorage.setItem("User", JSON.stringify({ email: email, phone: phone, role: 'doctor' }))
           navigate("/Dashboard")
         }
       })
-      .catch(err => {
-        console.error("Error in SignUp: ", err)
+      .catch(() => {
         setErrorMessage("An error occurred during sign-up. Please try again.")
       })
   }
 
-  return (
-    <div className="flex min-h-screen bg-blue-50 items-center justify-center p-4">
-      <div className="bg-white rounded-[40px] overflow-hidden shadow-2xl max-w-5xl w-full">
-        <div className="flex flex-col md:flex-row">
-          <div className="bg-blue-100 p-12 md:w-1/2 relative flex flex-col justify-between">
-            <div className="text-2xl text-gray-800 font-semibold mb-12">
-              Join MedWell as a Doctor<br />and provide excellent<br />care to your patients.
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-[#F5F0FF] p-4 flex flex-col">
+        <div className="relative w-full">
+          <div className="relative flex flex-col items-center">
+            <div className="w-full h-36 bg-[#F5F0FF] rounded-b-full relative overflow-hidden">
+              <img
+                src="/doc_signup_mobile.png"
+                alt="Doctor"
+                className="w-32 h-32 object-contain absolute bottom-0 left-1/2 -translate-x-1/2"
+              />
             </div>
-            <div className="flex items-center justify-center flex-grow">
-              <div className="relative w-64 h-64">
-                <div className="absolute inset-0 bg-blue-200 rounded-full"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <img
-                    src="/Stethoscope.png"
-                    alt="Stethoscope"
-                    width={200}
-                    height={200}
-                    className="object-contain"
+            <h1 className="text-[#2D2D2D] text-3xl font-bold mt-4 mb-6">Sign-Up</h1>
+            
+            <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
+              {errorMessage && (
+                <div className="text-red-500 text-sm text-center">{errorMessage}</div>
+              )}
+              <div className="relative">
+                <label className="text-sm text-gray-600 mb-1 block">Email</label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    required
+                    className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="email@gmail.com"
                   />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 </div>
               </div>
-            </div>
+
+              <div className="relative">
+                <label className="text-sm text-gray-600 mb-1 block">Phone no</label>
+                <div className="relative">
+                  <input
+                    type="tel"
+                    required
+                    className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Enter your phone no"
+                  />
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+
+              <div className="relative">
+                <label className="text-sm text-gray-600 mb-1 block">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                  />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <button
+                    type="button"
+                    className="absolute right-4 top-1/2 -translate-y-1/2"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+              >
+                Create Account
+              </button>
+
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-[#F5F0FF] text-gray-500">or</span>
+                </div>
+              </div>
+
+              <div id="signInDiv" className="flex justify-center"></div>
+
+              <p className="text-center text-sm text-gray-600 mt-6">
+                Already have an account?{' '}
+                <Link to="/doctor/login" className="text-[#7C3AED] font-medium">
+                  Sign in
+                </Link>
+              </p>
+            </form>
           </div>
-          <div className="p-12 md:w-1/2">
-            <h2 className="text-3xl font-bold text-center mb-8">Create Doctor Account</h2>
-            <div id="signInDiv" className="flex justify-center mb-8"></div>
-            <div className="relative mb-8">
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-[#FFF5F5] flex">
+    <div className="hidden lg:flex flex-1 bg-[#F5F0FF] items-center justify-center">
+      <img
+        src="/doc_signup.png"
+        alt="Doctor"
+        className="w-1/2 h-auto object-contain" // Reduced from w-3/4 to w-1/2
+      />
+    </div>
+    <div className="flex-1 flex items-center justify-center p-4"> {/* Reduced padding from p-8 to p-4 */}
+      <div className="w-full max-w-md">
+        <h1 className="text-[#2D2D2D] text-4xl font-bold mb-6">Create Account</h1>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {errorMessage && (
+              <div className="text-red-500 text-sm text-center">{errorMessage}</div>
+            )}
+            <div className="relative">
+              <label className="text-sm text-gray-600 mb-1 block">Email</label>
+              <div className="relative">
+                <input
+                  type="email"
+                  required
+                  className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="email@gmail.com"
+                />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+
+            <div className="relative">
+              <label className="text-sm text-gray-600 mb-1 block">Phone no</label>
+              <div className="relative">
+                <input
+                  type="tel"
+                  required
+                  className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Enter your phone no"
+                />
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+
+            <div className="relative">
+              <label className="text-sm text-gray-600 mb-1 block">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <button
+                  type="button"
+                  className="absolute right-4 top-1/2 -translate-y-1/2"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOffIcon className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5 text-gray-400" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+            >
+              Create Account
+            </button>
+
+            <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">OR</span>
+                <span className="px-2 bg-[#FFF5F5] text-gray-500">or</span>
               </div>
             </div>
-            {errorMessage && (
-              <div className="mb-4 text-red-500 text-sm text-center">{errorMessage}</div>
-            )}
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="full-name" className="block text-sm font-medium text-gray-700 mb-1">Full Name:</label>
-                <input
-                  id="full-name"
-                  type="text"
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="relative">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password:</label>
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOffIcon className="h-5 w-5 text-gray-400"   /> : <EyeIcon className="h-5 w-5 text-gray-400" />}
-                </button>
-              </div>
-              <div className="relative">
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirm Password:</label>
-                <input
-                  id="confirmPassword"
-                  type={showCPassword ? "text" : "password"}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                  onClick={() => setShowCPassword(!showCPassword)}
-                >
-                  {showCPassword ? <EyeOffIcon className="h-5 w-5 text-gray-400" /> : <EyeIcon className="h-5 w-5 text-gray-400" />}
-                </button>
-              </div>
-              <button
-                type="submit"
-                className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Create Account
-              </button>
-            </form>
-            <p className="mt-4 text-center text-sm text-gray-600">
-              Already have an Account? <Link to="/doctor/login" className="font-medium text-blue-600 hover:text-blue-500">Log in</Link>
+
+            <div id="signInDiv" className="flex justify-center"></div>
+
+            <p className="text-center text-sm text-gray-600 mt-6">
+              Already have an account?{' '}
+              <Link to="/doctor/login" className="text-[#7C3AED] font-medium">
+                Sign in
+              </Link>
             </p>
-          </div>
+          </form>
         </div>
       </div>
     </div>
