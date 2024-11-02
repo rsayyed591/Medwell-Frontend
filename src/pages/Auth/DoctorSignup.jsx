@@ -99,14 +99,14 @@ export function DoctorSignUp() {
       <div className="min-h-screen bg-[#FFF5F5] flex flex-col">
         <div className="relative w-full">
           {/* Mobile shape background */}
-          <div className="absolute inset-x-0 top-0 h-[245px] bg-[#B7A6F3] rounded-b-full" />
+          <div className="absolute inset-x-0 top-0 h-[225px] bg-[#B7A6F3] rounded-b-full" />
           
           <div className="relative pt-8 px-6 flex flex-col items-center">
-            <h1 className="text-[#2D2D2D] text-3xl font-bold mb-2">Sign-Up</h1>
+            <h1 className="text-[#2D2D2D] text-3xl font-bold mb-0">Sign-Up</h1>
             <img
               src="/doc_signup_mobile.png"
               alt="Doctor"
-              className="w-40 h-40 object-contain mb-4"
+              className="w-40 h-40 object-contain mb-0"
             />
             
             <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
