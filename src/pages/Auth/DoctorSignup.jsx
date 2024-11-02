@@ -104,7 +104,7 @@ export function DoctorSignUp() {
           <div className="relative pt-8 px-6 flex flex-col items-center">
             <h1 className="text-[#2D2D2D] text-3xl font-bold mb-0">Sign-Up</h1>
             <img
-              src="/doc_signup_mobile.png"
+              src="/auth/doc_signup_mobile.png"
               alt="Doctor"
               className="w-40 h-40 object-contain mb-0"
             />
@@ -208,7 +208,7 @@ export function DoctorSignUp() {
           <div className="absolute inset-0 w-[70%] bg-[#B7A6F3] rounded-t-full translate-x-[120px] translate-y-20" />
         </div>
         <img
-          src="/doc_signup.png"
+          src="/auth/doc_signup.png"
           alt="Doctor"
           className="relative w-[40%] h-auto object-contain"
         />
