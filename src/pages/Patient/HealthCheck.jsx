@@ -1,7 +1,7 @@
 import { Line } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js'
 import { AnimatedCard, CircularMetric } from './SharedComponents'
-
+import CombinedChat from "../Chatbots/CombinedChat"
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -84,6 +84,7 @@ export default function HealthCheck({ isLoaded, charts }) {
             />
           </AnimatedCard>
         ))}
+        <CombinedChat/>
       </div>
     </>
   )

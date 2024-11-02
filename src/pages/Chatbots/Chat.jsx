@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useState, useEffect, useRef } from 'react'
 import { Bot, X } from 'lucide-react'
 
@@ -61,7 +59,7 @@ export default function Chat() {
               src="https://console.dialogflow.com/api-client/demo/embedded/23f22ced-19cc-4886-832d-3f7ca260a6c6"
               className={`w-full h-full ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setIframeLoaded(true)}
-              title="Dialogflow Chat"
+              title="Agasthya"
             ></iframe>
           </div>
         </div>

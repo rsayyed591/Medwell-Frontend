@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, FileText, AlertCircle, ExternalLink, Download } from 'lucide-react'
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
-
+import CombinedChat from "../Chatbots/CombinedChat"
 export default function Reports({ reports }) {
   const [selectedReport, setSelectedReport] = useState(null)
 
@@ -301,6 +301,7 @@ export default function Reports({ reports }) {
           </motion.div>
         )}
       </AnimatePresence>
+      <CombinedChat/>
     </div>
   )
 }

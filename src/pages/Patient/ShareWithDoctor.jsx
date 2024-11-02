@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, Link } from 'lucide-react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-
+import Chat from "../Chatbots/Chat"
 export default function ShareWithDoctor() {
   const [scanResult, setScanResult] = useState('');
   const [isScannerVisible, setIsScannerVisible] = useState(false);
@@ -136,6 +136,8 @@ export default function ShareWithDoctor() {
           </p>
         </motion.div>
       </div>
+    <Chat/>
+
     </div>
   );
 }
