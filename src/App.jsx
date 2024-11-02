@@ -12,7 +12,7 @@ import { Login } from './pages/Auth/Login'
 import UserSelect from './pages/UserSelect'
 import { DoctorLogin } from './pages/Auth/DoctorLogin'
 import { DoctorSignUp } from './pages/Auth/DoctorSignup'
-import { HospitalLogin } from './pages/Auth/HospitalLogin'
+import HospitalLogin from './pages/Auth/HospitalLogin'
 import { HospitalSignUp } from './pages/Auth/HospitalSignup'
 
 export default function App() {

@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { EyeIcon, EyeOffIcon, Building2 } from 'lucide-react'
+import { EyeIcon, EyeOffIcon, Mail, Lock } from 'lucide-react'
 import { google_ngrok_url, ngrok_url } from '../../utils/global'
 
-export function HospitalLogin() {
+export default function HospitalLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     const token = localStorage.getItem("Token")
@@ -23,7 +32,7 @@ export function HospitalLogin() {
         })
         window.google.accounts.id.renderButton(
           document.getElementById("signInDiv"),
-          { theme: "outline", size: "large" }
+          { theme: "outline", size: "large", width: isMobile ? 300 : 400 }
         )
       } else {
         setTimeout(initializeGoogleSignIn, 100)
@@ -31,7 +40,7 @@ export function HospitalLogin() {
     }
 
     initializeGoogleSignIn()
-  }, [navigate])
+  }, [navigate, isMobile])
 
   const handleCallbackResponse = (response) => {
     const formData = new FormData()
@@ -43,12 +52,10 @@ export function HospitalLogin() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log("Backend response: ", data)
         localStorage.setItem("Token", data.access)
         navigate("/Dashboard")
       })
-      .catch(err => {
-        console.error("Error in Google login: ", err)
+      .catch(() => {
         setErrorMessage("An error occurred during Google login. Please try again.")
       })
   }
@@ -66,7 +73,6 @@ export function HospitalLogin() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log("Backend response: ", data)
         if (data.mssg === 'Incorrect Credentials' && data.status === 0) {
           setErrorMessage('Incorrect email or password. Please try again.')
         } else {
@@ -75,85 +81,201 @@ export function HospitalLogin() {
           navigate("/Dashboard")
         }
       })
-      .catch(err => {
-        console.error("Error in Login: ", err)
+      .catch(() => {
         setErrorMessage("An error occurred. Please try again.")
       })
   }
 
-  return (
-    <div className="flex min-h-screen bg-blue-50 items-center justify-center p-4">
-      <div className="bg-white rounded-[40px] overflow-hidden shadow-2xl max-w-5xl w-full">
-        <div className="flex flex-col md:flex-row">
-          <div className="bg-blue-100 p-12 md:w-1/2 relative flex flex-col justify-between">
-            <div className="text-2xl text-gray-800 font-semibold mb-12">
-              Welcome back!<br />Manage your hospital<br />efficiently with MedWell.
-            </div>
-            <div className="flex items-center justify-center flex-grow">
-              <div className="relative w-64 h-64">
-                <div className="absolute inset-0 bg-blue-200 rounded-full"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Building2 size={100} className="text-blue-600" />
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-[#FFF5F5] flex flex-col">
+        <div className="relative w-full">
+          {/* Mobile shape background */}
+          <div className="absolute inset-x-0 top-0 h-[245px] bg-[#B7A6F3] rounded-b-full" />
+    
+          <div className="relative pt-8 px-6 flex flex-col items-center">
+          <h1 className="text-[#2D2D2D] text-3xl font-bold mb-3">Login</h1>
+          <img
+              src="/hospital_login_mobile.png"
+              alt="Hospital illustration"
+              className="w-40 h-40 object-contain mb-4"
+            />
+                        
+            <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 px-6">
+              {errorMessage && (
+                <div className="text-red-500 text-sm text-center">{errorMessage}</div>
+              )}
+              <div className="relative">
+                <label className="text-sm text-gray-600 mb-1 block">Email</label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    required
+                    className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="email@gmail.com"
+                  />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 </div>
               </div>
-            </div>
+
+              <div className="relative">
+                <label className="text-sm text-gray-600 mb-1 block">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                  />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <button
+                    type="button"
+                    className="absolute right-4 top-1/2 -translate-y-1/2"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <Link to="/forgot-password" className="text-sm text-gray-600">
+                  Forgot Password?
+                </Link>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+              >
+                Login
+              </button>
+
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-[#F5F0FF] text-gray-500">or</span>
+                </div>
+              </div>
+
+              <div id="signInDiv" className="flex justify-center"></div>
+
+              <p className="text-center text-sm text-gray-600 mt-6">
+                Don't have an account?{' '}
+                <Link to="/hospital/signup" className="text-[#7C3AED] font-medium">
+                  Sign up
+                </Link>
+              </p>
+            </form>
           </div>
-          <div className="p-12 md:w-1/2">
-            <h2 className="text-3xl font-bold text-center mb-8">Hospital Login</h2>
-            <div id="signInDiv" className="flex justify-center mb-8"></div>
-            <div className="relative mb-8">
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-[#FFF5F5] flex">
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <h1 className="text-[#2D2D2D] text-4xl font-bold mb-8">Welcome Back!!</h1>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {errorMessage && (
+              <div className="text-red-500 text-sm text-center">{errorMessage}</div>
+            )}
+            <div className="relative">
+              <label className="text-sm text-gray-600 mb-1 block">Email</label>
+              <div className="relative">
+                <input
+                  type="email"
+                  required
+                  className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="email@gmail.com"
+                />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+
+            <div className="relative">
+              <label className="text-sm text-gray-600 mb-1 block">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <button
+                  type="button"
+                  className="absolute right-4 top-1/2 -translate-y-1/2"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOffIcon className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5 text-gray-400" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-sm text-gray-600">
+                Forgot Password?
+              </Link>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+            >
+              Login
+            </button>
+
+            <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">OR</span>
+                <span className="px-2 bg-[#FFF5F5] text-gray-500">or</span>
               </div>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {errorMessage && (
-                <div className="text-red-500 text-sm text-center">{errorMessage}</div>
-              )}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="relative">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password:</label>
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOffIcon className="h-5 w-5 text-gray-400" /> : <EyeIcon className="h-5 w-5 text-gray-400" />}
-                </button>
-              </div>
-              <button
-                type="submit"
-                className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Log In
-              </button>
-            </form>
-            <p className="mt-4 text-center text-sm text-gray-600">
-              Don't have an account? <Link to="/hospital/signup" className="font-medium text-blue-600 hover:text-blue-500">Sign up</Link>
+
+            <div id="signInDiv" className="flex justify-center"></div>
+
+            <p className="text-center text-sm text-gray-600 mt-6">
+              Don't have an account?{' '}
+              <Link to="/hospital/signup" className="text-[#7C3AED] font-medium">
+                Sign up
+              </Link>
             </p>
-          </div>
+          </form>
         </div>
+      </div>
+      <div className="hidden lg:flex flex-1 bg-[#F5F0FF] items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 w-[70%] bg-[#B7A6F3] rounded-t-full -translate-x-[-120px] translate-y-20" />
+        </div>
+        <img
+          src="/hospital_login.png"
+          alt="Hospital"
+          className="relative w-1/2 h-auto object-contain"
+        />
       </div>
     </div>
   )
