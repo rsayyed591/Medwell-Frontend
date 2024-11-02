@@ -96,17 +96,18 @@ export function DoctorSignUp() {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-[#F5F0FF] p-4 flex flex-col">
+      <div className="min-h-screen bg-[#FFF5F5] flex flex-col">
         <div className="relative w-full">
-          <div className="relative flex flex-col items-center">
-            <div className="w-full h-36 bg-[#F5F0FF] rounded-b-full relative overflow-hidden">
-              <img
-                src="/doc_signup_mobile.png"
-                alt="Doctor"
-                className="w-32 h-32 object-contain absolute bottom-0 left-1/2 -translate-x-1/2"
-              />
-            </div>
-            <h1 className="text-[#2D2D2D] text-3xl font-bold mt-4 mb-6">Sign-Up</h1>
+          {/* Mobile shape background */}
+          <div className="absolute inset-x-0 top-0 h-[245px] bg-[#B7A6F3] rounded-b-full" />
+          
+          <div className="relative pt-8 px-6 flex flex-col items-center">
+            <h1 className="text-[#2D2D2D] text-3xl font-bold mb-2">Sign-Up</h1>
+            <img
+              src="/doc_signup_mobile.png"
+              alt="Doctor"
+              className="w-40 h-40 object-contain mb-4"
+            />
             
             <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
               {errorMessage && (
@@ -180,7 +181,7 @@ export function DoctorSignUp() {
                   <div className="w-full border-t border-gray-300"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-[#F5F0FF] text-gray-500">or</span>
+                  <span className="px-2 bg-[#FFF5F5] text-gray-500">or</span>
                 </div>
               </div>
 
@@ -201,16 +202,21 @@ export function DoctorSignUp() {
 
   return (
     <div className="min-h-screen bg-[#FFF5F5] flex">
-    <div className="hidden lg:flex flex-1 bg-[#F5F0FF] items-center justify-center">
-      <img
-        src="/doc_signup.png"
-        alt="Doctor"
-        className="w-1/2 h-auto object-contain" // Reduced from w-3/4 to w-1/2
-      />
-    </div>
-    <div className="flex-1 flex items-center justify-center p-4"> {/* Reduced padding from p-8 to p-4 */}
-      <div className="w-full max-w-md">
-        <h1 className="text-[#2D2D2D] text-4xl font-bold mb-6">Create Account</h1>
+      {/* Move the illustration section to the left */}
+      <div className="hidden lg:flex flex-1 bg-[#F5F0FF] items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 w-[70%] bg-[#B7A6F3] rounded-t-full translate-x-[120px] translate-y-20" />
+        </div>
+        <img
+          src="/doc_signup.png"
+          alt="Doctor"
+          className="relative w-[40%] h-auto object-contain"
+        />
+      </div>
+
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <h1 className="text-[#2D2D2D] text-4xl font-bold mb-6">Create Account</h1>
           
           <form onSubmit={handleSubmit} className="space-y-4">
             {errorMessage && (

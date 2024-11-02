@@ -88,17 +88,19 @@ export function DoctorLogin() {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-[#F5F0FF] flex flex-col">
+      <div className="min-h-screen bg-[#FFF5F5] flex flex-col">
         <div className="relative w-full">
-          <div className="absolute inset-x-0 top-0 h-64 bg-[#F5F0FF] rounded-b-[50%]" />
-          <div className="relative pt-8 flex flex-col items-center">
-            <img
+          {/* Mobile shape background */}
+          <div className="absolute inset-x-0 top-0 h-[245px] bg-[#B7A6F3] rounded-b-full" />
+    
+          <div className="relative pt-8 px-6 flex flex-col items-center">
+          <h1 className="text-[#2D2D2D] text-3xl font-bold mb-3">Login</h1>
+          <img
               src="/doc_login_mobile.png"
-              alt="Doctor"
-              className="w-32 h-32 object-contain mb-2"
+              alt="Doctor illustration"
+              className="w-40 h-40 object-contain mb-4"
             />
-            <h1 className="text-[#2D2D2D] text-3xl font-bold mb-6">Login</h1>
-            
+                        
             <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 px-6">
               {errorMessage && (
                 <div className="text-red-500 text-sm text-center">{errorMessage}</div>
@@ -267,7 +269,7 @@ export function DoctorLogin() {
       </div>
       <div className="hidden lg:flex flex-1 bg-[#F5F0FF] items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute inset-x-0 top-0 h-[500px] bg-[#F5F0FF] rounded-b-[50%]" />
+          <div className="absolute inset-0 w-[70%] bg-[#B7A6F3] rounded-t-full -translate-x-[-120px] translate-y-20" />
         </div>
         <img
           src="/doc_login.png"
