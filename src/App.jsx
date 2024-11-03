@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import './App.css'
 import Loader from './pages/components/Loader'
 import Navbar from './pages/components/Navbar'
 import Footer from './pages/components/Footer'
@@ -15,21 +16,36 @@ import { DoctorSignUp } from './pages/Auth/DoctorSignup'
 import HospitalLogin from './pages/Auth/HospitalLogin'
 import { HospitalSignUp } from './pages/Auth/HospitalSignup'
 
-export default function App() {
+function LoaderWrapper() {
   const [isLoading, setIsLoading] = useState(true)
+  const location = useLocation()
+
+  useEffect(() => {
+    if (location.pathname === '/') {
+      setIsLoading(true)
+    } else {
+      setIsLoading(false)
+    }
+  }, [location])
 
   const handleLoadingComplete = () => {
     setIsLoading(false)
   }
 
+  if (!isLoading) {
+    return null
+  }
+
+  return <Loader onLoadingComplete={handleLoadingComplete} />
+}
+
+export default function App() {
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
-      <Loader onLoadingComplete={handleLoadingComplete} />
-      <div className={`transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
-        <Router>
-          <Layout />
-        </Router>
-      </div>
+      <Router>
+        <LoaderWrapper />
+        <Layout />
+      </Router>
     </div>
   )
 }
