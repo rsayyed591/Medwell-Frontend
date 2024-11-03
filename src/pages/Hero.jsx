@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Activity, Calendar, FileText, Lock, MessageCircle, DollarSign } from 'lucide-react';
-
+import {Link} from "react-router-dom"
 const AnimatedSection = ({ children, className }) => {
   const controls = useAnimation();
   const [ref, inView] = useInView({
@@ -187,7 +187,7 @@ export default function Hero() {
               transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
               className="mt-8 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
             >
-              <button className="px-6 py-3 font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">Get Started</button>
+              <button className="px-6 py-3 font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"><Link to="/Dashboard">Get Started</Link></button>
               <button className="px-6 py-3 font-semibold text-blue-500 bg-white rounded-lg border border-blue-500 hover:bg-blue-50 transition">Learn More</button>
             </motion.div>
           </div>

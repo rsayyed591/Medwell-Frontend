@@ -8,13 +8,13 @@ import Dashboard from './pages/Dashboard'
 import About from './pages/About'
 import Pricing from './pages/Pricing'
 import Hero from './pages/Hero'
-import { SignUp } from './pages/Auth/SignUp'
-import { Login } from './pages/Auth/Login'
+import  SignUp  from './pages/Auth/SignUp'
+import  Login  from './pages/Auth/Login'
 import UserSelect from './pages/UserSelect'
-import { DoctorLogin } from './pages/Auth/DoctorLogin'
-import { DoctorSignUp } from './pages/Auth/DoctorSignup'
+import  DoctorLogin  from './pages/Auth/DoctorLogin'
+import  DoctorSignUp  from './pages/Auth/DoctorSignup'
 import HospitalLogin from './pages/Auth/HospitalLogin'
-import { HospitalSignUp } from './pages/Auth/HospitalSignup'
+import  HospitalSignUp  from './pages/Auth/HospitalSignup'
 
 function LoaderWrapper() {
   const [isLoading, setIsLoading] = useState(true)

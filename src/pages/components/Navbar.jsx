@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Bars3BottomRightIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import { LogOut } from 'lucide-react'
+import { useAuth } from '../Auth/useAuth'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [navBackground, setNavBackground] = useState('bg-transparent')
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const navigate = useNavigate()
-
+  const { logout } = useAuth()
+  
   const Links = [
     { name: 'Home', link: '/' },
     { name: 'Dashboard', link: '/Dashboard' },
@@ -16,12 +16,31 @@ export default function Navbar() {
     { name: 'About', link: '/about' },
   ]
 
-  useEffect(() => {
-    const token = localStorage.getItem('Token')
-    if (token) {
-      setIsLoggedIn(true)
-    }
-  }, [])
+  const useAuthState = () => {
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+    useEffect(() => {
+      const checkAuthStatus = () => {
+        const token = localStorage.getItem('Token')
+        setIsLoggedIn(!!token)
+      }
+
+      checkAuthStatus()
+
+      window.addEventListener('storage', checkAuthStatus)
+      
+      window.addEventListener('authStateChange', checkAuthStatus)
+
+      return () => {
+        window.removeEventListener('storage', checkAuthStatus)
+        window.removeEventListener('authStateChange', checkAuthStatus)
+      }
+    }, [])
+
+    return isLoggedIn
+  }
+
+  const isLoggedIn = useAuthState()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,9 +68,8 @@ export default function Navbar() {
   }, [isOpen])
 
   const handleLogout = () => {
-    localStorage.removeItem('Token')
-    setIsLoggedIn(false)
-    navigate('/')
+    logout()
+    window.dispatchEvent(new Event('authStateChange'))
   }
 
   return (
@@ -110,7 +128,7 @@ export default function Navbar() {
                   className="text-gray-700 hover:text-gray-900 transition duration-300"
                   onClick={() => setIsOpen(false)}
                 >
-                  Login
+                  Get Started
                 </Link>
               </li>
             )}

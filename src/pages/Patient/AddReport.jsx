@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, File, X, Send } from 'lucide-react'
+import { Upload, File, X, Send, Loader2 } from 'lucide-react'
 import { Worker, Viewer } from '@react-pdf-viewer/core'
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout'
 import '@react-pdf-viewer/core/lib/styles/index.css'
@@ -13,6 +13,8 @@ export default function AddReport() {
   const [previewUrl, setPreviewUrl] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadStatus, setUploadStatus] = useState(null)
+  const [taskId, setTaskId] = useState(null)
+  const [taskStatus, setTaskStatus] = useState(null)
   const fileInputRef = useRef(null)
   const defaultLayoutPluginInstance = defaultLayoutPlugin()
 
@@ -67,7 +69,7 @@ export default function AddReport() {
     setIsUploading(true)
     setUploadStatus('Uploading...')
 
-    const bearerToken = localStorage.getItem('Bearer')
+    const bearerToken = localStorage.getItem('Token')
     if (!bearerToken) {
       setUploadStatus('Authentication token not found')
       setIsUploading(false)
@@ -91,15 +93,43 @@ export default function AddReport() {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      const result = await response.text()
+      const result = await response.json()
       console.log(result)
+      setTaskId(result.task_id)
       setUploadStatus('Upload successful')
+      checkTaskStatus(result.task_id)
     } catch (error) {
       console.error('Upload error:', error)
       setUploadStatus('Upload failed')
     } finally {
       setIsUploading(false)
     }
+  }
+
+  const checkTaskStatus = (id) => {
+    const checkStatus = async () => {
+      try {
+        console.log(`${google_ngrok_url}/patient/get_report_task_status/?task_id=${id}`)
+        const response = await fetch(`${google_ngrok_url}/patient/get_report_task_status/?task_id=${id}`,
+          {method:"GET",
+          headers:new Headers({"ngrok-skip-browser-warning": true})})
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const data = await response.json()
+        setTaskStatus(data.status)
+        if (data.status === 'SUCCESS') {
+          clearInterval(intervalId)
+        }
+      } catch (e) {
+        console.error('Error checking task status:', e)
+        setTaskStatus('ERROR')
+        clearInterval(intervalId)
+      }
+    }
+
+    const intervalId = setInterval(checkStatus, 4000)
+    return () => clearInterval(intervalId)
   }
 
   return (
@@ -110,7 +140,6 @@ export default function AddReport() {
       transition={{ duration: 0.5 }}
       className="container mx-auto px-4 py-8"
     >
-      {/* <h1 className="text-3xl font-bold mb-6">Add Report</h1> */}
       <div className="flex flex-col lg:flex-row gap-8">
         <motion.div
           initial={{ x: -50, opacity: 0 }}
@@ -206,6 +235,25 @@ export default function AddReport() {
               {uploadStatus}
             </motion.div>
           )}
+          {taskId && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mt-4 p-2 rounded-lg text-center bg-blue-100 text-blue-800"
+            >
+              {taskStatus === 'SUCCESS' ? (
+                <div className="text-green-500">Task completed successfully!</div>
+              ) : taskStatus === 'ERROR' ? (
+                <div className="text-red-500">An error occurred while processing the task</div>
+              ) : (
+                <div className="flex items-center justify-center space-x-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Processing report...</span>
+                </div>
+              )}
+            </motion.div>
+          )}
         </motion.div>
         <motion.div
           initial={{ x: 50, opacity: 0 }}
@@ -255,8 +303,7 @@ export default function AddReport() {
             )}
           </AnimatePresence>
         </motion.div>
-    <Chat/>
-
+        <Chat/>
       </div>
     </motion.div>
   )

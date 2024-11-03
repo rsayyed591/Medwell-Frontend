@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { EyeIcon, EyeOffIcon, Mail, Lock } from 'lucide-react'
-import { google_ngrok_url, ngrok_url } from '../../utils/global'
+import { useAuth } from './useAuth'
 
-export function Login() {
+export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  const navigate = useNavigate()
+  const { login, googleLogin, errorMessage, checkAuth } = useAuth()
 
   useEffect(() => {
     const handleResize = () => {
@@ -20,10 +19,7 @@ export function Login() {
   }, [])
 
   useEffect(() => {
-    const token = localStorage.getItem("Token")
-    if (token) {
-      navigate("/Dashboard")
-    }
+    checkAuth()
     const initializeGoogleSignIn = () => {
       if (window.google && window.google.accounts) {
         window.google.accounts.id.initialize({
@@ -40,50 +36,15 @@ export function Login() {
     }
 
     initializeGoogleSignIn()
-  }, [navigate, isMobile])
+  }, [isMobile])
 
   const handleCallbackResponse = (response) => {
-    const formData = new FormData()
-    formData.append("token", response.credential)
-
-    fetch(`${google_ngrok_url}/auth/google_login/`, {
-      method: "POST",
-      body: formData,  
-    })
-      .then(res => res.json())
-      .then(data => {
-        localStorage.setItem("Token", data.access)
-        navigate("/Dashboard")
-      })
-      .catch(() => {
-        setErrorMessage("An error occurred during Google login. Please try again.")
-      })
+    googleLogin(response.credential, "patient")
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    setErrorMessage('')
-    const formData = new FormData()
-    formData.append("email", email)
-    formData.append("password", password)
-
-    fetch(`${ngrok_url}/auth/login_user/`, {
-      method: "POST",
-      body: formData,  
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.mssg === 'Incorrect Credentials' && data.status === 0) {
-          setErrorMessage('Incorrect email or password. Please try again.')
-        } else {
-          localStorage.setItem("Token", data.access_token)
-          localStorage.setItem("User", JSON.stringify({ email: email }))
-          navigate("/Dashboard")
-        }
-      })
-      .catch(() => {
-        setErrorMessage("An error occurred. Please try again.")
-      })
+    login(email, password, "patient")
   }
 
   if (isMobile) {

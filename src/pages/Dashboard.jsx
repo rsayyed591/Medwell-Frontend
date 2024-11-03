@@ -6,7 +6,7 @@ import Profile from './Patient/Profile'
 import HealthCheck from './Patient/HealthCheck'
 import Reports from './Patient/Reports'
 import AddReport from './Patient/AddReport'
-import ExpenseTracker from './Patient/ExpenseTracker'
+import ExpenseTracker from './Expenses/ExpenseTracker'
 import PatientDashboard from './Patient/PatientDashboard'
 import Appointments from './Patient/Appointments'
 import ShareWithDoctor from './Patient/ShareWithDoctor'
@@ -77,9 +77,9 @@ export default function MedicalDashboard() {
     user_info:{email:'123@gmail.com'}
   })
 
-  const [expenseData, setExpenseData] = useState({ overall_expense: 0 })
-  const [appointmentData, setAppointmentData] = useState({ doctor: 'N/A', date: 'N/A' })
-  const [healthData, setHealthData] = useState({ wbc_count: [], hemoglobin: [] })
+  // const [expenseData, setExpenseData] = useState({ overall_expense: 0 })
+  // const [appointmentData, setAppointmentData] = useState({ doctor: 'N/A', date: 'N/A' })
+  // const [healthData, setHealthData] = useState({ wbc_count: [], hemoglobin: [] })
   const [reports, setReports] = useState([])
 
   useEffect(() => {
@@ -168,13 +168,7 @@ export default function MedicalDashboard() {
   const renderContent = () => {
     switch (activeSection) {
       case 'Dashboard':
-        return <PatientDashboard 
-          profileData={patientInfo}
-          expenseData={expenseData}
-          appointmentData={appointmentData}
-          healthData={healthData}
-          reportsData={reports}
-        />
+        return <PatientDashboard />
       case 'Profile':
         return <Profile patientInfo={patientInfo} />
       case 'Health Check':

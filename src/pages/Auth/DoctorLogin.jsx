@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { EyeIcon, EyeOffIcon, Mail, Lock } from 'lucide-react'
 import { google_ngrok_url, ngrok_url } from '../../utils/global'
 
-export function DoctorLogin() {
+export default function DoctorLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
