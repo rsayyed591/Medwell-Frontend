@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, Heart, Clipboard, Calendar, MapPin, QrCode } from 'lucide-react';
+import { Edit, Heart, Clipboard, Calendar, MapPin, QrCode,Activity, Utensils } from 'lucide-react';
 import { google_ngrok_url } from '../../utils/global';
 import { useFetch } from '../components/useFetch';
 import Chat from "../Chatbots/Chat"
@@ -152,26 +152,24 @@ export default function Profile({ patientInfo }) {
           </div>
         </div>
       </div>
-      {/* //Make these two wide */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-xl font-bold mb-4 flex items-center">
-            <MapPin className="w-5 h-5 mr-2 text-yellow-500" />
-            Wellbeing
-          </h3>
-          <div className="space-y-2">
-            <p><span className="font-semibold">Health Summary:</span> {localPatientInfo?.health_summary}</p>
-          </div>
+      <div className="md:col-span-3 bg-white rounded-lg shadow-lg p-6">
+        <h3 className="text-xl font-bold mb-4 flex items-center">
+          <Activity className="w-5 h-5 mr-2 text-purple-500" />
+          Wellbeing
+        </h3>
+        <div className="space-y-2">
+          <p><span className="font-semibold">Health Summary:</span> {localPatientInfo?.health_summary}</p>
         </div>
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-xl font-bold mb-4 flex items-center">
-            <MapPin className="w-5 h-5 mr-2 text-yellow-500" />
-            Diet
-          </h3>
-          <div className="space-y-2">
-            <p><span className="font-semibold">Diet:</span> {localPatientInfo?.diet_plan}</p>
-          </div>
+      </div>
+      <div className="md:col-span-3 bg-white rounded-lg shadow-lg p-6">
+        <h3 className="text-xl font-bold mb-4 flex items-center">
+          <Utensils className="w-5 h-5 mr-2 text-green-500" />
+          Diet
+        </h3>
+        <div className="space-y-2">
+          <p><span className="font-semibold">Diet:</span> {localPatientInfo?.diet_plan}</p>
         </div>
-        {/* //Make these two wide */}
+      </div>
     </div>
   );
 

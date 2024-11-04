@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { EyeIcon, EyeOffIcon, Mail, Lock, Building2 } from 'lucide-react'
+import { NotebookTabs, EyeIcon, EyeOffIcon, Mail, Lock, Building2 } from 'lucide-react'
 import { ngrok_url, google_ngrok_url } from '../../utils/global'
 
 export default function HospitalSignUp() {
   const [hospitalName, setHospitalName] = useState('')
+  const [registrationNumber, setRegistrationNumber] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -88,6 +89,7 @@ export default function HospitalSignUp() {
     formData.append("password1", password)
     formData.append("password2", confirmPassword)
     formData.append("hospital_name", hospitalName)
+    formData.append("registration_number", registrationNumber)
 
     fetch(`${ngrok_url}/auth/register_userhospital/`, {
       method: "POST",
@@ -99,7 +101,7 @@ export default function HospitalSignUp() {
           setErrorMessage(data.mssg)
         } else {
           localStorage.setItem("Token", data.access_token)
-          localStorage.setItem("User", JSON.stringify({ email: email, hospitalName: hospitalName, role: 'hospital' }))
+          localStorage.setItem("User", JSON.stringify({ email: email, hospitalName: hospitalName, registrationNumber: registrationNumber, role: 'hospital' }))
           navigate("/Dashboard")
         }
       })
@@ -138,6 +140,21 @@ export default function HospitalSignUp() {
                     placeholder="Enter hospital name"
                   />
                   <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+
+              <div className="relative">
+                <label className="text-sm text-gray-600 mb-1 block">Registration Number</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    required
+                    className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                    value={registrationNumber}
+                    onChange={(e) => setRegistrationNumber(e.target.value)}
+                    placeholder="Enter hospital name"
+                  />
+                  <NotebookTabs className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 </div>
               </div>
 
@@ -272,6 +289,21 @@ export default function HospitalSignUp() {
                   placeholder="Enter hospital name"
                 />
                 <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+            
+            <div className="relative">
+              <label className="text-sm text-gray-600 mb-1 block">Registration Number</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  required
+                  className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                  value={registrationNumber}
+                  onChange={(e) => setRegistrationNumber(e.target.value)}
+                  placeholder="Enter hospital registration number"
+                />
+                <NotebookTabs className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               </div>
             </div>
 
