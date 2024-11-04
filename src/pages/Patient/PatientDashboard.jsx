@@ -119,11 +119,11 @@ export default function PatientDashboard() {
   )
 
   if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
   if (!apiData) return <div>No data available</div>
 
   return (
     <div className="bg-gray-100 p-2 sm:p-4 rounded-xl">
+      {error && <div>Error {error}</div>}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <div className="sm:col-span-2 lg:col-span-3 bg-blue-500 text-white p-4 sm:p-6 rounded-xl flex flex-col sm:flex-row items-center justify-between relative overflow-hidden min-h-[200px] sm:min-h-[250px]">
           <div className="z-10 mb-4 sm:mb-0 relative">

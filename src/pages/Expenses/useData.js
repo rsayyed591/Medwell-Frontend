@@ -36,14 +36,14 @@ export const useData = () => {
       let requestBody;
       if (expenseData.query_type === 'natural_language') {
         requestBody = {
-          query_type: 'natural_language',
-          query: expenseData.query
+          "query_type": 'natural_language',
+          "query": expenseData.query
         };
       } else {
         requestBody = {
-          query_type: 'normal',
-          expense_type: expenseData.expense_type,
-          amount: expenseData.amount
+          "query_type": 'normal',
+          "expense_type": expenseData.expense_type,
+          "amount": expenseData.amount
         };
       }
   
@@ -51,8 +51,9 @@ export const useData = () => {
         method: 'POST',
         body: JSON.stringify(requestBody),
       });
-  
+      
       setLoading(false);
+      console.log(result)
       return result;
     } catch (err) {
       setLoading(false);
@@ -77,6 +78,7 @@ export const useData = () => {
         method: 'POST',
       });
       setLoading(false);
+      console.log("Called")
       return result;
     } catch (err) {
       setError(err.message);

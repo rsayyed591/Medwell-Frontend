@@ -152,6 +152,26 @@ export default function Profile({ patientInfo }) {
           </div>
         </div>
       </div>
+      {/* //Make these two wide */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h3 className="text-xl font-bold mb-4 flex items-center">
+            <MapPin className="w-5 h-5 mr-2 text-yellow-500" />
+            Wellbeing
+          </h3>
+          <div className="space-y-2">
+            <p><span className="font-semibold">Health Summary:</span> {localPatientInfo?.health_summary}</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h3 className="text-xl font-bold mb-4 flex items-center">
+            <MapPin className="w-5 h-5 mr-2 text-yellow-500" />
+            Diet
+          </h3>
+          <div className="space-y-2">
+            <p><span className="font-semibold">Diet:</span> {localPatientInfo?.diet_plan}</p>
+          </div>
+        </div>
+        {/* //Make these two wide */}
     </div>
   );
 
