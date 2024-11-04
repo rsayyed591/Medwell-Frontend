@@ -26,7 +26,7 @@ const teamMembers = [
   },
   {
     name: "Rohit Deshmukh",
-    role: "UX Designer",
+    role: "Full stack Developer",
     image: '/Rohit.jpg',
     github: "https://github.com/ardie",
     linkedin: "https://linkedin.com/in/rohit",
