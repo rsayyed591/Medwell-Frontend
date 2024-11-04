@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, File, X, Send, Loader2 } from 'lucide-react'
+import { Upload, File, X, Send, Loader2, FileText } from 'lucide-react'
 import { Worker, Viewer } from '@react-pdf-viewer/core'
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout'
 import '@react-pdf-viewer/core/lib/styles/index.css'
@@ -109,7 +109,6 @@ export default function AddReport() {
   const checkTaskStatus = (id) => {
     const checkStatus = async () => {
       try {
-        console.log(`${google_ngrok_url}/patient/get_report_task_status/?task_id=${id}`)
         const response = await fetch(`${google_ngrok_url}/patient/get_report_task_status/?task_id=${id}`,
           {method:"GET",
           headers:new Headers({"ngrok-skip-browser-warning": true})})
@@ -138,8 +137,9 @@ export default function AddReport() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="container mx-auto px-4 py-8"
+      className="container mx-auto px-4 py-8 bg-gradient-to-b from-blue-50 to-white min-h-screen"
     >
+      <h1 className="text-3xl font-bold text-blue-800 mb-8 text-center">Add Medical Report</h1>
       <div className="flex flex-col lg:flex-row gap-8">
         <motion.div
           initial={{ x: -50, opacity: 0 }}
@@ -150,7 +150,7 @@ export default function AddReport() {
           <motion.div 
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-all duration-300 hover:border-blue-500"
+            className="border-2 border-dashed border-blue-300 rounded-lg p-8 text-center transition-all duration-300 hover:border-blue-500 bg-white shadow-lg"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
@@ -166,15 +166,15 @@ export default function AddReport() {
               htmlFor="file-upload" 
               className="cursor-pointer flex flex-col items-center justify-center"
             >
-              <Upload className="w-12 h-12 text-gray-400 mb-4" />
-              <p className="text-lg mb-2">Drag and drop your report here</p>
+              <FileText className="w-16 h-16 text-blue-500 mb-4" />
+              <p className="text-lg mb-2 text-blue-800">Drag and drop your medical report here</p>
               <p className="text-sm text-gray-500 mb-4">or</p>
               <motion.button 
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 type="button"
                 onClick={handleBrowseClick}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition-colors duration-300"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-300 shadow-md"
               >
                 Browse Files
               </motion.button>
@@ -187,11 +187,11 @@ export default function AddReport() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="mt-4 bg-gray-100 p-4 rounded-lg flex items-center justify-between"
+                className="mt-4 bg-white p-4 rounded-lg flex items-center justify-between shadow-md"
               >
                 <div className="flex items-center">
                   <File className="w-6 h-6 mr-2 text-blue-500" />
-                  <span className="text-sm">{uploadedFile.name}</span>
+                  <span className="text-sm text-blue-800">{uploadedFile.name}</span>
                 </div>
                 <motion.button 
                   whileHover={{ scale: 1.1 }}
@@ -216,7 +216,7 @@ export default function AddReport() {
                 whileTap={{ scale: 0.95 }}
                 onClick={handleUpload}
                 disabled={isUploading}
-                className={`w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded transition-colors duration-300 flex items-center justify-center ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-full transition-colors duration-300 flex items-center justify-center shadow-md ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <Send className="w-5 h-5 mr-2" />
                 {isUploading ? 'Uploading...' : 'Send Report'}
@@ -228,7 +228,7 @@ export default function AddReport() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className={`mt-4 p-2 rounded-lg text-center ${
+              className={`mt-4 p-3 rounded-lg text-center shadow-md ${
                 uploadStatus === 'Upload successful' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
               }`}
             >
@@ -240,16 +240,16 @@ export default function AddReport() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="mt-4 p-2 rounded-lg text-center bg-blue-100 text-blue-800"
+              className="mt-4 p-3 rounded-lg text-center bg-blue-100 text-blue-800 shadow-md"
             >
               {taskStatus === 'SUCCESS' ? (
-                <div className="text-green-500">Task completed successfully!</div>
+                <div className="text-green-600 font-semibold">Task completed successfully!</div>
               ) : taskStatus === 'ERROR' ? (
-                <div className="text-red-500">An error occurred while processing the task</div>
+                <div className="text-red-600 font-semibold">An error occurred while processing the task</div>
               ) : (
                 <div className="flex items-center justify-center space-x-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Processing report...</span>
+                  <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                  <span className="text-blue-700">Processing report...</span>
                 </div>
               )}
             </motion.div>
@@ -261,7 +261,7 @@ export default function AddReport() {
           transition={{ duration: 0.5 }}
           className="w-full lg:w-1/2"
         >
-          <h2 className="text-2xl font-semibold mb-4">Uploaded Report</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-blue-800">Uploaded Report Preview</h2>
           <AnimatePresence>
             {previewUrl ? (
               <motion.div
@@ -270,7 +270,7 @@ export default function AddReport() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
-                className="border rounded-lg overflow-hidden"
+                className="border rounded-lg overflow-hidden bg-white shadow-lg"
               >
                 {uploadedFile && uploadedFile.type.startsWith('image/') ? (
                   <img src={previewUrl} alt="Uploaded report" className="w-full h-auto" />
@@ -296,14 +296,16 @@ export default function AddReport() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="border rounded-lg p-8 text-center text-gray-500"
+                className="border rounded-lg p-8 text-center text-gray-500 bg-white shadow-lg"
               >
                 No report uploaded yet
               </motion.div>
             )}
           </AnimatePresence>
         </motion.div>
-        <Chat/>
+      </div>
+      <div className="mt-8">
+        <Chat />
       </div>
     </motion.div>
   )

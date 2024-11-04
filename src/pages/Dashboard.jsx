@@ -126,13 +126,13 @@ export default function MedicalDashboard() {
         className="w-full flex items-center justify-between mb-4"
       >
         <div className="flex items-center">
-          <img src="/patient.png" alt="Patient" className="w-12 h-12 rounded-full mr-3" />
+          <img src={patientInfo.profile_pic || "/patient.png"} alt="Patient" className="w-12 h-12 rounded-full mr-3 border-2 border-blue-500" />
           <div>
             <h2 className="text-lg font-bold text-gray-800">{patientInfo?.name || 'John Doe'}</h2>
-            <p className="text-sm text-gray-600">Patient ID: {patientInfo?.id || 'P12345'}</p>
+            <p className="text-sm text-blue-600">Patient ID: {patientInfo?.id || 'P12345'}</p>
           </div>
         </div>
-        {isProfileExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+        {isProfileExpanded ? <ChevronUp className="h-5 w-5 text-blue-500" /> : <ChevronDown className="h-5 w-5 text-blue-500" />}
       </button>
       <AnimatePresence>
         {isProfileExpanded && (
@@ -141,11 +141,11 @@ export default function MedicalDashboard() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="text-sm space-y-2 mb-4"
+            className="text-sm space-y-2 mb-4 bg-blue-50 p-4 rounded-lg"
           >
-            <p><strong>Age:</strong> {patientInfo?.age || 30}</p>
-            <p><strong>Blood Type:</strong> {patientInfo?.blood_group || 'O+'}</p>
-            <p><strong>Allergies:</strong> {patientInfo?.allergies?.join(', ') || 'None'}</p>
+            <p><strong className="text-blue-700">Age:</strong> <span className="text-blue-600">{patientInfo?.age || 30}</span></p>
+            <p><strong className="text-blue-700">Blood Type:</strong> <span className="text-blue-600">{patientInfo?.blood_group || 'O+'}</span></p>
+            <p><strong className="text-blue-700">Allergies:</strong> <span className="text-blue-600">{patientInfo?.allergies?.join(', ') || 'None'}</span></p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -153,7 +153,7 @@ export default function MedicalDashboard() {
   )
 
   return (
-    <div className="bg-gray-100 text-gray-800 min-h-screen flex">
+    <div className="bg-gradient-to-br from-blue-50 to-white text-blue-900 min-h-screen flex">
       {/* Sidebar */}
       <AnimatePresence>
         {(isSidebarOpen || !isMobile) && (
@@ -169,24 +169,24 @@ export default function MedicalDashboard() {
           >
             {(!isMobile && !isSidebarOpen) && (
               <button
-                className="w-full flex justify-center items-center py-4 hover:bg-gray-100 transition-colors duration-200"
+                className="w-full flex justify-center items-center py-4 hover:bg-blue-50 transition-colors duration-200"
                 onClick={toggleSidebar}
               >
-                <ChevronRight className="h-6 w-6" />
+                <ChevronRight className="h-6 w-6 text-blue-500" />
               </button>
             )}
-            <div className="flex justify-between items-center p-4">
+            <div className="flex justify-between items-center p-4 bg-blue-100">
               {isSidebarOpen ? (
-                <Link to="/" className="text-2xl font-bold">MedWell</Link>
+                <Link to="/" className="text-2xl font-bold text-gray-800">MedWell</Link>
               ) : (
-                <img src="/patient.png" alt="Patient" className="w-10 h-8 rounded-full" />
+                <img src="/patient.png" alt="MedWell" className="w-10 h-8" />
               )}
               {(isMobile || isSidebarOpen) && (
                 <button
-                  className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200"
+                  className="p-2 rounded-full hover:bg-blue-200 transition-colors duration-200"
                   onClick={toggleSidebar}
                 >
-                  <X className="h-6 w-6" />
+                  <X className="h-6 w-6 text-gray-500" />
                 </button>
               )}
             </div>
@@ -197,8 +197,8 @@ export default function MedicalDashboard() {
                   key={index}
                   className={`w-full text-left py-2 px-4 rounded-lg mb-2 flex items-center ${
                     activeSection === item.label
-                      ? 'bg-blue-100 text-blue-600'
-                      : 'hover:bg-gray-100'
+                      ? 'bg-gray-100 text-gray-600'
+                      : 'hover:bg-gray-50 text-gray-700'
                   } ${(!isMobile && !isSidebarOpen) ? 'justify-center' : ''}`}
                   onClick={() => {
                     setActiveSection(item.label)
@@ -220,21 +220,23 @@ export default function MedicalDashboard() {
           <h1 className="text-3xl font-bold text-gray-800">{activeSection}</h1>
           {(isMobile || !isSidebarOpen) && (
             <button
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200"
+              className="p-2 rounded-lg border border-blue-300 hover:bg-blue-100 transition-colors duration-200"
               onClick={toggleSidebar}
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-6 w-6 text-gray-500" />
             </button>
           )}
         </div>
 
         {isLoading ? (
-          <div className="text-center">Loading...</div>
+          <div className="text-center text-blue-600">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            Loading...
+          </div>
         ) : error ? (
           <div>
-          <div className="text-center text-red-500">Error: {error}
-          </div>
-         { renderContent()}
+            <div className="text-center text-red-500 mb-4">Error: {error}</div>
+            {renderContent()}
           </div>
         ) : (
           renderContent()
