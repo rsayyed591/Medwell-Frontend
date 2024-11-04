@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+import emailjs from '@emailjs/browser';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Activity, Calendar, FileText, Lock, MessageCircle, DollarSign, Heart, Stethoscope, Microscope, Brain } from 'lucide-react';
-import { Link } from "react-router-dom"
+import { Link } from "react-router-dom";
+
+// Access environment variables
+const EMAIL_PUBLIC_KEY = import.meta.env.VITE_EMAIL_PUBLIC_KEY;
+const EMAIL_TEMPLATE_ID = import.meta.env.VITE_EMAIL_TEMPLATE_ID;
 
 const AnimatedSection = ({ children, className }) => {
   const controls = useAnimation();
@@ -11,7 +16,7 @@ const AnimatedSection = ({ children, className }) => {
     threshold: 0.1,
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (inView) {
       controls.start('visible');
     }
@@ -137,6 +142,8 @@ const RollingTestimonials = ({ testimonials }) => {
 };
 
 export default function Hero() {
+  const [formStatus, setFormStatus] = useState('');
+
   const testimonials = [
     { comment: "The health tips provided here have been life-changing!", author: "Vivek" },
     { comment: "The articles here are clear and incredibly informative. I trust the advice!", author: "Nishi" },
@@ -148,6 +155,31 @@ export default function Hero() {
     { comment: "The in-depth analysis on medical trends is impressive and reliable.", author: "Bilal" },
     { comment: "I appreciate how the site covers all aspects of health and wellness.", author: "Affan" }
   ];
+
+  const sendEmail = (e) => {
+    e.preventDefault();
+    setFormStatus('Sending...');
+
+    const templateParams = {
+      user_name: e.target.user_name.value,
+      user_email: e.target.user_email.value,
+      message: e.target.message.value,
+    };
+
+    emailjs.send(
+      'default_service',
+      EMAIL_TEMPLATE_ID,
+      templateParams,
+      EMAIL_PUBLIC_KEY
+    )
+      .then((result) => {
+        setFormStatus('Message sent successfully!');
+        e.target.reset();
+      }, (error) => {
+        setFormStatus('Failed to send message. Please try again.');
+        console.error('EmailJS Error:', error);
+      });
+  };
 
   return (
     <div className="font-sans text-blue-900">
@@ -191,14 +223,14 @@ export default function Hero() {
               className="mt-8 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
             >
               <button className="px-6 py-3 font-semibold bg-blue-600 text-white rounded-full hover:bg-blue-700 transition shadow-lg"><Link to="/Dashboard">Get Started</Link></button>
-              <button className="px-6 py-3 font-semibold text-white bg-transparent rounded-full border-2 border-white hover:bg-white hover:text-blue-600 transition shadow-lg">Learn More</button>
+              <button className="px-6 py-3 font-semibold text-white bg-transparent rounded-full border-2 border-white hover:bg-white hover:text-blue-600 transition shadow-lg" onClick={() => document.getElementById('about').scrollIntoView({ behavior: 'smooth' })}>Learn More</button>
             </motion.div>
           </div>
         </div>
       </section>
 
       <AnimatedSection className="py-20 bg-blue-50 text-center">
-        <h2 className="text-3xl font-bold text-blue-800 mb-4">About Us</h2>
+        <h2 id="about" className="text-3xl font-bold text-blue-800 mb-4">About Us</h2>
         <p className="max-w-2xl mx-auto text-blue-600 mb-8 px-4">
           MedWell is committed to providing the best health services. From virtual consultations to advanced health tracking, we're here to support your wellness journey.
         </p>
@@ -244,11 +276,39 @@ export default function Hero() {
 
       <AnimatedSection className="py-20 bg-white text-center">
         <h2 className="text-3xl font-bold text-blue-800 mb-8">Contact Us</h2>
-        <form className="max-w-lg mx-auto space-y-4 px-4">
-          <input type="text" placeholder="Name" className="w-full px-4 py-2 border border-blue-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <input type="email" placeholder="Email" className="w-full px-4 py-2 border border-blue-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <textarea placeholder="Message" rows={4} className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-          <button className="w-full px-6 py-3 font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 transition shadow-lg">Send Message</button>
+        <form onSubmit={sendEmail} className="max-w-lg mx-auto space-y-4 px-4">
+          <input 
+            type="text" 
+            name="user_name" 
+            placeholder="Name" 
+            className="w-full px-4 py-2 border border-blue-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            required 
+          />
+          <input 
+            type="email" 
+            name="user_email" 
+            placeholder="Email" 
+            className="w-full px-4 py-2 border border-blue-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            required 
+          />
+          <textarea 
+            name="message" 
+            placeholder="Message" 
+            rows={4} 
+            className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            required 
+          />
+          <button 
+            type="submit" 
+            className="w-full px-6 py-3 font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 transition shadow-lg"
+          >
+            Send Message
+          </button>
+          {formStatus && (
+            <p className={`text-${formStatus.includes('success') ? 'green' : 'red'}-500`}>
+              {formStatus}
+            </p>
+          )}
         </form>
       </AnimatedSection>
     </div>

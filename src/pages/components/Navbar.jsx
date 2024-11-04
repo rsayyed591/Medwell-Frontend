@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Bars3BottomRightIcon, XMarkIcon } from '@heroicons/react/24/solid'
-import { LogOut } from 'lucide-react'
+import { LogOut, Heart, Activity, FileText, DollarSign } from 'lucide-react'
 import { useAuth } from '../Auth/useAuth'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
-  const [navBackground, setNavBackground] = useState('bg-transparent')
+  const [navBackground, setNavBackground] = useState('bg-white')
   const { logout } = useAuth()
   
   const Links = [
-    { name: 'Home', link: '/' },
-    { name: 'Dashboard', link: '/Dashboard' },
-    { name: 'Pricing', link: '/pricing' },
-    { name: 'About', link: '/about' },
+    { name: 'Home', link: '/', icon: Heart },
+    { name: 'Dashboard', link: '/Dashboard', icon: Activity },
+    { name: 'Pricing', link: '/pricing', icon: DollarSign },
+    { name: 'About', link: '/about', icon: FileText },
   ]
 
   const useAuthState = () => {
@@ -28,7 +28,6 @@ export default function Navbar() {
       checkAuthStatus()
 
       window.addEventListener('storage', checkAuthStatus)
-      
       window.addEventListener('authStateChange', checkAuthStatus)
 
       return () => {
@@ -47,7 +46,7 @@ export default function Navbar() {
       if (window.scrollY > 50) {
         setNavBackground('bg-white shadow-md')
       } else {
-        setNavBackground('bg-transparent')
+        setNavBackground('bg-white')
       }
     }
 
@@ -58,12 +57,8 @@ export default function Navbar() {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
-      setNavBackground('bg-white')
     } else {
       document.body.style.overflow = 'unset'
-      if (window.scrollY <= 50) {
-        setNavBackground('bg-transparent')
-      }
     }
   }, [isOpen])
 
@@ -77,12 +72,12 @@ export default function Navbar() {
       <div className="container mx-auto px-4 py-4 md:flex md:justify-between md:items-center">
         <div className="flex justify-between items-center">
           <Link to="/" className="text-2xl font-bold">
-            <span className='text-gray-700'>Med</span><span className='text-gray-900'>Well</span>
+            <span className='text-blue-600'>Med</span><span className='text-blue-800'>Well</span>
           </Link>
           <div className="md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600"
+              className="text-blue-600 hover:text-blue-800 focus:outline-none focus:text-blue-800"
               aria-label="toggle menu"
             >
               {isOpen ? (
@@ -97,16 +92,17 @@ export default function Navbar() {
         <div
           className={`${
             isOpen ? 'block' : 'hidden'
-          } md:block mt-4 md:mt-0 ${isOpen ? 'bg-white' : 'bg-transparent'}`}
+          } md:block mt-4 md:mt-0 bg-white`}
         >
           <ul className="flex flex-col md:flex-row md:items-center md:space-x-8">
             {Links.map((link) => (
               <li key={link.name} className="my-3 md:my-0">
                 <Link
                   to={link.link}
-                  className="text-gray-700 hover:text-gray-900 transition duration-300"
+                  className="flex items-center text-blue-600 hover:text-blue-800 transition duration-300"
                   onClick={() => setIsOpen(false)}
                 >
+                  <link.icon className="mr-2 h-5 w-5" />
                   {link.name}
                 </Link>
               </li>
@@ -115,7 +111,7 @@ export default function Navbar() {
               <li className="my-3 md:my-0">
                 <button
                   onClick={handleLogout}
-                  className="flex items-center text-gray-700 hover:text-gray-900 transition duration-300"
+                  className="flex items-center text-blue-600 hover:text-blue-800 transition duration-300"
                 >
                   <LogOut className="mr-2 h-5 w-5" />
                   Logout
@@ -125,7 +121,7 @@ export default function Navbar() {
               <li className="my-3 md:my-0">
                 <Link
                   to="/auth"
-                  className="text-gray-700 hover:text-gray-900 transition duration-300"
+                  className="flex items-center text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-full transition duration-300"
                   onClick={() => setIsOpen(false)}
                 >
                   Get Started
