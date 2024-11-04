@@ -16,13 +16,13 @@ export default function Profile({ patientInfo }) {
 
   useEffect(() => {
     setLocalPatientInfo(patientInfo);
-    if (patientInfo && patientInfo.profile_qr) {
-      const fullQrUrl = google_ngrok_url + patientInfo.profile_qr;
+    if (localPatientInfo && localPatientInfo.profile_qr) {
+      const fullQrUrl = google_ngrok_url + localPatientInfo.profile_qr;
       setQrCodeUrl(fullQrUrl);
       console.log(qrCodeUrl)
     }
-    if (patientInfo && patientInfo.profile_pic) {
-      const profile_pic = google_ngrok_url + patientInfo.profile_pic;
+    if (localPatientInfo && localPatientInfo.profile_pic) {
+      const profile_pic = google_ngrok_url + localPatientInfo.profile_pic;
       setProfilePic(profile_pic);
       console.log(profilePic)
     }
