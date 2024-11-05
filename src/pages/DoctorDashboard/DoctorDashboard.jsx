@@ -12,11 +12,11 @@ export default function DoctorDashboard() {
   const [isProfileExpanded, setIsProfileExpanded] = useState(false)
   
   const doctorInfo = {
-    name: 'Dr. John Smith',
+    name: 'Dr. Vivek Ammonia',
     id: 'D12345',
     specialization: 'Cardiologist',
     experience: '15 years',
-    profile_pic: "/doctor.png"
+    profile_pic: "/Vivek.jpg"
   }
 
   const navItems = [
@@ -80,7 +80,6 @@ export default function DoctorDashboard() {
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-white text-blue-900 min-h-screen flex">
-      {/* Sidebar */}
       <AnimatePresence>
         {(isSidebarOpen || !isMobile) && (
           <motion.div
@@ -140,7 +139,6 @@ export default function DoctorDashboard() {
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">{activeSection}</h1>
