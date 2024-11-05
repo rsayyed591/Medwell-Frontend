@@ -12,6 +12,7 @@ export default function Navbar() {
   const Links = [
     { name: 'Home', link: '/', icon: Heart },
     { name: 'Dashboard', link: '/Dashboard', icon: Activity },
+    { name: 'DDashboard', link: '/doctordashboard', icon: Activity },
     { name: 'Pricing', link: '/pricing', icon: DollarSign },
     { name: 'About', link: '/about', icon: FileText },
   ]

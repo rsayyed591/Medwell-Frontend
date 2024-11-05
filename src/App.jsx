@@ -15,7 +15,7 @@ import  DoctorLogin  from './pages/Auth/DoctorLogin'
 import  DoctorSignUp  from './pages/Auth/DoctorSignup'
 import HospitalLogin from './pages/Auth/HospitalLogin'
 import  HospitalSignUp  from './pages/Auth/HospitalSignup'
-
+import DoctorDashboard from './pages/DoctorDashboard/DoctorDashboard'
 function LoaderWrapper() {
   const [isLoading, setIsLoading] = useState(true)
   const location = useLocation()
@@ -60,6 +60,7 @@ function Layout() {
           <Route path="/auth" element={<UserSelect />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/doctordashboard" element={<DoctorDashboard />} />
           <Route path="/about" element={<About />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
