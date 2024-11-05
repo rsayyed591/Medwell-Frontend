@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Camera, Link, Shield } from 'lucide-react';
+import { Camera, Link, Shield, CheckCircle, AlertCircle } from 'lucide-react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import Chat from "../Chatbots/Chat"
+import { google_ngrok_url } from '../../utils/global';
 
 export default function ShareWithDoctor() {
   const [scanResult, setScanResult] = useState('');
   const [isScannerVisible, setIsScannerVisible] = useState(false);
+  const [manualUrl, setManualUrl] = useState('');
+  const [status, setStatus] = useState(null);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     let scanner;
@@ -25,6 +29,7 @@ export default function ShareWithDoctor() {
         scanner.clear();
         setScanResult(result);
         setIsScannerVisible(false);
+        handleProvideAccess(result);
       }
 
       function error(err) {
@@ -38,6 +43,42 @@ export default function ShareWithDoctor() {
       }
     };
   }, [isScannerVisible]);
+
+  const handleManualSubmit = (e) => {
+    e.preventDefault();
+    setScanResult(manualUrl);
+    handleProvideAccess(manualUrl);
+    setManualUrl('');
+  };
+
+  const handleProvideAccess = async (encData) => {
+    setStatus(null);
+    setMessage('');
+
+    try {
+      const response = await fetch(google_ngrok_url+'/patient/provide_access/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('Token')}` 
+        },
+        body: JSON.stringify({"enc_data": encData })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStatus('success');
+        setMessage(data.mssg);
+      } else {
+        setStatus('error');
+        setMessage(data.mssg || 'An error occurred. Please try again.');
+      }
+    } catch (error) {
+      setStatus('error');
+      setMessage('Network error. Please check your connection and try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-6 sm:py-8 md:py-12 px-4 sm:px-6 lg:px-8">
@@ -93,16 +134,11 @@ export default function ShareWithDoctor() {
                 transition={{ delay: 0.2, duration: 0.5 }}
                 className="text-center mb-6 bg-blue-50 p-4 rounded-lg"
               >
-                <p className="text-lg font-semibold mb-2 text-blue-800">Scanned Result:</p>
-                <a
-                  href={scanResult}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 transition-colors duration-300 break-all flex items-center justify-center"
-                >
+                <p className="text-lg font-semibold mb-2 text-blue-800">QR DATA:</p>
+                <p className="text-blue-600 break-all flex items-center justify-center">
                   <Link className="mr-2" />
                   {scanResult}
-                </a>
+                </p>
               </motion.div>
             )}
 
@@ -112,15 +148,51 @@ export default function ShareWithDoctor() {
               transition={{ delay: 0.8, duration: 0.5 }}
               className="text-center"
             >
-              <p className="text-sm text-blue-600 mb-2">Or enter the link manually:</p>
-              <input
-                type="text"
-                placeholder="Enter URL here"
-                className="w-full px-4 py-2 border border-blue-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-blue-800 placeholder-blue-300"
-                value={scanResult}
-                onChange={(e) => setScanResult(e.target.value)}
-              />
+              <form onSubmit={handleManualSubmit}>
+                <p className="text-sm text-blue-600 mb-2">Or enter the encrypted data manually:</p>
+                <div className="flex">
+                  <input
+                    type="text"
+                    placeholder="Enter encrypted data here"
+                    className="flex-grow px-4 py-2 border border-blue-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-blue-800 placeholder-blue-300"
+                    value={manualUrl}
+                    onChange={(e) => setManualUrl(e.target.value)}
+                    aria-label="Enter encrypted data manually"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r-full transition duration-300 ease-in-out"
+                    aria-label="Submit manually entered encrypted data"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </form>
             </motion.div>
+
+            {status && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className={`mt-4 p-4 rounded-md ${
+                  status === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+                }`}
+              >
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    {status === 'success' ? (
+                      <CheckCircle className="h-5 w-5 text-green-400" aria-hidden="true" />
+                    ) : (
+                      <AlertCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
+                    )}
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium">{message}</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </div>
         </motion.div>
 

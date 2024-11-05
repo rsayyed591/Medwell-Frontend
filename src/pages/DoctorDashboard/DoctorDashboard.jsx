@@ -20,6 +20,7 @@ export default function DoctorDashboard() {
   }
 
   const navItems = [
+    { label: "Dashboard", icon: Home, component: null },
     { label: "Profile", icon: User, component: DoctorProfile },
     { label: "Patients", icon: Users, component: Patients },
     { label: "Appointments", icon: Calendar, component: PatientAppointments },
