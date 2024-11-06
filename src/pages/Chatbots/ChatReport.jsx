@@ -1,25 +1,117 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { FileText, X, Send } from 'lucide-react'
+import { google_ngrok_url } from '../../utils/global'
 
 export default function ChatReport() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState([])
   const [inputMessage, setInputMessage] = useState('')
+  const [agentKey, setAgentKey] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const chatRef = useRef(null)
   const messagesEndRef = useRef(null)
 
-  const toggleChat = () => setIsOpen(!isOpen)
+  const toggleChat = async () => {
+    if (!isOpen) {
+      await checkAndCreateAgent()
+      if (messages.length === 0) {
+        setMessages([{ text: "Welcome to MedBuddy! How can I assist you today?", sender: 'bot' }])
+      }
+    }
+    setIsOpen(!isOpen)
+  }
+
+  const checkAndCreateAgent = async () => {
+    console.log("Checking and creating agent if necessary")
+    const storedTimestamp = localStorage.getItem('chatbotTimestamp')
+    const storedKey = localStorage.getItem('chatbotKey')
+    const token = localStorage.getItem('Token')
+    const currentTime = new Date().getTime()
+
+    if (!storedTimestamp || !storedKey || currentTime - parseInt(storedTimestamp) > 15 * 60 * 1000) {
+      try {
+        const response = await fetch(google_ngrok_url+'/patient/create_agent/', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer '+token, 
+            'Content-Type': 'application/json'
+          }
+        })
+        if (response.ok) {
+          console.log("initial")
+          const data = await response.json()
+          localStorage.setItem('chatbotKey', data.key)
+          localStorage.setItem('chatbotTimestamp', currentTime.toString())
+          setAgentKey(data.key)
+        } else if (response.status === 401) {
+          setError('Unauthorized: Invalid token')
+        } else {
+          setError('Error creating agent')
+        }
+      } catch (error) {
+        setError('Error creating agent')
+      }
+    } else {
+      setAgentKey(storedKey)
+    }
+  }
 
   const handleInputChange = (e) => setInputMessage(e.target.value)
+  
+  const sendMessageToBackend = async (message) => {
+    const token = localStorage.getItem('Token')
+    setIsLoading(true)
+    setError('')
+    try {
+      const response = await fetch(google_ngrok_url+'/patient/chat/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer '+token
+        },
+        body: JSON.stringify({
+          "key": agentKey,
+          "question": message
+        })
+      })
 
-  const handleSendMessage = (e) => {
+      if (response.ok) {
+        const data = await response.json()
+        console.log(data)
+        return data.data
+      } else if (response.status === 401) {
+        throw new Error('Unauthorized: Access expired')
+      } else {
+        throw new Error('Error communicating with the server')
+      }
+    } catch (error) {
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSendMessage = async (e) => {
     e.preventDefault()
-    if (inputMessage.trim()) {
-      setMessages([...messages, { text: inputMessage, sender: 'user' }])
+    if (inputMessage.trim() && !isLoading) {
+      const userMessage = { text: inputMessage, sender: 'user' }
+      setMessages(prevMessages => [...prevMessages, userMessage])
       setInputMessage('')
-      setTimeout(() => {
-        setMessages(prevMessages => [...prevMessages, { text: "Thanks for your message! This is a simulated response.", sender: 'bot' }])
-      }, 1000)
+
+      try {
+        const botResponse = await sendMessageToBackend(inputMessage)
+        setMessages(prevMessages => [...prevMessages, { text: botResponse, sender: 'bot' }])
+      } catch (error) {
+        setError(error.message)
+        if (error.message === 'Unauthorized: Access expired') {
+          await checkAndCreateAgent()
+          if (agentKey) {
+            const botResponse = await sendMessageToBackend(inputMessage)
+            setMessages(prevMessages => [...prevMessages, { text: botResponse, sender: 'bot' }])
+          }
+        }
+      }
     }
   }
 
@@ -49,7 +141,7 @@ export default function ChatReport() {
         {isOpen ? (
           <div 
             ref={chatRef}
-            className="bg-white shadow-xl flex flex-col w-full sm:w-[400px] h-[80vh] max-h-[800px] rounded-lg overflow-hidden"
+            className="bg-white shadow-xl flex flex-col w-full sm:w-[450px] h-[80vh] max-h-[800px] rounded-lg overflow-hidden"
           >
             <div className="bg-green-500 text-white p-4 flex justify-between items-center">
               <h2 className="text-lg font-semibold">MedBuddy</h2>
@@ -69,6 +161,14 @@ export default function ChatReport() {
                   </div>
                 </div>
               ))}
+              {error && (
+                <div className="text-red-500 text-center">{error}</div>
+              )}
+              {isLoading && (
+                <div className="text-center">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
             <form onSubmit={handleSendMessage} className="border-t p-4 flex">
@@ -78,11 +178,13 @@ export default function ChatReport() {
                 onChange={handleInputChange}
                 placeholder="Type a message..."
                 className="flex-1 border rounded-l-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                disabled={isLoading}
               />
               <button
                 type="submit"
-                className="bg-green-500 text-white rounded-r-lg px-4 py-2 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="bg-green-500 text-white rounded-r-lg px-4 py-2 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
                 aria-label="Send message"
+                disabled={isLoading}
               >
                 <Send size={20} />
               </button>
