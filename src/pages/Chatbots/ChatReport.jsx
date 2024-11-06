@@ -16,7 +16,7 @@ export default function ChatReport() {
     if (!isOpen) {
       await checkAndCreateAgent()
       if (messages.length === 0) {
-        setMessages([{ text: "Welcome to MedBuddy! How can I assist you today?", sender: 'bot' }])
+        setMessages([{ text: "Hello! I'm MedBuddy, your personal health assistant. I can help you understand your medical reports and health trends. For example, I can explain your hemoglobin trends or interpret other lab results. How can I assist you today?", sender: 'bot' }])
       }
     }
     setIsOpen(!isOpen)
