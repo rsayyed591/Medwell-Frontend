@@ -5,8 +5,6 @@ import { google_ngrok_url, ngrok_url } from '../../utils/global'
 import Loader from '../components/Loader'
 
 export default function DoctorLogin() {
-  const [step, setStep] = useState(1)
-  const [registrationNumber, setRegistrationNumber] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -43,16 +41,13 @@ export default function DoctorLogin() {
       }
     }
 
-    if (step === 2) {
-      initializeGoogleSignIn()
-    }
-  }, [navigate, isMobile, step])
+    initializeGoogleSignIn()
+  }, [navigate, isMobile])
 
   const handleCallbackResponse = (response) => {
     setIsLoading(true)
     const formData = new FormData()
     formData.append("token", response.credential)
-    formData.append("registration_number", registrationNumber)
 
     fetch(`${google_ngrok_url}/auth/google_login_doctor/`, {
       method: "POST",
@@ -73,22 +68,11 @@ export default function DoctorLogin() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (step === 1) {
-      if (registrationNumber.trim() === '') {
-        setErrorMessage('Please enter a valid registration number.')
-        return
-      }
-      setStep(2)
-      setErrorMessage('')
-      return
-    }
-
     setIsLoading(true)
     setErrorMessage('')
     const formData = new FormData()
     formData.append("email", email)
     formData.append("password", password)
-    formData.append("registration_number", registrationNumber)
 
     fetch(`${ngrok_url}/auth/login_userdoctor/`, {
       method: "POST",
@@ -116,123 +100,6 @@ export default function DoctorLogin() {
     return <Loader />
   }
 
-  const renderForm = () => {
-    if (step === 1) {
-      return (
-        <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 px-6">
-          {errorMessage && (
-            <div className="text-red-500 text-sm text-center">{errorMessage}</div>
-          )}
-          <div className="relative">
-            <label className="text-sm text-gray-600 mb-1 block">Please Enter Registration Number</label>
-            <div className="relative">
-              <input
-                type="text"
-                required
-                className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
-                value={registrationNumber}
-                onChange={(e) => setRegistrationNumber(e.target.value)}
-                placeholder="Enter your registration number"
-              />
-            </div>
-          </div>
-          <button
-            type="submit"
-            className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
-          >
-            Continue
-          </button>
-          <p className="text-center text-sm text-gray-600 mt-6">
-            Don't have an account?{' '}
-            <Link to="/doctor/signup" className="text-[#7C3AED] font-medium">
-              Sign up
-            </Link>
-          </p>
-        </form>
-      )
-    }
-
-    return (
-      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 px-6">
-        {errorMessage && (
-          <div className="text-red-500 text-sm text-center">{errorMessage}</div>
-        )}
-        <div className="relative">
-          <label className="text-sm text-gray-600 mb-1 block">Email</label>
-          <div className="relative">
-            <input
-              type="email"
-              required
-              className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email@gmail.com"
-            />
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-          </div>
-        </div>
-
-        <div className="relative">
-          <label className="text-sm text-gray-600 mb-1 block">Password</label>
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              required
-              className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-            />
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <button
-              type="button"
-              className="absolute right-4 top-1/2 -translate-y-1/2"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? (
-                <EyeOffIcon className="h-5 w-5 text-gray-400" />
-              ) : (
-                <EyeIcon className="h-5 w-5 text-gray-400" />
-              )}
-            </button>
-          </div>
-        </div>
-
-        <div className="text-right">
-          <Link to="/forgot-password" className="text-sm text-gray-600">
-            Forgot Password?
-          </Link>
-        </div>
-
-        <button
-          type="submit"
-          className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Logging in...' : 'Login'}
-        </button>
-
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-[#F5F0FF] text-gray-500">or</span>
-          </div>
-        </div>
-
-        <div id="signInDiv" className="flex justify-center"></div>
-
-        <p className="text-center text-sm text-gray-600 mt-6">
-          Don't have an account?{' '}
-          <Link to="/doctor/signup" className="text-[#7C3AED] font-medium">
-            Sign up
-          </Link>
-        </p>
-      </form>
-    )
-  }
-
   if (isMobile) {
     return (
       <div className="min-h-screen bg-[#FFF5F5] flex flex-col">
@@ -240,15 +107,90 @@ export default function DoctorLogin() {
           <div className="absolute inset-x-0 top-0 h-[245px] bg-[#B7A6F3] rounded-b-full" />
     
           <div className="relative pt-8 px-6 flex flex-col items-center">
-            <h1 className="text-[#2D2D2D] text-3xl font-bold mb-3">
-              {step === 1 ? 'Doctor Registration' : 'Login'}
-            </h1>
-            <img
+          <h1 className="text-[#2D2D2D] text-3xl font-bold mb-3">Login</h1>
+          <img
               src="/auth/doc_login_mobile.png"
               alt="Doctor illustration"
               className="w-40 h-40 object-contain mb-4"
             />
-            {renderForm()}
+                        
+            <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 px-6">
+              {errorMessage && (
+                <div className="text-red-500 text-sm text-center">{errorMessage}</div>
+              )}
+              <div className="relative">
+                <label className="text-sm text-gray-600 mb-1 block">Email</label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    required
+                    className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="email@gmail.com"
+                  />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+
+              <div className="relative">
+                <label className="text-sm text-gray-600 mb-1 block">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                  />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <button
+                    type="button"
+                    className="absolute right-4 top-1/2 -translate-y-1/2"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <Link to="/forgot-password" className="text-sm text-gray-600">
+                  Forgot Password?
+                </Link>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Logging in...' : 'Login'}
+              </button>
+
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-[#F5F0FF] text-gray-500">or</span>
+                </div>
+              </div>
+
+              <div id="signInDiv" className="flex justify-center"></div>
+
+              <p className="text-center text-sm text-gray-600 mt-6">
+                Don't have an account?{' '}
+                <Link to="/doctor/signup" className="text-[#7C3AED] font-medium">
+                  Sign up
+                </Link>
+              </p>
+            </form>
           </div>
         </div>
       </div>
@@ -259,10 +201,85 @@ export default function DoctorLogin() {
     <div className="min-h-screen bg-[#FFF5F5] flex">
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <h1 className="text-[#2D2D2D] text-4xl font-bold mb-8">
-            {step === 1 ? 'Before you continue!' : 'Welcome Back!!'}
-          </h1>
-          {renderForm()}
+          <h1 className="text-[#2D2D2D] text-4xl font-bold mb-8">Welcome Back!!</h1>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {errorMessage && (
+              <div className="text-red-500 text-sm text-center">{errorMessage}</div>
+            )}
+            <div className="relative">
+              <label className="text-sm text-gray-600 mb-1 block">Email</label>
+              <div className="relative">
+                <input
+                  type="email"
+                  required
+                  className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="email@gmail.com"
+                />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+
+            <div className="relative">
+              <label className="text-sm text-gray-600 mb-1 block">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className="w-full px-12 py-3 bg-white rounded-full border border-gray-200"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <button
+                  type="button"
+                  className="absolute right-4 top-1/2 -translate-y-1/2"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOffIcon className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5 text-gray-400" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-sm text-gray-600">
+                Forgot Password?
+              </Link>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Logging in...' : 'Login'}
+            </button>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-[#FFF5F5] text-gray-500">or</span>
+              </div>
+            </div>
+
+            <div id="signInDiv" className="flex justify-center"></div>
+
+            <p className="text-center text-sm text-gray-600 mt-6">
+              Don't have an account?{' '}
+              <Link to="/doctor/signup" className="text-[#7C3AED] font-medium">
+                Sign up
+              </Link>
+            </p>
+          </form>
         </div>
       </div>
       <div className="hidden lg:flex flex-1 bg-[#F5F0FF] items-center justify-center relative overflow-hidden">
