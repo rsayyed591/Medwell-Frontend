@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { NotebookTabs, EyeIcon, EyeOffIcon, Mail, Lock, Building2 } from 'lucide-react'
 import { ngrok_url, google_ngrok_url } from '../../utils/global'
+import Loader from '../components/Loader'
 
 export default function HospitalSignUp() {
   const [hospitalName, setHospitalName] = useState('')
@@ -13,6 +14,7 @@ export default function HospitalSignUp() {
   const [showCPassword, setShowCPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -47,6 +49,7 @@ export default function HospitalSignUp() {
   }, [navigate, isMobile])
 
   const handleCallbackResponse = (response) => {
+    setIsLoading(true)
     const formData = new FormData()
     formData.append("token", response.credential)
 
@@ -61,6 +64,9 @@ export default function HospitalSignUp() {
       })
       .catch(() => {
         setErrorMessage("An error occurred during Google sign-up. Please try again.")
+      })
+      .finally(() => {
+        setIsLoading(false)
       })
   }
 
@@ -78,9 +84,11 @@ export default function HospitalSignUp() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    setIsLoading(true)
     setErrorMessage('')
 
     if (!validateForm()) {
+      setIsLoading(false)
       return
     }
 
@@ -108,6 +116,13 @@ export default function HospitalSignUp() {
       .catch(() => {
         setErrorMessage("An error occurred during sign-up. Please try again.")
       })
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }
+
+  if (isLoading) {
+    return <Loader />
   }
 
   if (isMobile) {
@@ -228,8 +243,9 @@ export default function HospitalSignUp() {
               <button
                 type="submit"
                 className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+                disabled={isLoading}
               >
-                Create Account
+                {isLoading ? 'Creating Account...' : 'Create Account'}
               </button>
 
               <div className="relative my-6">
@@ -377,8 +393,9 @@ export default function HospitalSignUp() {
             <button
               type="submit"
               className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium  hover:bg-[#6D28D9] transition-colors"
+              disabled={isLoading}
             >
-              Create Account
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
 
             <div className="relative my-6">

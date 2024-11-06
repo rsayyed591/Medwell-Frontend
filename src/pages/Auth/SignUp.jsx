@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { EyeIcon, EyeOffIcon, Mail, Lock, User } from 'lucide-react'
 import { useAuth } from './useAuth'
+import Loader from '../components/Loader'
 
 export default function SignUp() {
   const [fullName, setFullName] = useState('')
@@ -11,6 +12,7 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false)
   const [showCPassword, setShowCPassword] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isLoading, setIsLoading] = useState(false)
   const { signup, googleLogin, errorMessage, setErrorMessage, checkAuth } = useAuth()
 
   useEffect(() => {
@@ -42,7 +44,9 @@ export default function SignUp() {
   }, [isMobile])
 
   const handleCallbackResponse = (response) => {
-    googleLogin(response.credential,"patient")
+    setIsLoading(true)
+    googleLogin(response.credential, "patient")
+      .finally(() => setIsLoading(false))
   }
 
   const validateForm = () => {
@@ -57,12 +61,20 @@ export default function SignUp() {
     return true
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!validateForm()) return
-    signup(email, password, confirmPassword, fullName, "patient")
+    setIsLoading(true)
+    try {
+      await signup(email, password, confirmPassword, fullName, "patient")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
+  if (isLoading) {
+    return <Loader />
+  }
 
   if (isMobile) {
     return (
@@ -167,8 +179,9 @@ export default function SignUp() {
               <button
                 type="submit"
                 className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+                disabled={isLoading}
               >
-                Create Account
+                {isLoading ? 'Creating Account...' : 'Create Account'}
               </button>
 
               <div className="relative my-6">
@@ -300,9 +313,10 @@ export default function SignUp() {
 
             <button
               type="submit"
-              className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium  hover:bg-[#6D28D9] transition-colors"
+              className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+              disabled={isLoading}
             >
-              Create Account
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
 
             <div className="relative my-6">

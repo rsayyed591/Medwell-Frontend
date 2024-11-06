@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { EyeIcon, EyeOffIcon, Mail, Lock, Phone } from 'lucide-react'
 import { ngrok_url, google_ngrok_url } from '../../utils/global'
+import Loader from '../components/Loader'
 
 export default function DoctorSignUp() {
   const [email, setEmail] = useState('')
@@ -10,6 +11,7 @@ export default function DoctorSignUp() {
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -44,6 +46,7 @@ export default function DoctorSignUp() {
   }, [navigate, isMobile])
 
   const handleCallbackResponse = (response) => {
+    setIsLoading(true)
     const formData = new FormData()
     formData.append("token", response.credential)
 
@@ -59,14 +62,19 @@ export default function DoctorSignUp() {
       .catch(() => {
         setErrorMessage("An error occurred during Google sign-up. Please try again.")
       })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    setIsLoading(true)
     setErrorMessage('')
 
     if (password.length < 8) {
       setErrorMessage("Password must be at least 8 characters long.")
+      setIsLoading(false)
       return
     }
 
@@ -92,13 +100,19 @@ export default function DoctorSignUp() {
       .catch(() => {
         setErrorMessage("An error occurred during sign-up. Please try again.")
       })
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }
+
+  if (isLoading) {
+    return <Loader />
   }
 
   if (isMobile) {
     return (
       <div className="min-h-screen bg-[#FFF5F5] flex flex-col">
         <div className="relative w-full">
-          {/* Mobile shape background */}
           <div className="absolute inset-x-0 top-0 h-[225px] bg-[#B7A6F3] rounded-b-full" />
           
           <div className="relative pt-8 px-6 flex flex-col items-center">
@@ -172,8 +186,9 @@ export default function DoctorSignUp() {
               <button
                 type="submit"
                 className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+                disabled={isLoading}
               >
-                Create Account
+                {isLoading ? 'Creating Account...' : 'Create Account'}
               </button>
 
               <div className="relative my-6">
@@ -202,7 +217,6 @@ export default function DoctorSignUp() {
 
   return (
     <div className="min-h-screen bg-[#FFF5F5] flex">
-      {/* Move the illustration section to the left */}
       <div className="hidden lg:flex flex-1 bg-[#F5F0FF] items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 w-[70%] bg-[#B7A6F3] rounded-t-full translate-x-[120px] translate-y-20" />
@@ -281,8 +295,9 @@ export default function DoctorSignUp() {
             <button
               type="submit"
               className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+              disabled={isLoading}
             >
-              Create Account
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
 
             <div className="relative my-6">

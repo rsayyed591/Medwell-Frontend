@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { EyeIcon, EyeOffIcon, Mail, Lock } from 'lucide-react'
 import { useAuth } from './useAuth'
+import Loader from '../components/Loader'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isLoading, setIsLoading] = useState(false)
   const { login, googleLogin, errorMessage, checkAuth } = useAuth()
 
   useEffect(() => {
@@ -39,12 +41,23 @@ export default function Login() {
   }, [isMobile])
 
   const handleCallbackResponse = (response) => {
+    setIsLoading(true)
     googleLogin(response.credential, "patient")
+      .finally(() => setIsLoading(false))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    login(email, password, "patient")
+    setIsLoading(true)
+    try {
+      await login(email, password, "patient")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (isLoading) {
+    return <Loader />
   }
 
   if (isMobile) {
@@ -54,8 +67,8 @@ export default function Login() {
           <div className="absolute inset-x-0 top-0 h-[245px] bg-[#B7A6F3] rounded-b-full" />
     
           <div className="relative pt-8 px-6 flex flex-col items-center">
-          <h1 className="text-[#2D2D2D] text-3xl font-bold mb-3">Login</h1>
-          <img
+            <h1 className="text-[#2D2D2D] text-3xl font-bold mb-3">Login</h1>
+            <img
               src="/auth/login_mobile.png"
               alt="Login illustration"
               className="w-40 h-40 object-contain mb-0"
@@ -115,8 +128,9 @@ export default function Login() {
               <button
                 type="submit"
                 className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+                disabled={isLoading}
               >
-                Login
+                {isLoading ? 'Logging in...' : 'Login'}
               </button>
 
               <div className="relative my-6">
@@ -203,8 +217,9 @@ export default function Login() {
             <button
               type="submit"
               className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+              disabled={isLoading}
             >
-              Login
+              {isLoading ? 'Logging in...' : 'Login'}
             </button>
 
             <div className="relative my-6">

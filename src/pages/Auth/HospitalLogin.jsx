@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { EyeIcon, EyeOffIcon, Mail, Lock } from 'lucide-react'
 import { google_ngrok_url, ngrok_url } from '../../utils/global'
+import Loader from '../components/Loader'
 
 export default function HospitalLogin() {
   const [email, setEmail] = useState('')
@@ -9,6 +10,7 @@ export default function HospitalLogin() {
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -43,6 +45,7 @@ export default function HospitalLogin() {
   }, [navigate, isMobile])
 
   const handleCallbackResponse = (response) => {
+    setIsLoading(true)
     const formData = new FormData()
     formData.append("token", response.credential)
 
@@ -58,10 +61,14 @@ export default function HospitalLogin() {
       .catch(() => {
         setErrorMessage("An error occurred during Google login. Please try again.")
       })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    setIsLoading(true)
     setErrorMessage('')
     const formData = new FormData()
     formData.append("email", email)
@@ -84,13 +91,19 @@ export default function HospitalLogin() {
       .catch(() => {
         setErrorMessage("An error occurred. Please try again.")
       })
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }
+
+  if (isLoading) {
+    return <Loader />
   }
 
   if (isMobile) {
     return (
       <div className="min-h-screen bg-[#FFF5F5] flex flex-col">
         <div className="relative w-full">
-          {/* Mobile shape background */}
           <div className="absolute inset-x-0 top-0 h-[245px] bg-[#B7A6F3] rounded-b-full" />
     
           <div className="relative pt-8 px-6 flex flex-col items-center">
@@ -155,8 +168,9 @@ export default function HospitalLogin() {
               <button
                 type="submit"
                 className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+                disabled={isLoading}
               >
-                Login
+                {isLoading ? 'Logging in...' : 'Login'}
               </button>
 
               <div className="relative my-6">
@@ -243,8 +257,9 @@ export default function HospitalLogin() {
             <button
               type="submit"
               className="w-full py-3 bg-[#7C3AED] text-white rounded-full font-medium hover:bg-[#6D28D9] transition-colors"
+              disabled={isLoading}
             >
-              Login
+              {isLoading ? 'Logging in...' : 'Login'}
             </button>
 
             <div className="relative my-6">
