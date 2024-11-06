@@ -1,9 +1,9 @@
-import React, { useEffect,useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, FileText, AlertCircle, ExternalLink, Download } from 'lucide-react'
+import { ArrowLeft, FileText, AlertCircle, ExternalLink, Download, Search } from 'lucide-react'
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
-import CombinedChat from "../Chatbots/CombinedChat"
+import CombinedChat from '../Chatbots/CombinedChat'
 import { useFetch } from '../components/useFetch'
 
 const mockReports = [
@@ -48,17 +48,20 @@ const mockReports = [
       calcium: { max: 10.5, min: 8.5, unit: "mg/dL", value: 7.9 },
       iron: { max: 170, min: 60, unit: "µg/dL", value: 50 },
       vitaminD: { max: 100, min: 30, unit: "ng/mL", value: 20 },
-      magnesium: { max: 2.6, min: 1.8, unit: "mg/dL", value: 1.6 }
+      magnesium: { max: 2.6, min: 1.8, unit: "mg/dL", value: -1 }
     },
     reportUrl: 'https://drive.google.com/file/d/1XvgQ7lpsXazqMiH7dRiRs4prRbyjTEy4/view?usp=sharing',
   },
 ]
+
 export default function Reports() {
   const [selectedReport, setSelectedReport] = useState(null)
   const [reports, setReports] = useState([])
   const { fetchReports } = useFetch()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [globalSearch, setGlobalSearch] = useState('')
+  const [similarReports, setSimilarReports] = useState([])
 
   useEffect(() => {
     const loadReports = async () => {
@@ -77,7 +80,7 @@ export default function Reports() {
             reportType: report.report_type || 'Unknown',
             submittedAt: report.submitted_at || 'Submission date not available',
           }))
-          setReports(formattedReports,...mockReports)
+          setReports([...formattedReports, ...mockReports])
         } else {
           console.log("No reports data received from API, using mock data")
           setReports(mockReports)
@@ -96,10 +99,18 @@ export default function Reports() {
 
   const handleReportClick = useCallback((report) => {
     setSelectedReport(report)
-  }, [])
+    const similar = reports.filter(r => 
+      r.id !== report.id && 
+      (r.title.toLowerCase().includes(report.title.toLowerCase()) ||
+       r.doctorName === report.doctorName ||
+       Object.keys(r.elements).some(key => report.elements.hasOwnProperty(key)))
+    )
+    setSimilarReports(similar)
+  }, [reports])
 
   const handleBackClick = useCallback(() => {
     setSelectedReport(null)
+    setSimilarReports([])
   }, [])
 
   const handleViewReport = useCallback(() => {
@@ -111,28 +122,23 @@ export default function Reports() {
   const handleDownloadPDF = useCallback((report) => {
     const doc = new jsPDF()
 
-    // Add border
     doc.rect(5, 5, 200, 287)
 
-    // Add logo and quote
     doc.setFontSize(28)
-    doc.setTextColor(128, 0, 128) // Purple color
+    doc.setTextColor(128, 0, 128)
     doc.text("MEDWELL", 20, 25)
     
     doc.setFontSize(10)
-    doc.setTextColor(100, 100, 100) // Gray color
+    doc.setTextColor(100, 100, 100)
     doc.text("Empowering Health Through Innovation", 20, 32)
 
-    // Add decorative line under the quote
-    doc.setDrawColor(128, 0, 128) // Purple color
+    doc.setDrawColor(128, 0, 128)
     doc.line(20, 35, 100, 35)
 
-    // Add report title vertically
     doc.setFontSize(16)
-    doc.setTextColor(128, 0, 128) // Purple color
+    doc.setTextColor(128, 0, 128)
     doc.text("R E P O R T", 200, 40, null, 90)
 
-    // Add patient details with improved alignment
     doc.setFontSize(10)
     doc.setTextColor(0, 0, 0)
     const detailsX = 20
@@ -148,26 +154,21 @@ export default function Reports() {
     doc.text("Reg. Location", detailsX, 69)
     doc.text(": Not Available", valuesX, 69)
 
-    // Add collection and reporting dates at the right end
     const datesX = 140
     doc.text(`Collected : ${report.collectionDate}`, datesX, 63)
     doc.text(`Reported  : ${report.date}`, datesX, 69)
 
-    // Add horizontal line
     doc.line(20, 75, 190, 75)
 
-    // Add report title
     doc.setFontSize(14)
     doc.setFont("helvetica", "bold")
     doc.text(report.title, 20, 85)
 
-    // Add summary
     doc.setFont("helvetica", "normal")
     doc.setFontSize(10)
     const splitSummary = doc.splitTextToSize(report.summary, 170)
     doc.text(splitSummary, 20, 95)
 
-    // Add detailed results
     const tableData = Object.entries(report.elements).map(([name, data]) => {
       const isInRange = data.value >= data.min && data.value <= data.max
       return [
@@ -188,7 +189,6 @@ export default function Reports() {
       styles: { cellPadding: 5, fontSize: 8 }
     })
 
-    // Add footer
     const pageCount = doc.internal.getNumberOfPages()
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i)
@@ -197,9 +197,24 @@ export default function Reports() {
       doc.text('MedWell AI © 2024 | Empowering Health Through Innovation', 20, doc.internal.pageSize.height - 10)
     }
 
-    // Save the PDF
     doc.save(`${report.title.replace(/\s+/g, '_')}_Report.pdf`)
   }, [])
+
+  const handleGlobalSearchChange = useCallback((e) => {
+    setGlobalSearch(e.target.value)
+  }, [])
+
+  const filteredReports = useMemo(() => {
+    return reports.filter(report => 
+      report.title.toLowerCase().includes(globalSearch.toLowerCase()) ||
+      report.doctorName.toLowerCase().includes(globalSearch.toLowerCase()) ||
+      report.summary.toLowerCase().includes(globalSearch.toLowerCase()) ||
+      Object.entries(report.elements).some(([key, value]) => 
+        key.toLowerCase().includes(globalSearch.toLowerCase()) ||
+        value.value.toString().includes(globalSearch.toLowerCase())
+      )
+    )
+  }, [reports, globalSearch])
 
   const ReportCard = useCallback(({ report, onClick, index }) => (
     <motion.div
@@ -217,11 +232,45 @@ export default function Reports() {
   ), [])
 
   const DetailedReport = useCallback(({ report }) => {
-    const sortedElements = Object.entries(report.elements).sort(([, a], [, b]) => {
-      if (a.value === -1 && b.value !== -1) return 1;
-      if (a.value !== -1 && b.value === -1) return -1;
-      return 0;
-    });
+    const [localSearch, setLocalSearch] = useState('')
+    const [localRangeFilter, setLocalRangeFilter] = useState('all')
+
+    const handleLocalSearchChange = (e) => {
+      setLocalSearch(e.target.value)
+    }
+
+    const handleLocalRangeFilterChange = (e) => {
+      setLocalRangeFilter(e.target.value)
+    }
+
+    const filteredElements = Object.entries(report.elements).filter(([name, data]) => {
+      const isValuePresent = data.value !== -1
+      const isInRange = isValuePresent && data.value >= data.min && data.value <= data.max
+      const matchesSearch = localSearch.toLowerCase() === '' ||
+        name.toLowerCase().includes(localSearch.toLowerCase()) ||
+        data.value.toString().includes(localSearch.toLowerCase())
+
+      let matchesRangeFilter = true
+      switch (localRangeFilter) {
+        case 'inRange':
+          matchesRangeFilter = isInRange
+          break
+        case 'outOfRange':
+          matchesRangeFilter = !isInRange && isValuePresent
+          break
+        case 'notAvailable':
+          matchesRangeFilter = !isValuePresent
+          break
+      }
+
+      return matchesSearch && matchesRangeFilter
+    })
+
+    const sortedElements = filteredElements.sort(([, a], [, b]) => {
+      if (a.value === -1 && b.value !== -1) return 1
+      if (a.value !== -1 && b.value === -1) return -1
+      return 0
+    })
 
     return (
       <motion.div
@@ -284,6 +333,28 @@ export default function Reports() {
           <p className="text-gray-700">{report.summary}</p>
         </div>
         <h3 className="text-lg font-semibold mb-4">Detailed Results</h3>
+        <div className="mb-4 flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-grow">
+            <input
+              type="text"
+              placeholder="Search test names or values"
+              value={localSearch}
+              onChange={handleLocalSearchChange}
+              className="w-full pl-10 pr-4 py-2 border rounded-md"
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+          <select
+            value={localRangeFilter}
+            onChange={handleLocalRangeFilterChange}
+            className="p-2 border rounded-md"
+          >
+            <option value="all">All Results</option>
+            <option value="inRange">In Range</option>
+            <option value="outOfRange">Out of Range</option>
+            <option value="notAvailable">Not Available</option>
+          </select>
+        </div>
         <motion.div
           initial="hidden"
           animate="visible"
@@ -297,8 +368,8 @@ export default function Reports() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
         >
           {sortedElements.map(([name, data]) => {
-            const isValuePresent = data.value !== -1;
-            const isInRange = isValuePresent && data.value >= data.min && data.value <= data.max;
+            const isValuePresent = data.value !== -1
+            const isInRange = isValuePresent && data.value >= data.min && data.value <= data.max
             return (
               <motion.div
                 key={name}
@@ -351,9 +422,19 @@ export default function Reports() {
             )
           })}
         </motion.div>
+        {similarReports.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4">Similar Reports</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {similarReports.map((similarReport, index) => (
+                <ReportCard key={similarReport.id} report={similarReport} onClick={handleReportClick} index={index} />
+              ))}
+            </div>
+          </div>
+        )}
       </motion.div>
     )
-  }, [handleBackClick, handleViewReport, handleDownloadPDF])
+  }, [handleBackClick, handleViewReport, handleDownloadPDF, handleReportClick, ReportCard])
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -363,36 +444,49 @@ export default function Reports() {
         <div className="text-center text-red-500">Error loading reports: {error}</div>
       ) : (
         <AnimatePresence mode="wait">
-        {selectedReport ? (
-          <motion.div
-            key="detailed-report"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <DetailedReport report={selectedReport} />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="report-list"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h1 className="text-3xl font-bold mb-6 flex items-center">
-              <FileText className="w-8 h-8 mr-2" />
-              Your Reports
-            </h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-6">
-              {reports.map((report, index) => (
-                <ReportCard key={report.id} report={report} onClick={handleReportClick} index={index} />
-              ))}
-            </div>
-          </motion.div>
-        )}
-       </AnimatePresence>
+          {selectedReport ? (
+            <motion.div
+              key="detailed-report"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <DetailedReport report={selectedReport} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="report-list"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h1 className="text-3xl font-bold mb-6 flex items-center">
+                <FileText className="w-8 h-8 mr-2" />
+                Your Reports
+              </h1>
+              <div className="mb-6 relative">
+                <input
+                  type="text"
+                  placeholder="Search across all reports"
+                  value={globalSearch}
+                  onChange={handleGlobalSearchChange}
+                  className="w-full pl-10 pr-4 py-2 border rounded-md"
+                />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredReports.map((report, index) => (
+                  <ReportCard key={report.id} report={report} onClick={handleReportClick} index={index} />
+                ))}
+              </div>
+              {filteredReports.length === 0 && (
+                <p className="text-center text-gray-500 mt-8">No reports found matching your search.</p>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
       <CombinedChat/>
     </div>
