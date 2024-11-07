@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Patients } from './Patients'
 import { DoctorProfile } from './DoctorProfile'
+import { Dashboard } from './Dashboard'
 import {PatientAppointments} from './PatientAppointments'
 export default function DoctorDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -20,7 +21,7 @@ export default function DoctorDashboard() {
   }
 
   const navItems = [
-    { label: "Dashboard", icon: Home, component: null },
+    { label: "Dashboard", icon: Home, component: Dashboard },
     { label: "Profile", icon: User, component: DoctorProfile },
     { label: "Patients", icon: Users, component: Patients },
     { label: "Appointments", icon: Calendar, component: PatientAppointments },
