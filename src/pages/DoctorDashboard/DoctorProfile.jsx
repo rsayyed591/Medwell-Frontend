@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Edit, X, User, Briefcase, MapPin, Phone, Mail, Camera } from 'lucide-react'
+import { Edit, X, User, Briefcase, MapPin, Phone, Mail, Camera, QrCode } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const initialDoctorInfo = {
@@ -9,12 +9,14 @@ const initialDoctorInfo = {
   location: "India, IN",
   phone: "+91 9819191971",
   email: "nishi@gmail.com",
-  profilePicture: './doctorpfp.png'
+  profilePicture: './doctorpfp.png',
+  qrCodePicture: './dummyqr.png'
 }
 
 export function DoctorProfile() {
   const [doctorInfo, setDoctorInfo] = useState(initialDoctorInfo)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false)
   const [tempProfilePicture, setTempProfilePicture] = useState(null)
 
   const handleEditSubmit = (e) => {
@@ -86,18 +88,29 @@ export function DoctorProfile() {
             <div className="mt-6 md:mt-0 text-center md:text-left flex-1">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
-                <h1 className="text-2xl sm:text-gray-600 md:text-4xl font-bold text-gray-600 md:text-white md:mb-2">{doctorInfo.name}</h1>
-                <p className="text-lg text-blue-700 md:text-blue-100 mb-4">{doctorInfo.specialization}</p>
+                  <h1 className="text-2xl md:text-4xl font-bold text-white md:mb-2">{doctorInfo.name}</h1>
+                  <p className="text-lg text-blue-100 mb-4">{doctorInfo.specialization}</p>
                 </div>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-full shadow-md hover:bg-blue-50 transition-colors duration-200"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </motion.button>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-full shadow-md hover:bg-blue-50 transition-colors duration-200"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsQRModalOpen(true)}
+                    className="inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-full shadow-md hover:bg-blue-50 transition-colors duration-200"
+                  >
+                    <QrCode className="w-4 h-4 mr-2" />
+                    Show QR
+                  </motion.button>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -107,7 +120,7 @@ export function DoctorProfile() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-12 md:mt-20 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 pb-8"
+            className="mt-12 md:mt-20 grid grid-cols-1 md:grid-cols-2 gap-6 pb-8"
           >
             {[
               { icon: Briefcase, label: 'Experience', value: doctorInfo.experience },
@@ -204,7 +217,7 @@ export function DoctorProfile() {
                           id={field.id}
                           name={field.id}
                           defaultValue={field.value}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 text-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
                     ))}
@@ -228,6 +241,45 @@ export function DoctorProfile() {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* QR Code Modal */}
+      <AnimatePresence>
+        {isQRModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl w-full max-w-md p-6"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">QR Code</h2>
+                <button
+                  onClick={() => setIsQRModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="flex justify-center">
+                <img
+                  src={doctorInfo.qrCodePicture}
+                  alt="Doctor QR Code"
+                  className="w-64 h-64 object-contain"
+                />
+              </div>
+              <p className="mt-4 text-center text-sm text-gray-500">
+                Scan this QR code to quickly access the doctor's information.
+              </p>
             </motion.div>
           </motion.div>
         )}
