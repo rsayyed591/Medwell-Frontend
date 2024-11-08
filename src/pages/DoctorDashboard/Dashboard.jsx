@@ -66,7 +66,7 @@ export default function Dashboard() {
           {/* Overview Section */}
           <div className="mb-5">
             <h2 className="text-xl font-semibold mb-4 text-blue-800">Today's Overview</h2>
-            <div className="flex flex-col sm:flex-row flex-wrap gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <OverviewCard icon={<Users size={24} />} value={dashboardData.overview.patients} label="Patients" color="bg-blue-500" />
               <OverviewCard icon={<Star size={24} />} value={dashboardData.overview.reviews} label="Reviews" color="bg-yellow-500" />
               <OverviewCard icon={<MessageSquare size={24} />} value={dashboardData.overview.appointments} label="Appointments" color="bg-green-500" />
@@ -250,7 +250,7 @@ export default function Dashboard() {
 
 function OverviewCard({ icon, value, label, color }) {
   return (
-    <div className={`${color} rounded-xl p-4 flex items-center gap-3 flex-1 min-w-[200px] text-white shadow-md transition-transform hover:scale-105`}>
+    <div className={`${color} rounded-xl p-4 flex items-center gap-3 text-white shadow-md transition-transform hover:scale-105`}>
       <div className="bg-white bg-opacity-30 p-2 rounded-full">{icon}</div>
       <div>
         <div className="text-2xl font-bold">
