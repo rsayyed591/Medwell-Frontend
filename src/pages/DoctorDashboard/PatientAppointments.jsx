@@ -166,125 +166,128 @@ export function PatientAppointments() {
   )
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 md:gap-8 max-w-7xl mx-auto px-4 py-4 md:py-8">
-      <motion.div
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full md:w-1/3"
-      >
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow-md">
-          <h2 className="text-xl md:text-2xl font-semibold mb-4">Today's Appointments</h2>
-          {todayAppointments.length === 0 ? (
-            <p className="text-gray-500">No appointments scheduled for today</p>
-          ) : (
-            <div className="space-y-4">
-              {todayAppointments.map(appointment => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
-              ))}
-            </div>
-          )}
-          
-          <h2 className="text-xl md:text-2xl font-semibold mb-4 mt-8">Upcoming Appointments</h2>
-          {futureAppointments.length === 0 ? (
-            <p className="text-gray-500">No upcoming appointments scheduled</p>
-          ) : (
-            <div className="space-y-4">
-              {futureAppointments.map(appointment => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
-              ))}
-            </div>
-          )}
-        </div>
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, x: 50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full md:w-2/3"
-      >
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow-md">
-          <div className="flex justify-between items-center mb-4 md:mb-8">
-            <button 
-              onClick={() => handleNavigate('PREV')} 
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-            >
-              <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
-            </button>
-            <span className="text-base md:text-lg lg:text-2xl font-medium">
-              {formatDateRange(currentDate)}
-            </span>
-            <button 
-              onClick={() => handleNavigate('NEXT')} 
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-            >
-              <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
-            </button>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-gray-800 mb-0">Appointment</h1>
+      <div className="flex flex-col md:flex-row gap-4 md:gap-8 max-w-7xl mx-auto px-4 py-4 md:py-8">
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full md:w-1/3"
+        >
+          <div className="bg-white p-4 md:p-6 rounded-lg shadow-md">
+            <h2 className="text-xl md:text-2xl font-semibold mb-4">Today's Appointments</h2>
+            {todayAppointments.length === 0 ? (
+              <p className="text-gray-500">No appointments scheduled for today</p>
+            ) : (
+              <div className="space-y-4">
+                {todayAppointments.map(appointment => (
+                  <AppointmentCard key={appointment.id} appointment={appointment} />
+                ))}
+              </div>
+            )}
+            
+            <h2 className="text-xl md:text-2xl font-semibold mb-4 mt-8">Upcoming Appointments</h2>
+            {futureAppointments.length === 0 ? (
+              <p className="text-gray-500">No upcoming appointments scheduled</p>
+            ) : (
+              <div className="space-y-4">
+                {futureAppointments.map(appointment => (
+                  <AppointmentCard key={appointment.id} appointment={appointment} />
+                ))}
+              </div>
+            )}
           </div>
-          <Calendar
-            localizer={localizer}
-            events={appointments}
-            startAccessor="start"
-            endAccessor="end"
-            style={{ height: isMobile ? 400 : 600 }}
-            view={currentView}
-            onView={handleViewChange}
-            views={isMobile ? [Views.DAY] : [Views.WEEK, Views.DAY]}
-            date={currentDate}
-            onNavigate={setCurrentDate}
-            eventPropGetter={eventStyleGetter}
-            onSelectEvent={handleSelectEvent}
-            messages={messages}
-            className="rounded-lg border border-gray-200"
-            toolbar={false}
-          />
-        </div>
-      </motion.div>
-      <AnimatePresence>
-        {selectedAppointment && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-          >
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full md:w-2/3"
+        >
+          <div className="bg-white p-4 md:p-6 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-4 md:mb-8">
+              <button 
+                onClick={() => handleNavigate('PREV')} 
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+              >
+                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+              </button>
+              <span className="text-base md:text-lg lg:text-2xl font-medium">
+                {formatDateRange(currentDate)}
+              </span>
+              <button 
+                onClick={() => handleNavigate('NEXT')} 
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+              >
+                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+              </button>
+            </div>
+            <Calendar
+              localizer={localizer}
+              events={appointments}
+              startAccessor="start"
+              endAccessor="end"
+              style={{ height: isMobile ? 400 : 600 }}
+              view={currentView}
+              onView={handleViewChange}
+              views={isMobile ? [Views.DAY] : [Views.WEEK, Views.DAY]}
+              date={currentDate}
+              onNavigate={setCurrentDate}
+              eventPropGetter={eventStyleGetter}
+              onSelectEvent={handleSelectEvent}
+              messages={messages}
+              className="rounded-lg border border-gray-200"
+              toolbar={false}
+            />
+          </div>
+        </motion.div>
+        <AnimatePresence>
+          {selectedAppointment && (
             <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              className="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
             >
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg md:text-xl lg:text-2xl font-semibold">{selectedAppointment.title}</h2>
-                <button 
-                  onClick={() => setSelectedAppointment(null)} 
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              <div className="space-y-3 text-sm md:text-base">
-                <p className="flex items-center">
-                  <User className="w-4 h-4 mr-2 text-blue-500" />
-                  <strong>Patient:</strong> {selectedAppointment.patient}
-                </p>
-                <p className="flex items-center">
-                  <Clock className="w-4 h-4 mr-2 text-blue-500" />
-                  <strong>Start:</strong> {moment(selectedAppointment.start).format('MMMM D, YYYY h:mm A')}
-                </p>
-                <p className="flex items-center">
-                  <Clock className="w-4 h-4 mr-2 text-blue-500" />
-                  <strong>End:</strong> {moment(selectedAppointment.end).format('MMMM D, YYYY h:mm A')}
-                </p>
-                <p className="flex items-center">
-                  <FileText className="w-4 h-4 mr-2 text-blue-500" />
-                  <strong>Notes:</strong> {selectedAppointment.notes || 'No notes'}
-                </p>
-              </div>
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.9 }}
+                className="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg md:text-xl lg:text-2xl font-semibold">{selectedAppointment.title}</h2>
+                  <button 
+                    onClick={() => setSelectedAppointment(null)} 
+                    className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                <div className="space-y-3 text-sm md:text-base">
+                  <p className="flex items-center">
+                    <User className="w-4 h-4 mr-2 text-blue-500" />
+                    <strong>Patient:</strong> {selectedAppointment.patient}
+                  </p>
+                  <p className="flex items-center">
+                    <Clock className="w-4 h-4 mr-2 text-blue-500" />
+                    <strong>Start:</strong> {moment(selectedAppointment.start).format('MMMM D, YYYY h:mm A')}
+                  </p>
+                  <p className="flex items-center">
+                    <Clock className="w-4 h-4 mr-2 text-blue-500" />
+                    <strong>End:</strong> {moment(selectedAppointment.end).format('MMMM D, YYYY h:mm A')}
+                  </p>
+                  <p className="flex items-center">
+                    <FileText className="w-4 h-4 mr-2 text-blue-500" />
+                    <strong>Notes:</strong> {selectedAppointment.notes || 'No notes'}
+                  </p>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
