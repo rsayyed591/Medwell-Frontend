@@ -40,6 +40,7 @@ export default function PatientAppointments() {
   const [todayAppointments, setTodayAppointments] = useState([])
   const [futureAppointments, setFutureAppointments] = useState([])
   const [isMobile, setIsMobile] = useState(false)
+  const [view, setView] = useState('list') // 'list' or 'calendar'
 
   useEffect(() => {
     const handleResize = () => {
@@ -133,7 +134,7 @@ export default function PatientAppointments() {
             <tr>
               <th className="p-2 border bg-blue-50"></th>
               {timeSlots.map((time, index) => (
-                <th key={index} className="p-2 border bg-blue-50 min-width-100 text-blue-800">
+                <th key={index} className="p-2 border bg-blue-50 min-w-[100px] text-blue-800">
                   {time.format('h:mm A')}
                 </th>
               ))}
@@ -142,7 +143,7 @@ export default function PatientAppointments() {
           <tbody>
             {weekDays.map((day, dayIndex) => (
               <tr key={dayIndex}>
-                <td className="p-2 border text-center font-semibold relative bg-blue-100 text-blue-800">
+                <td className="p-2 border text-center font-semibold relative bg-blue-100 text-blue-800 min-w-[100px]">
                   {day.format('ddd, MMM D')}
                   {appointments.some(app => moment(app.start).isSame(day, 'day')) && (
                     <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
@@ -157,7 +158,7 @@ export default function PatientAppointments() {
                     moment(app.start).isSame(cellDateTime, 'hour')
                   )
                   return (
-                    <td key={timeIndex} className="p-2 border relative min-height-50 hover:bg-blue-50 transition-colors duration-200">
+                    <td key={timeIndex} className="p-2 border relative min-h-[50px] hover:bg-blue-50 transition-colors duration-200">
                       {appointmentsInSlot.map((app, appIndex) => (
                         <div
                           key={appIndex}
@@ -182,12 +183,26 @@ export default function PatientAppointments() {
   return (
     <div className="container mx-auto px-4 py-8 bg-gradient-to-b from-blue-50 to-white min-h-screen">
       <h1 className="text-3xl font-bold text-blue-800 mb-6">Appointments</h1>
+      <div className="mb-4 flex justify-center md:hidden">
+        <button
+          onClick={() => setView('list')}
+          className={`px-4 py-2 rounded-l-lg ${view === 'list' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-600'}`}
+        >
+          List View
+        </button>
+        <button
+          onClick={() => setView('calendar')}
+          className={`px-4 py-2 rounded-r-lg ${view === 'calendar' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-600'}`}
+        >
+          Calendar View
+        </button>
+      </div>
       <div className="flex flex-col md:flex-row gap-4 md:gap-8 max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full md:w-1/3"
+          className={`w-full md:w-1/3 ${isMobile && view === 'calendar' ? 'hidden' : ''}`}
         >
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-md">
             <h2 className="text-xl md:text-2xl font-semibold mb-4 text-blue-800">Today's Appointments</h2>
@@ -217,7 +232,7 @@ export default function PatientAppointments() {
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full md:w-2/3"
+          className={`w-full md:w-full lg:w-2/3 ${isMobile && view === 'list' ? 'hidden' : ''}`}
         >
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-4 md:mb-8">
@@ -237,7 +252,9 @@ export default function PatientAppointments() {
                 <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
               </button>
             </div>
-            <WeeklyCalendar />
+            <div className="w-full max-w-[245px] md:max-w-screen-sm md:w-full md:min-w-[400px] overflow-x-auto">
+      <WeeklyCalendar />
+    </div>
           </div>
         </motion.div>
         <AnimatePresence>
