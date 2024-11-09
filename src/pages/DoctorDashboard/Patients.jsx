@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { FileText, Stethoscope, Search } from 'lucide-react'
 import PatientReports from './PatientReports'
 import PatientHealth from './PatientHealth'
+import { motion } from 'framer-motion'
 
 const patientData = [
   {
@@ -32,9 +33,14 @@ const PatientCard = ({ patient, onViewReports, onViewHealth }) => {
   const formattedDate = date.toLocaleString()
 
   return (
-    <div className="bg-white bg-opacity-80 backdrop-blur-sm rounded-lg shadow-md p-6 transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1 relative">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="bg-white bg-opacity-80 backdrop-blur-sm rounded-lg shadow-md p-6 transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1 relative"
+    >
       <div className="flex items-center mb-4">
-        <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold mr-4 bg-blue-100 text-blue-600">
+        <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold mr-4 bg-purple-100 text-purple-600">
           {patient.user_info.email[0].toUpperCase()}
         </div>
         <div>
@@ -65,7 +71,7 @@ const PatientCard = ({ patient, onViewReports, onViewHealth }) => {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -119,7 +125,7 @@ export const Patients = () => {
           placeholder="Search patients by email or ID..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full pl-10 pr-4 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
       </div>

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, FileText, AlertCircle, ExternalLink, Download, Search } from 'lucide-react'
+import { ArrowLeft, FileText, AlertCircle, ExternalLink, Download, Search, Calendar, User, Clock, Clipboard } from 'lucide-react'
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import CombinedChat from "../Chatbots/CombinedChat"
@@ -74,18 +74,18 @@ const ResultItem = memo(({ name, data }) => {
       className={`p-4 rounded-lg ${
         isValuePresent
           ? isInRange
-            ? 'bg-green-100'
-            : 'bg-red-100'
-          : 'bg-gray-100'
-      } cursor-pointer`}
+            ? 'bg-green-100 border border-green-200'
+            : 'bg-red-100 border border-red-200'
+          : 'bg-gray-100 border border-gray-200'
+      } cursor-pointer shadow-sm hover:shadow-md transition-all duration-300`}
     >
-      <h4 className="font-semibold mb-2 capitalize">{name.replace(/([A-Z])/g, ' $1').trim()}</h4>
+      <h4 className="font-semibold mb-2 capitalize text-blue-800">{name.replace(/([A-Z])/g, ' $1').trim()}</h4>
       {isValuePresent ? (
         <>
-          <p className="text-lg">
+          <p className="text-lg font-medium text-blue-900">
             {data.value} {data.unit}
           </p>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-blue-600">
             Range: {data.min} - {data.max} {data.unit}
           </p>
           {!isInRange && (
@@ -226,11 +226,14 @@ export default function PatientReports({ onClose }) {
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className="bg-white p-6 rounded-lg shadow-md cursor-pointer"
+      className="bg-white p-6 rounded-lg shadow-md cursor-pointer border border-blue-100 hover:border-blue-300 transition-all duration-300"
       onClick={() => onClick(report)}
     >
-      <h3 className="text-xl font-semibold mb-3">{report.report_type}</h3>
-      <p className="text-sm text-gray-600">{report.date_of_report}</p>
+      <h3 className="text-xl font-semibold mb-3 text-blue-800">{report.report_type}</h3>
+      <p className="text-sm text-blue-600 flex items-center">
+        <Calendar className="w-4 h-4 mr-2" />
+        {report.date_of_report}
+      </p>
     </motion.div>
   ), [])
 
@@ -270,7 +273,7 @@ export default function PatientReports({ onClose }) {
   }, [reports, globalSearch])
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 bg-blue-50 min-h-screen">
       <button
         onClick={onClose}
         className="mb-4 flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-300"
@@ -293,7 +296,7 @@ export default function PatientReports({ onClose }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.5 }}
-              className="bg-white p-6 rounded-lg shadow-lg"
+              className="bg-white p-6 rounded-lg shadow-lg border border-blue-200"
             >
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -305,7 +308,7 @@ export default function PatientReports({ onClose }) {
                 Back to Reports
               </motion.button>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-                <h2 className="text-2xl font-bold mb-2 sm:mb-0">{selectedReport.report_type}</h2>
+                <h2 className="text-2xl font-bold mb-2 sm:mb-0 text-blue-800">{selectedReport.report_type}</h2>
                 <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -329,25 +332,34 @@ export default function PatientReports({ onClose }) {
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div>
-                  <p className="text-sm text-gray-600">Report Date</p>
-                  <p className="font-semibold">{selectedReport.date_of_report}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div className="flex items-center">
+                  <Calendar className="w-5 h-5 mr-2 text-blue-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Report Date</p>
+                    <p className="font-semibold text-blue-800">{selectedReport.date_of_report}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600">Collection Date</p>
-                  <p className="font-semibold">{selectedReport.date_of_collection}</p>
+                <div className="flex items-center">
+                  <Clock className="w-5 h-5 mr-2 text-blue-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Collection Date</p>
+                    <p className="font-semibold text-blue-800">{selectedReport.date_of_collection}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600">Doctor</p>
-                  <p className="font-semibold">{selectedReport.doctor_name}</p>
+                <div className="flex items-center">
+                  <User className="w-5 h-5 mr-2 text-blue-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Doctor</p>
+                    <p className="font-semibold text-blue-800">{selectedReport.doctor_name}</p>
+                  </div>
                 </div>
               </div>
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">Summary</h3>
-                <p className="text-gray-700">{selectedReport.summary}</p>
+              <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                <h3 className="text-lg font-semibold mb-2 text-blue-800">Summary</h3>
+                <p className="text-blue-700">{selectedReport.summary}</p>
               </div>
-              <h3 className="text-lg font-semibold mb-4">Detailed Results</h3>
+              <h3 className="text-lg font-semibold mb-4 text-blue-800">Detailed Results</h3>
               <div className="mb-4 flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-grow">
                   <input
@@ -355,14 +367,14 @@ export default function PatientReports({ onClose }) {
                     placeholder="Search results"
                     value={localSearch}
                     onChange={handleLocalSearchChange}
-                    className="w-full pl-10 pr-4 py-2 border rounded-md"
+                    className="w-full pl-10 pr-4 py-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400" />
                 </div>
                 <select
                   value={localRangeFilter}
                   onChange={handleLocalRangeFilterChange}
-                  className="p-2 border rounded-md"
+                  className="p-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All Results</option>
                   <option value="inRange">In Range</option>
@@ -396,8 +408,8 @@ export default function PatientReports({ onClose }) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <h1 className="text-3xl font-bold mb-6 flex items-center">
-              <FileText className="w-8 h-8 mr-2" />
+            <h1 className="text-3xl font-bold mb-6 flex items-center text-blue-800">
+              <Clipboard className="w-8 h-8 mr-2 text-blue-600" />
               Your Reports
             </h1>
             <div className="mb-6 relative">
@@ -406,9 +418,9 @@ export default function PatientReports({ onClose }) {
                 placeholder="Search across all reports"
                 value={globalSearch}
                 onChange={handleGlobalSearchChange}
-                className="w-full pl-10 pr-4 py-2 border rounded-md"
+                className="w-full pl-10 pr-4 py-2 border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredReports.map((report, index) => (

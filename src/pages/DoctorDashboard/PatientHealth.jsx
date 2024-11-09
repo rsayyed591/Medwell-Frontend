@@ -1,7 +1,7 @@
 import React from 'react'
 import { Line } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js'
-import { AnimatedCard, CircularMetric } from '../Patient/SharedComponents'
+import { motion } from 'framer-motion'
 import CombinedChat from "../Chatbots/CombinedChat"
 import { Activity, Droplet, Thermometer, Heart, Zap, Clipboard, ArrowLeft } from 'lucide-react'
 
@@ -141,14 +141,62 @@ const LineChart = ({ data, color, label }) => {
   return <Line data={chartData} options={options} />
 }
 
+const AnimatedCard = ({ children, index, delay = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 50 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: index * 0.1 + delay }}
+  >
+    {children}
+  </motion.div>
+)
+
+const CircularMetric = ({ value, total, label, icon: Icon, color }) => {
+  const percentage = (value / total) * 100
+  return (
+    <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-lg font-semibold text-gray-800">{label}</h3>
+        <Icon className={`w-6 h-6 ${color}`} />
+      </div>
+      <div className="flex items-center">
+        <div className="relative w-20 h-20">
+          <svg className="w-full h-full" viewBox="0 0 36 36">
+            <path
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none"
+              stroke="#E6E6E6"
+              strokeWidth="2"
+            />
+            <path
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none"
+              stroke={color}
+              strokeWidth="2"
+              strokeDasharray={`${percentage}, 100`}
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-gray-800">
+            {value}
+          </div>
+        </div>
+        <div className="ml-4">
+          <p className="text-sm text-gray-500">Total: {total}</p>
+          <p className="text-sm font-medium text-gray-800">{percentage.toFixed(1)}%</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function PatientHealth({ patientId, onClose }) {
   const charts = [
-    { label: 'Hemoglobin', data: dummyResponse.data.hemoglobin.map(Number), color: '#FF6384', icon: Droplet },
-    { label: 'RBC Count', data: dummyResponse.data.rbc_count.map(Number), color: '#36A2EB', icon: Thermometer },
-    { label: 'WBC Count', data: dummyResponse.data.wbc_count.map(Number), color: '#FFCE56', icon: Activity },
-    { label: 'Platelet Count', data: dummyResponse.data.platelet_count.map(Number), color: '#4BC0C0', icon: Heart },
-    { label: 'PCV', data: dummyResponse.data.pcv.map(Number), color: '#9966FF', icon: Zap },
-    { label: 'Cholesterol', data: dummyResponse.data.sr_cholestrol.filter(Boolean).map(Number), color: '#FF9F40', icon: Clipboard }
+    { label: 'Hemoglobin', data: dummyResponse.data.hemoglobin.map(Number), color: '#9333ea', icon: Droplet },
+    { label: 'RBC Count', data: dummyResponse.data.rbc_count.map(Number), color: '#7e22ce', icon: Thermometer },
+    { label: 'WBC Count', data: dummyResponse.data.wbc_count.map(Number), color: '#6b21a8', icon: Activity },
+    { label: 'Platelet Count', data: dummyResponse.data.platelet_count.map(Number), color: '#581c87', icon: Heart },
+    { label: 'PCV', data: dummyResponse.data.pcv.map(Number), color: '#4c1d95', icon: Zap },
+    { label: 'Cholesterol', data: dummyResponse.data.sr_cholestrol.filter(Boolean).map(Number), color: '#3b0764', icon: Clipboard }
   ]
 
   return (
@@ -156,7 +204,7 @@ export default function PatientHealth({ patientId, onClose }) {
       <div className="mb-6">
         <button
           onClick={onClose}
-          className="mb-4 flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-300"
+          className="mb-4 flex items-center text-purple-600 hover:text-purple-800 transition-colors duration-300"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Patients
@@ -187,7 +235,7 @@ export default function PatientHealth({ patientId, onClose }) {
               total={Math.max(...chart.data)}
               label={chart.label}
               icon={chart.icon}
-              color={chart.color}
+              color={`text-${chart.color}`}
             />
           </AnimatedCard>
         ))}

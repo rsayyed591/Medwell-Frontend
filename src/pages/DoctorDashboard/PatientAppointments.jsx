@@ -1,11 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, momentLocalizer, Views } from 'react-big-calendar'
 import moment from 'moment'
-import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { ChevronLeft, ChevronRight, User, Clock, CalendarDays, FileText, X } from 'lucide-react'
-
-const localizer = momentLocalizer(moment)
 
 const initialAppointments = [
   {
@@ -37,35 +33,17 @@ const initialAppointments = [
   }
 ]
 
-const messages = {
-  allDay: 'All Day',
-  previous: 'Previous',
-  next: 'Next',
-  today: 'Today',
-  month: 'Month',
-  week: 'Week',
-  day: 'Day',
-  agenda: 'Agenda',
-  date: 'Date',
-  time: 'Time',
-  event: 'Event',
-  noEventsInRange: 'No appointments in this time range.'
-}
-
-export function PatientAppointments() {
+export default function PatientAppointments() {
   const [appointments, setAppointments] = useState(initialAppointments)
   const [selectedAppointment, setSelectedAppointment] = useState(null)
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [currentView, setCurrentView] = useState(Views.WEEK)
   const [todayAppointments, setTodayAppointments] = useState([])
   const [futureAppointments, setFutureAppointments] = useState([])
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 768
-      setIsMobile(mobile)
-      setCurrentView(mobile ? Views.DAY : Views.WEEK)
+      setIsMobile(window.innerWidth < 768)
     }
     handleResize()
     window.addEventListener('resize', handleResize)
@@ -95,80 +73,116 @@ export function PatientAppointments() {
 
   const handleNavigate = useCallback((action) => {
     setCurrentDate(prevDate => {
-      const newDate = new Date(prevDate);
+      const newDate = new Date(prevDate)
       if (action === 'PREV') {
-        newDate.setDate(newDate.getDate() - (isMobile ? 1 : 7));
+        newDate.setDate(newDate.getDate() - 7)
       } else if (action === 'NEXT') {
-        newDate.setDate(newDate.getDate() + (isMobile ? 1 : 7));
+        newDate.setDate(newDate.getDate() + 7)
       } else if (action === 'TODAY') {
-        return new Date();
+        return new Date()
       }
-      const day = newDate.getDay();
-      newDate.setDate(newDate.getDate() - day);
-      return newDate;
-    });
-  }, [isMobile]);
+      return newDate
+    })
+  }, [])
 
   const formatDateRange = (date) => {
-    if (isMobile) {
-      return moment(date).format('MMMM D, YYYY');
-    }
-    const start = moment(date).startOf('week');
-    const end = moment(date).endOf('week');
-    return `${start.format('MMM D')} - ${end.format('MMM D, YYYY')}`;
-  };
-
-  const handleViewChange = useCallback((newView) => {
-    setCurrentView(newView)
-  }, [])
-
-  const eventStyleGetter = useCallback((event) => {
-    return {
-      style: {
-        backgroundColor: event.color,
-        borderRadius: '4px',
-        opacity: 0.8,
-        color: 'white',
-        border: '0px',
-        display: 'block'
-      }
-    }
-  }, [])
+    const start = moment(date).startOf('week')
+    const end = moment(date).endOf('week')
+    return `${start.format('MMM D')} - ${end.format('MMM D, YYYY')}`
+  }
 
   const AppointmentCard = ({ appointment }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="bg-white p-4 rounded-lg shadow-md mb-4 hover:shadow-lg transition-shadow duration-200"
+      className="bg-white p-4 rounded-lg shadow-md mb-4 hover:shadow-lg transition-shadow duration-200 border-l-4 border-blue-500"
       onClick={() => handleSelectEvent(appointment)}
     >
-      <h3 className="font-semibold text-lg mb-2">{appointment.title}</h3>
+      <h3 className="font-semibold text-lg mb-2 text-blue-800">{appointment.title}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
         <div className="flex items-center">
           <User className="w-4 h-4 mr-2 text-blue-500" />
-          <span>{appointment.patient}</span>
+          <span className="text-blue-700">{appointment.patient}</span>
         </div>
         <div className="flex items-center">
           <Clock className="w-4 h-4 mr-2 text-blue-500" />
-          <span>{moment(appointment.start).format('h:mm A')}</span>
+          <span className="text-blue-700">{moment(appointment.start).format('h:mm A')}</span>
         </div>
         <div className="flex items-center">
           <CalendarDays className="w-4 h-4 mr-2 text-blue-500" />
-          <span>{moment(appointment.start).format('MMM D, YYYY')}</span>
+          <span className="text-blue-700">{moment(appointment.start).format('MMM D, YYYY')}</span>
         </div>
         <div className="flex items-center">
           <FileText className="w-4 h-4 mr-2 text-blue-500" />
-          <span className="truncate">{appointment.notes}</span>
+          <span className="text-blue-700 truncate">{appointment.notes}</span>
         </div>
       </div>
     </motion.div>
   )
 
+  const WeeklyCalendar = () => {
+    const weekStart = moment(currentDate).startOf('week')
+    const weekDays = Array.from({ length: 7 }, (_, i) => moment(weekStart).add(i, 'days'))
+    const timeSlots = Array.from({ length: 24 }, (_, i) => moment().startOf('day').add(i, 'hours'))
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="p-2 border bg-blue-50"></th>
+              {timeSlots.map((time, index) => (
+                <th key={index} className="p-2 border bg-blue-50 min-width-100 text-blue-800">
+                  {time.format('h:mm A')}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {weekDays.map((day, dayIndex) => (
+              <tr key={dayIndex}>
+                <td className="p-2 border text-center font-semibold relative bg-blue-100 text-blue-800">
+                  {day.format('ddd, MMM D')}
+                  {appointments.some(app => moment(app.start).isSame(day, 'day')) && (
+                    <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                  )}
+                </td>
+                {timeSlots.map((time, timeIndex) => {
+                  const cellDateTime = moment(day).set({
+                    hour: time.get('hour'),
+                    minute: time.get('minute'),
+                  })
+                  const appointmentsInSlot = appointments.filter(app => 
+                    moment(app.start).isSame(cellDateTime, 'hour')
+                  )
+                  return (
+                    <td key={timeIndex} className="p-2 border relative min-height-50 hover:bg-blue-50 transition-colors duration-200">
+                      {appointmentsInSlot.map((app, appIndex) => (
+                        <div
+                          key={appIndex}
+                          className="absolute inset-0 flex items-center justify-center text-xs cursor-pointer text-white rounded-md"
+                          style={{ backgroundColor: app.color }}
+                          onClick={() => handleSelectEvent(app)}
+                        >
+                          {app.title}
+                        </div>
+                      ))}
+                    </td>
+                  )
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-0">Appointment</h1>
-      <div className="flex flex-col md:flex-row gap-4 md:gap-8 max-w-7xl mx-auto px-4 py-4 md:py-8">
+    <div className="container mx-auto px-4 py-8 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+      <h1 className="text-3xl font-bold text-blue-800 mb-6">Appointments</h1>
+      <div className="flex flex-col md:flex-row gap-4 md:gap-8 max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -176,9 +190,9 @@ export function PatientAppointments() {
           className="w-full md:w-1/3"
         >
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-md">
-            <h2 className="text-xl md:text-2xl font-semibold mb-4">Today's Appointments</h2>
+            <h2 className="text-xl md:text-2xl font-semibold mb-4 text-blue-800">Today's Appointments</h2>
             {todayAppointments.length === 0 ? (
-              <p className="text-gray-500">No appointments scheduled for today</p>
+              <p className="text-blue-600">No appointments scheduled for today</p>
             ) : (
               <div className="space-y-4">
                 {todayAppointments.map(appointment => (
@@ -187,9 +201,9 @@ export function PatientAppointments() {
               </div>
             )}
             
-            <h2 className="text-xl md:text-2xl font-semibold mb-4 mt-8">Upcoming Appointments</h2>
+            <h2 className="text-xl md:text-2xl font-semibold mb-4 mt-8 text-blue-800">Upcoming Appointments</h2>
             {futureAppointments.length === 0 ? (
-              <p className="text-gray-500">No upcoming appointments scheduled</p>
+              <p className="text-blue-600">No upcoming appointments scheduled</p>
             ) : (
               <div className="space-y-4">
                 {futureAppointments.map(appointment => (
@@ -209,37 +223,21 @@ export function PatientAppointments() {
             <div className="flex justify-between items-center mb-4 md:mb-8">
               <button 
                 onClick={() => handleNavigate('PREV')} 
-                className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+                className="p-2 rounded-full hover:bg-blue-100 transition-colors duration-200 text-blue-600"
               >
                 <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
               </button>
-              <span className="text-base md:text-lg lg:text-2xl font-medium">
+              <span className="text-base md:text-lg lg:text-2xl font-medium text-blue-800">
                 {formatDateRange(currentDate)}
               </span>
               <button 
                 onClick={() => handleNavigate('NEXT')} 
-                className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+                className="p-2 rounded-full hover:bg-blue-100 transition-colors duration-200 text-blue-600"
               >
                 <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
               </button>
             </div>
-            <Calendar
-              localizer={localizer}
-              events={appointments}
-              startAccessor="start"
-              endAccessor="end"
-              style={{ height: isMobile ? 400 : 600 }}
-              view={currentView}
-              onView={handleViewChange}
-              views={isMobile ? [Views.DAY] : [Views.WEEK, Views.DAY]}
-              date={currentDate}
-              onNavigate={setCurrentDate}
-              eventPropGetter={eventStyleGetter}
-              onSelectEvent={handleSelectEvent}
-              messages={messages}
-              className="rounded-lg border border-gray-200"
-              toolbar={false}
-            />
+            <WeeklyCalendar />
           </div>
         </motion.div>
         <AnimatePresence>
@@ -257,10 +255,10 @@ export function PatientAppointments() {
                 className="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md"
               >
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg md:text-xl lg:text-2xl font-semibold">{selectedAppointment.title}</h2>
+                  <h2 className="text-lg md:text-xl lg:text-2xl font-semibold text-blue-800">{selectedAppointment.title}</h2>
                   <button 
                     onClick={() => setSelectedAppointment(null)} 
-                    className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+                    className="p-2 rounded-full hover:bg-blue-100 transition-colors duration-200 text-blue-600"
                   >
                     <X className="w-6 h-6" />
                   </button>
@@ -268,19 +266,19 @@ export function PatientAppointments() {
                 <div className="space-y-3 text-sm md:text-base">
                   <p className="flex items-center">
                     <User className="w-4 h-4 mr-2 text-blue-500" />
-                    <strong>Patient:</strong> {selectedAppointment.patient}
+                    <strong className="text-blue-700">Patient:</strong> <span className="text-blue-600 ml-1">{selectedAppointment.patient}</span>
                   </p>
                   <p className="flex items-center">
                     <Clock className="w-4 h-4 mr-2 text-blue-500" />
-                    <strong>Start:</strong> {moment(selectedAppointment.start).format('MMMM D, YYYY h:mm A')}
+                    <strong className="text-blue-700">Start:</strong> <span className="text-blue-600 ml-1">{moment(selectedAppointment.start).format('MMMM D, YYYY h:mm A')}</span>
                   </p>
                   <p className="flex items-center">
                     <Clock className="w-4 h-4 mr-2 text-blue-500" />
-                    <strong>End:</strong> {moment(selectedAppointment.end).format('MMMM D, YYYY h:mm A')}
+                    <strong className="text-blue-700">End:</strong> <span className="text-blue-600 ml-1">{moment(selectedAppointment.end).format('MMMM D, YYYY h:mm A')}</span>
                   </p>
                   <p className="flex items-center">
                     <FileText className="w-4 h-4 mr-2 text-blue-500" />
-                    <strong>Notes:</strong> {selectedAppointment.notes || 'No notes'}
+                    <strong className="text-blue-700">Notes:</strong> <span className="text-blue-600 ml-1">{selectedAppointment.notes || 'No notes'}</span>
                   </p>
                 </div>
               </motion.div>
