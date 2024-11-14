@@ -97,7 +97,7 @@ export default function HospitalDashboard() {
             animate={{ x: 0 }}
             exit={isMobile ? { x: -300 } : {}}
             transition={{ duration: 0.3 }}
-            className={`bg-white shadow-lg overflow-hidden flex flex-col ${
+            className={`bg-gradient-to-br shadow-lg overflow-hidden flex flex-col ${
               isMobile ? 'fixed inset-y-0 left-0 z-50' : 'relative'
             }`}
             style={{ width: isMobile ? '300px' : isSidebarOpen ? '300px' : '64px' }}

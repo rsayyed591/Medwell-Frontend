@@ -161,7 +161,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-4 bg-gray-100">
+    <div className="flex flex-col gap-6 p-4">
       <style jsx global>{`
         .react-calendar {
           border: none;
