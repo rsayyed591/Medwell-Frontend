@@ -8,14 +8,15 @@ import Dashboard from './pages/Dashboard'
 import About from './pages/About'
 import Pricing from './pages/Pricing'
 import Hero from './pages/Hero'
-import  SignUp  from './pages/Auth/SignUp'
-import  Login  from './pages/Auth/Login'
+import SignUp from './pages/Auth/SignUp'
+import Login from './pages/Auth/Login'
 import UserSelect from './pages/UserSelect'
-import  DoctorLogin  from './pages/Auth/DoctorLogin'
-import  DoctorSignUp  from './pages/Auth/DoctorSignup'
+import DoctorLogin from './pages/Auth/DoctorLogin'
+import DoctorSignUp from './pages/Auth/DoctorSignup'
 import HospitalLogin from './pages/Auth/HospitalLogin'
-import  HospitalSignUp  from './pages/Auth/HospitalSignup'
+import HospitalSignUp from './pages/Auth/HospitalSignup'
 import DoctorDashboard from './pages/DoctorDashboard/DoctorDashboard'
+import HospitalDashboard from './pages/Hospital/HospitalDashboard'
 function LoaderWrapper() {
   const [isLoading, setIsLoading] = useState(true)
   const location = useLocation()
@@ -61,6 +62,7 @@ function Layout() {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/doctordashboard" element={<DoctorDashboard />} />
+          <Route path="/hospitaldashboard" element={<HospitalDashboard />} />
           <Route path="/about" element={<About />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />

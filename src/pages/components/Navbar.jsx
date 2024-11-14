@@ -13,6 +13,7 @@ export default function Navbar() {
     { name: 'Home', link: '/', icon: Heart },
     { name: 'Dashboard', link: '/Dashboard', icon: Activity },
     { name: 'DDashboard', link: '/doctordashboard', icon: Activity },
+    { name: 'HDashboard', link: '/hospitaldashboard', icon: Activity },
     { name: 'Pricing', link: '/pricing', icon: DollarSign },
     { name: 'About', link: '/about', icon: FileText },
   ]
