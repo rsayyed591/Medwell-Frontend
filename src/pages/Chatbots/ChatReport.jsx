@@ -11,6 +11,34 @@ export default function ChatReport() {
   const [error, setError] = useState('')
   const chatRef = useRef(null)
   const messagesEndRef = useRef(null)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const cycleRef = useRef(null)
+
+  useEffect(() => {
+    const expandCycle = () => {
+      setIsExpanded(true)
+      setTimeout(() => {
+        setIsExpanded(false)
+      }, 7000)
+    }
+
+    const startCycle = () => {
+      expandCycle()
+      cycleRef.current = setInterval(() => {
+        expandCycle()
+      }, 17000)
+    }
+
+    if (!isOpen) {
+      startCycle()
+    }
+
+    return () => {
+      if (cycleRef.current) {
+        clearInterval(cycleRef.current)
+      }
+    }
+  }, [isOpen])
 
   const toggleChat = async () => {
     if (!isOpen) {
@@ -193,10 +221,21 @@ export default function ChatReport() {
         ) : (
           <button
             onClick={toggleChat}
-            className="bg-green-500 text-white rounded-full p-3 shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400"
+            className={`bg-green-500 text-white rounded-full shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-300 ease-in-out ${
+              isExpanded ? 'px-4 py-3' : 'p-3'
+            }`}
             aria-label="Open chat report"
           >
-            <FileText size={24} />
+            <div className="flex items-center">
+              <FileText size={24} className={isExpanded ? 'mr-2' : ''} />
+              <span 
+                className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
+                  isExpanded ? 'max-w-[200px] opacity-100' : 'max-w-0 opacity-0'
+                }`}
+              >
+                Chat with MedBuddy
+              </span>
+            </div>
           </button>
         )}
       </div>

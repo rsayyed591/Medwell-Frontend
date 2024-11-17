@@ -3,16 +3,23 @@ import { Bot, X } from 'lucide-react'
 
 export default function Chat() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
   const [iframeLoaded, setIframeLoaded] = useState(false)
   const chatRef = useRef(null)
+  const cycleRef = useRef(null)
 
-  const toggleChat = () => setIsOpen(!isOpen)
+  const toggleChat = () => {
+    setIsOpen(!isOpen)
+    if (!isOpen) {
+      setIsExpanded(false)
+    }
+  }
 
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
         setIframeLoaded(true)
-      }, 1000) 
+      }, 1000)
 
       return () => clearTimeout(timer)
     } else {
@@ -33,14 +40,40 @@ export default function Chat() {
     }
   }, [])
 
+  useEffect(() => {
+    const expandCycle = () => {
+      setIsExpanded(true)
+      setTimeout(() => {
+        setIsExpanded(false)
+      }, 7000)
+    }
+
+    const startCycle = () => {
+      expandCycle()
+      cycleRef.current = setInterval(() => {
+        expandCycle()
+      }, 17000)
+    }
+
+    if (!isOpen) {
+      startCycle()
+    }
+
+    return () => {
+      if (cycleRef.current) {
+        clearInterval(cycleRef.current)
+      }
+    }
+  }, [isOpen])
+
   return (
     <div className="fixed bottom-4 right-4 z-50" ref={chatRef}>
       {isOpen ? (
         <div className="bg-blue-400 rounded-lg shadow-xl w-[350px] h-[430px] flex flex-col overflow-hidden">
-          <div className="bg-primary text-primary-foreground p-2 flex justify-end items-center">
+          <div className="bg-blue-500 text-white p-2 flex justify-end items-center">
             <button 
               onClick={toggleChat} 
-              className="text-primary-foreground hover:text-gray-200"
+              className="text-white hover:text-gray-200"
               aria-label="Close chat"
             >
               <X size={20} />
@@ -49,7 +82,7 @@ export default function Chat() {
           <div className="flex-1 relative">
             {!iframeLoaded && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
               </div>
             )}
             <iframe
@@ -66,10 +99,21 @@ export default function Chat() {
       ) : (
         <button
           onClick={toggleChat}
-          className="bg-blue-500 text-white rounded-full p-3 shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className={`bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 ease-in-out flex items-center justify-center overflow-hidden h-12 ${
+            isExpanded ? 'w-48' : 'w-12'
+          }`}
           aria-label="Open chat"
         >
-          <Bot size={24} />
+          {isExpanded ? (
+            <>
+              <Bot size={24} className="mr-2" />
+              <span className="whitespace-nowrap transition-opacity duration-300">
+                Chat with Agasthya
+              </span>
+            </>
+          ) : (
+            <Bot size={24} />
+          )}
         </button>
       )}
     </div>
