@@ -70,18 +70,18 @@ export default function Appointments() {
         <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">Appointment Management</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-green-600">
-            <h2 className="text-xl font-semibold mb-4 text-green-800">Upcoming Appointments</h2>
+          <div className="bg-white bg-opacity-80 rounded-lg shadow-md p-4">
+            <h2 className="text-xl font-semibold mb-4 text-black">Upcoming Appointments</h2>
             <div className="space-y-4">
               {appointments.map((appointment) => (
                 <div 
                   key={appointment.id} 
-                  className="bg-gray-50 p-4 rounded-md cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200 hover:border-green-500"
+                  className="bg-gray-100 p-4 rounded-md cursor-pointer hover:bg-gray-200 transition-colors"
                   onClick={() => handleAppointmentClick(appointment)}
                 >
-                  <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-2">
-                    <span className="font-medium text-green-800">{appointment.patientName}</span>
-                    <span className="text-sm text-gray-500">{appointment.date}</span>
+                  <div className="flex justify-between items-center border-b border-gray-300 pb-2 mb-2">
+                    <span className="font-medium text-black">{appointment.patientName}</span>
+                    <span className="text-sm text-gray-600">{appointment.date}</span>
                   </div>
                   <div className="flex items-center text-sm text-gray-600 mb-1">
                     <User className="h-4 w-4 mr-2 text-green-600" />
@@ -96,18 +96,18 @@ export default function Appointments() {
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-green-600">
-            <h2 className="text-xl font-semibold mb-4 text-green-800">Calendar</h2>
+          <div className="bg-white bg-opacity-80 rounded-lg shadow-md p-4">
+            <h2 className="text-xl font-semibold mb-4 text-black">Calendar</h2>
             <style jsx global>{`
               .react-calendar {
                 border: none;
                 width: 100%;
-                background: white;
+                background: transparent;
                 font-family: inherit;
                 line-height: 1.125em;
               }
               .react-calendar__navigation button {
-                color: #15803d;
+                color: #000;
                 min-width: 44px;
                 background: none;
                 font-size: 16px;
@@ -115,10 +115,10 @@ export default function Appointments() {
               }
               .react-calendar__navigation button:enabled:hover,
               .react-calendar__navigation button:enabled:focus {
-                background-color: #f0fdf4;
+                background-color: #e6e6e6;
               }
               .react-calendar__navigation button[disabled] {
-                background-color: #f0fdf4;
+                background-color: #f0f0f0;
               }
               .react-calendar__tile {
                 padding: 10px 6px;
@@ -130,20 +130,20 @@ export default function Appointments() {
               }
               .react-calendar__tile:enabled:hover,
               .react-calendar__tile:enabled:focus {
-                background-color: #f0fdf4;
-                color: #15803d;
+                background-color: #e6e6e6;
+                color: #000;
               }
               .react-calendar__tile--now {
-                background: #f0fdf4;
-                color: #15803d;
+                background: #f0f0f0;
+                color: #000;
               }
               .react-calendar__tile--active {
-                background: #15803d;
+                background: #22c55e;
                 color: white;
               }
               .react-calendar__tile--active:enabled:hover,
               .react-calendar__tile--active:enabled:focus {
-                background: #15803d;
+                background: #22c55e;
                 color: white;
               }
               .react-calendar__month-view__weekdays {
@@ -151,26 +151,26 @@ export default function Appointments() {
                 text-transform: uppercase;
                 font-weight: bold;
                 font-size: 12px;
-                color: #15803d;
+                color: #000;
               }
               .react-calendar__month-view__days__day--weekend {
-                color: #166534;
+                color: #d10000;
               }
             `}</style>
             <Calendar
               onChange={handleDateChange}
               value={selectedDate}
-              className="border-0 shadow-sm"
-              tileClassName="text-sm hover:bg-green-50"
+              className="shadow-sm"
+              tileClassName="text-sm hover:bg-gray-200"
             />
           </div>
         </div>
 
         {selectedAppointment && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md border-t-4 border-green-600">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-green-800">Appointment Details</h2>
+                <h2 className="text-xl font-semibold text-black">Appointment Details</h2>
                 <button
                   onClick={() => setSelectedAppointment(null)}
                   className="text-gray-500 hover:text-gray-700"
@@ -193,8 +193,8 @@ export default function Appointments() {
                     <p className="text-sm text-gray-600">{selectedAppointment.time}</p>
                   </div>
                 </div>
-                <div className="bg-green-50 rounded-md p-2">
-                  <p className="text-sm text-green-800">
+                <div className="bg-gray-100 rounded-md p-2">
+                  <p className="text-sm text-gray-800">
                     Status: <span className="font-medium">{selectedAppointment.status}</span>
                   </p>
                 </div>
@@ -205,12 +205,12 @@ export default function Appointments() {
                   <Calendar
                     onChange={handleDateChange}
                     value={selectedDate}
-                    className="border-0 mb-4"
+                    className="mb-4"
                   />
                   <div className="flex justify-end space-x-2">
                     <button
                       onClick={() => setIsRescheduling(false)}
-                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors border border-gray-300"
+                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
                     >
                       Cancel
                     </button>
