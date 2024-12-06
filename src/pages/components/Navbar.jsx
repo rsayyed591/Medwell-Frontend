@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Bars3BottomRightIcon, XMarkIcon } from '@heroicons/react/24/solid'
-import { LogOut, Heart, Activity, FileText, DollarSign } from 'lucide-react'
+import { LogOut, Heart, Activity, FileText, DollarSign, Stethoscope } from 'lucide-react'
 import { useAuth } from '../Auth/useAuth'
 
 export default function Navbar() {
@@ -16,6 +16,7 @@ export default function Navbar() {
     { name: 'HDashboard', link: '/hospitaldashboard', icon: Activity },
     { name: 'Pricing', link: '/pricing', icon: DollarSign },
     { name: 'About', link: '/about', icon: FileText },
+    { name: 'DoctorSearch', link: '/doctorsearch', icon: Stethoscope },
   ]
 
   const useAuthState = () => {
