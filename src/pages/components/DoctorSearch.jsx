@@ -17,7 +17,7 @@ const DoctorIcon = new L.Icon({
 const dummyDoctors = [
   { name: "Dr. Sanika", specialty: "General Physician", address: "123 MG Road, Bangalore, Karnataka", latitude: 12.9716, longitude: 77.5946 },
   { name: "Dr. Nishikant", specialty: "Pediatrician", address: "456 Anna Salai, Chennai, Tamil Nadu", latitude: 13.0827, longitude: 80.2707 },
-  { name: "Mc. Rohit Seshmukh", specialty: "Cardiologist", address: "789 SV Road, Mumbai, Maharashtra", latitude: 19.0760, longitude: 72.8777 },
+  { name: "Mc. Rohit Seshmukh", specialty: "Church priest", address: "789 SV Road, Mumbai, Maharashtra", latitude: 19.0760, longitude: 72.8777 },
   { name: "Dr. Rehan 👁️sha", specialty: "Gynecologist", address: "101 Camac Street, Kolkata, West Bengal", latitude: 22.5726, longitude: 88.3639 },
   { name: "Dr. Vivek Backender", specialty: "Orthopedic Surgeon", address: "202 Banjara Hills, Hyderabad, Telangana", latitude: 17.4126, longitude: 78.4387 },
 ]
