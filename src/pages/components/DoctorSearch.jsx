@@ -3,7 +3,9 @@ import axios from 'axios'
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
+import { Link } from "react-router-dom";
 import { google_ngrok_url } from '../../utils/global'
+import { MapPin, Search, AlertTriangle, Stethoscope, Pill, FileText, UserPlus } from 'lucide-react'
 
 const DoctorIcon = new L.Icon({
   iconUrl: 'modiji.svg',
@@ -19,11 +21,8 @@ const dummyDoctors = [
   { id: 2, name: "Dr. Nishikant", specialty: "Pediatrician", address: "456 Anna Salai, Chennai, Tamil Nadu", latitude: 13.0827, longitude: 80.2707 },
   { id: 3, name: "Mc. Rohit Seshmukh", specialty: "Church priest", address: "789 SV Road, Mumbai, Maharashtra", latitude: 19.0760, longitude: 72.8777 },
   { id: 4, name: "Dr. Rehan 👁️sha", specialty: "Gynecologist", address: "101 Camac Street, Kolkata, West Bengal", latitude: 22.5726, longitude: 88.3639 },
-  { id: 5, name: "Dr. Vivek Backender", specialty: "Orthopedic Surgeon", address: "202 Banjara Hills, Hyderabad, Telangana", latitude: 17.4126, longitude: 78.4387 },
-  { id: 5, name: "Dr. Vivek Backender", specialty: "Orthopedic Surgeon", address: "202 Banjara Hills, Hyderabad, Telangana", latitude: 17.4126, longitude: 78.4387 },
-  { id: 5, name: "Dr. Vivek Backender", specialty: "Orthopedic Surgeon", address: "202 Banjara Hills, Hyderabad, Telangana", latitude: 17.4126, longitude: 78.4387 },
-  { id: 5, name: "Dr. Vivek Backender", specialty: "Orthopedic Surgeon", address: "202 Banjara Hills, Hyderabad, Telangana", latitude: 17.4126, longitude: 78.4387 },
-  { id: 5, name: "Dr. Vivek Backender", specialty: "Orthopedic Surgeon", address: "202 Banjara Hills, Hyderabad, Telangana", latitude: 17.4126, longitude: 78.4387 },
+  { id: 5, name: "Dr. Rehan", specialty: "Other", address: "16 SV Road, Mumbai, Maharashtra", latitude: 18.5726, longitude: 73.3639 },
+  { id: 6, name: "Dr. Vivek Backender", specialty: "Orthopedic Surgeon", address: "202 Banjara Hills, Hyderabad, Telangana", latitude: 17.4126, longitude: 78.4387 },
 ]
 
 function MapUpdater({ center, onMapClick }) {
@@ -45,12 +44,30 @@ export default function DoctorSearch() {
   const [filteredDoctors, setFilteredDoctors] = useState(dummyDoctors)
   const [mapCenter, setMapCenter] = useState([20.5937, 78.9629])
   const [isBlurred, setIsBlurred] = useState(true)
-  const [location, setLocation] = useState('')
   const [error, setError] = useState(null)
   const [specialtyFilter, setSpecialtyFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedDoctor, setSelectedDoctor] = useState(null)
+  const [locationOption, setLocationOption] = useState('default')
+  const [userLocation, setUserLocation] = useState(null)
   const doctorsPerPage = 5
+
+  // Assume this function fetches the user's address from the backend
+  const fetchUserAddress = async () => {
+    // This is a placeholder. Replace with actual API call to your backend
+    return { latitude: 19.0760, longitude: 72.8777, address: "User's Address, City, State" };
+  }
+
+  useEffect(() => {
+    // Fetch user's default location from backend when component mounts
+    fetchUserAddress().then(location => {
+      setUserLocation(location);
+      setMapCenter([location.latitude, location.longitude]);
+    }).catch(error => {
+      console.error('Error fetching user location:', error);
+      setError('Failed to fetch your default location. Please try again.');
+    });
+  }, []);
 
   const searchNearbyDoctors = useCallback(async (lat, lon) => {
     setLoading(true)
@@ -78,20 +95,25 @@ export default function DoctorSearch() {
     }
   }, [])
 
-  const handleNearbySearch = () => {
-    if (isBlurred) {
+  const handleLocationChange = async (e) => {
+    const selectedOption = e.target.value;
+    setLocationOption(selectedOption);
+
+    if (selectedOption === 'current') {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const { latitude, longitude } = position.coords
-          setMapCenter([latitude, longitude])
-          searchNearbyDoctors(latitude, longitude)
+          const { latitude, longitude } = position.coords;
+          setMapCenter([latitude, longitude]);
+          searchNearbyDoctors(latitude, longitude);
         },
         (error) => {
-          console.error('Error getting location:', error)
-          setError('Failed to get your location. Please ensure location services are enabled.')
-          setLoading(false)
+          console.error('Error getting current location:', error);
+          setError('Failed to get your current location. Please ensure location services are enabled.');
         }
-      )
+      );
+    } else if (selectedOption === 'default' && userLocation) {
+      setMapCenter([userLocation.latitude, userLocation.longitude]);
+      searchNearbyDoctors(userLocation.latitude, userLocation.longitude);
     }
   }
 
@@ -101,16 +123,25 @@ export default function DoctorSearch() {
     setError(null)
 
     try {
-      const geocodeResponse = await fetch(`https://api.openstreetmap.org/nominatim/search?format=json&q=${encodeURIComponent(location)}`)
-      const geocodeData = await geocodeResponse.json()
-
-      if (geocodeData.length === 0) {
-        throw new Error('Location not found')
+      if (locationOption === 'current') {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords
+            setMapCenter([latitude, longitude])
+            searchNearbyDoctors(latitude, longitude)
+          },
+          (error) => {
+            console.error('Error getting current location:', error)
+            setError('Failed to get your current location. Please ensure location services are enabled.')
+            setLoading(false)
+          }
+        )
+      } else if (userLocation) {
+        setMapCenter([userLocation.latitude, userLocation.longitude])
+        await searchNearbyDoctors(userLocation.latitude, userLocation.longitude)
+      } else {
+        throw new Error('No location selected')
       }
-
-      const { lat, lon } = geocodeData[0]
-      setMapCenter([parseFloat(lat), parseFloat(lon)])
-      await searchNearbyDoctors(lat, lon)
     } catch (err) {
       console.error('Error:', err)
       setError(err.message || 'An error occurred while searching for doctors.')
@@ -138,107 +169,176 @@ export default function DoctorSearch() {
   const paginate = (pageNumber) => setCurrentPage(pageNumber)
 
   return (
-    <div className="max-w-7xl mx-auto p-4 min-h-screen">
-      <div className="relative">
-        <div className={`mt-8 ${isBlurred ? 'filter blur-md' : ''}`}>
-          <div className="flex flex-col lg:flex-row gap-8">
-            <div className="lg:w-1/2">
-              <div className="mb-4">
-                <form onSubmit={handleLocationSearch} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="Enter location"
-                    className="flex-grow p-2 border rounded"
-                    required
-                  />
-                  <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-                    Search
-                  </button>
-                </form>
-              </div>
-              <div className="h-[calc(100vh-300px)] w-full rounded-lg overflow-hidden shadow-lg">
-                <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }}>
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  <MapUpdater center={mapCenter} onMapClick={handleMapClick} />
-                  {filteredDoctors.map((doctor) => (
-                    <Marker 
-                      key={doctor.id} 
-                      position={[doctor.latitude, doctor.longitude]} 
-                      icon={DoctorIcon}
-                      eventHandlers={{
-                        click: () => setSelectedDoctor(doctor),
-                      }}
-                    >
-                      <Popup>
-                        <div>
-                          <h3 className="font-bold">{doctor.name}</h3>
-                          <p className="text-sm text-gray-600">{doctor.specialty}</p>
-                          <p className="text-sm">{doctor.address}</p>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-                </MapContainer>
-              </div>
-            </div>
+    <div className="min-h-screen bg-[#27428c]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-4xl font-bold text-white text-center mb-4">Your home for health</h1>
+        <h2 className="text-2xl text-white text-center mb-8">Find Your Doctor</h2>
 
-            <div className="lg:w-1/2">
-              <h2 className="text-2xl font-bold mb-4">Doctors</h2>
-              {error && <p className="text-red-500 mb-4">{error}</p>}
-              <div className="mb-4">
-                <input
-                  type="text"
-                  value={specialtyFilter}
-                  onChange={(e) => setSpecialtyFilter(e.target.value)}
-                  placeholder="Filter by specialty"
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-              <div className="space-y-4 max-h-[calc(100vh-450px)] overflow-y-auto pr-4">
-                {currentDoctors.map((doctor) => (
-                  <div key={doctor.id} className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-                    <h3 className="font-bold text-lg text-blue-600">{doctor.name}</h3>
-                    <p className="text-gray-700">{doctor.specialty}</p>
-                    <p className="text-gray-600 text-sm mt-1">{doctor.address}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 flex justify-center">
-                {Array.from({ length: Math.ceil(filteredDoctors.length / doctorsPerPage) }, (_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => paginate(i + 1)}
-                    className={`mx-1 px-3 py-1 rounded ${currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
+        <div className="bg-white rounded-lg shadow-lg p-4 mb-8">
+          <form onSubmit={handleLocationSearch} className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 flex items-center gap-2 border-b md:border-b-0 md:border-r border-gray-300 pb-4 md:pb-0 md:pr-4">
+              <MapPin className="text-gray-400" />
+              <select
+                value={locationOption}
+                onChange={handleLocationChange}
+                className="w-full p-2 focus:outline-none"
+              >
+                <option value="default">Use default location</option>
+                <option value="current">Use current location</option>
+              </select>
             </div>
+            <div className="flex-1 flex items-center gap-2">
+              <Search className="text-gray-400" />
+              <input
+                type="text"
+                value={specialtyFilter}
+                onChange={(e) => setSpecialtyFilter(e.target.value)}
+                placeholder="Search doctors, clinics, hospitals, etc."
+                className="w-full p-2 focus:outline-none"
+              />
+            </div>
+            <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+              Search
+            </button>
+          </form>
+        </div>
+
+        <div className="mb-8">
+          <div className="flex flex-wrap gap-2">
+            {["Dermatologist", "Pediatrician", "Gynecologist", "Other"].map((specialty) => (
+              <button 
+                key={specialty}
+                onClick={() => setSpecialtyFilter(specialty)}
+                className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full hover:bg-blue-700 transition-colors"
+              >
+                {specialty}
+              </button>
+            ))}
           </div>
         </div>
 
-        {isBlurred && (
-          <div 
-            className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
-            onClick={handleNearbySearch}
-          >
-            <p className="text-2xl font-bold text-gray-800 bg-white bg-opacity-75 p-4 rounded-lg">
-              Click here to find nearby doctors
-            </p>
-          </div>
-        )}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="relative">
+            <div className={`${isBlurred ? 'filter blur-md' : ''}`}>
+              <div className="flex flex-col lg:flex-row gap-8">
+                <div className="lg:w-1/2">
+                  <div className="h-[calc(100vh-300px)] w-full rounded-lg overflow-hidden shadow-lg">
+                    <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }}>
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      />
+                      <MapUpdater center={mapCenter} onMapClick={handleMapClick} />
+                      {filteredDoctors.map((doctor) => (
+                        <Marker 
+                          key={doctor.id} 
+                          position={[doctor.latitude, doctor.longitude]} 
+                          icon={DoctorIcon}
+                          eventHandlers={{
+                            click: () => setSelectedDoctor(doctor),
+                          }}
+                        >
+                          <Popup>
+                            <div>
+                              <h3 className="font-bold">{doctor.name}</h3>
+                              <p className="text-sm text-gray-600">{doctor.specialty}</p>
+                              <p className="text-sm">{doctor.address}</p>
+                            </div>
+                          </Popup>
+                        </Marker>
+                      ))}
+                    </MapContainer>
+                  </div>
+                </div>
 
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center z-20 bg-white bg-opacity-75">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <div className="lg:w-1/2">
+                  <h2 className="text-2xl font-bold mb-4">Doctors</h2>
+                  {error && <p className="text-red-500 mb-4">{error}</p>}
+                  <div className="space-y-4 max-h-[calc(100vh-450px)] overflow-y-auto pr-4">
+                    {currentDoctors.map((doctor) => (
+                      <div key={doctor.id} className="bg-gray-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                        <h3 className="font-bold text-lg text-blue-600">{doctor.name}</h3>
+                        <p className="text-gray-700">{doctor.specialty}</p>
+                        <p className="text-gray-600 text-sm mt-1">{doctor.address}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 flex justify-center">
+                    {Array.from({ length: Math.ceil(filteredDoctors.length / doctorsPerPage) }, (_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => paginate(i + 1)}
+                        className={`mx-1 px-3 py-1 rounded ${currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {isBlurred && (
+              <div 
+                className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
+                onClick={() => setIsBlurred(false)}
+              >
+                <p className="text-2xl font-bold text-gray-800 bg-white bg-opacity-75 p-4 rounded-lg">
+                  Click here to find nearby doctors
+                </p>
+              </div>
+            )}
+
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center z-20 bg-white bg-opacity-75">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
+      </div>
+
+      <div className="bg-[#152a63] py-4 mt-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-center">
+            <Link to="/doctor/login" className="text-white hover:text-gray-200">
+              <div className="flex flex-col items-center">
+                <Stethoscope className="h-6 w-6 mb-1" />
+                <span>Doctor Login</span>
+              </div>
+            </Link>
+            <Link to="/login" className="text-white hover:text-gray-200">
+              <div className="flex flex-col items-center">
+                <Pill className="h-6 w-6 mb-1" />
+                <span>Patient Login</span>
+              </div>
+            </Link>
+            <Link to="/pricing" className="text-white hover:text-gray-200">
+              <div className="flex flex-col items-center">
+                <FileText className="h-6 w-6 mb-1" />
+                <span>Pricing</span>
+              </div>
+            </Link>
+            <a href="#" className="text-white hover:text-gray-200">
+              <div className="flex flex-col items-center">
+                <AlertTriangle className="h-6 w-6 mb-1" />
+                <span>Book test</span>
+              </div>
+            </a>
+            <a href="#" className="text-white hover:text-gray-200">
+              <div className="flex flex-col items-center">
+                <Search className="h-6 w-6 mb-1" />
+                <span>Read articles</span>
+              </div>
+            </a>
+            <Link to="/auth" className="text-white hover:text-gray-200">
+              <div className="flex flex-col items-center">
+                <UserPlus className="h-6 w-6 mb-1" />
+                <span>Get Started</span>
+              </div>
+            </Link>
+          </div>
+        </div>
       </div>
 
       {selectedDoctor && (
@@ -259,4 +359,3 @@ export default function DoctorSearch() {
     </div>
   )
 }
-
