@@ -48,26 +48,13 @@ export default function DoctorSearch() {
   const [specialtyFilter, setSpecialtyFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedDoctor, setSelectedDoctor] = useState(null)
-  const [locationOption, setLocationOption] = useState('default')
+  const [locationOption, setLocationOption] = useState('current') // Updated
   const [userLocation, setUserLocation] = useState(null)
   const doctorsPerPage = 5
-
-  // Assume this function fetches the user's address from the backend
-  const fetchUserAddress = async () => {
-    // This is a placeholder. Replace with actual API call to your backend
-    return { latitude: 19.0760, longitude: 72.8777, address: "User's Address, City, State" };
-  }
-
-  useEffect(() => {
-    // Fetch user's default location from backend when component mounts
-    fetchUserAddress().then(location => {
-      setUserLocation(location);
-      setMapCenter([location.latitude, location.longitude]);
-    }).catch(error => {
-      console.error('Error fetching user location:', error);
-      setError('Failed to fetch your default location. Please try again.');
-    });
-  }, []);
+  const [districts] = useState([
+    'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 
+    'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow'
+  ])
 
   const searchNearbyDoctors = useCallback(async (lat, lon) => {
     setLoading(true)
@@ -95,7 +82,7 @@ export default function DoctorSearch() {
     }
   }, [])
 
-  const handleLocationChange = async (e) => {
+  const handleLocationChange = async (e) => { // Updated
     const selectedOption = e.target.value;
     setLocationOption(selectedOption);
 
@@ -111,13 +98,27 @@ export default function DoctorSearch() {
           setError('Failed to get your current location. Please ensure location services are enabled.');
         }
       );
-    } else if (selectedOption === 'default' && userLocation) {
-      setMapCenter([userLocation.latitude, userLocation.longitude]);
-      searchNearbyDoctors(userLocation.latitude, userLocation.longitude);
+    } else {
+      const dummyCoordinates = {
+        'Mumbai': [19.0760, 72.8777],
+        'Delhi': [28.6139, 77.2090],
+        'Bangalore': [12.9716, 77.5946],
+        'Hyderabad': [17.3850, 78.4867],
+        'Chennai': [13.0827, 80.2707],
+        'Kolkata': [22.5726, 88.3639],
+        'Pune': [18.5204, 73.8567],
+        'Ahmedabad': [23.0225, 72.5714],
+        'Jaipur': [26.9124, 75.7873],
+        'Lucknow': [26.8467, 80.9462]
+      };
+
+      const [latitude, longitude] = dummyCoordinates[selectedOption] || [20.5937, 78.9629];
+      setMapCenter([latitude, longitude]);
+      searchNearbyDoctors(latitude, longitude);
     }
   }
 
-  const handleLocationSearch = async (e) => {
+  const handleLocationSearch = async (e) => { // Updated
     e.preventDefault()
     setLoading(true)
     setError(null)
@@ -136,11 +137,9 @@ export default function DoctorSearch() {
             setLoading(false)
           }
         )
-      } else if (userLocation) {
-        setMapCenter([userLocation.latitude, userLocation.longitude])
-        await searchNearbyDoctors(userLocation.latitude, userLocation.longitude)
       } else {
-        throw new Error('No location selected')
+        // Use the coordinates set by handleLocationChange
+        await searchNearbyDoctors(mapCenter[0], mapCenter[1])
       }
     } catch (err) {
       console.error('Error:', err)
@@ -183,8 +182,10 @@ export default function DoctorSearch() {
                 onChange={handleLocationChange}
                 className="w-full p-2 focus:outline-none"
               >
-                <option value="default">Use default location</option>
-                <option value="current">Use current location</option>
+                <option value="current">Use current location</option> 
+                {districts.map((district) => ( 
+                  <option key={district} value={district}>{district}</option>
+                ))}
               </select>
             </div>
             <div className="flex-1 flex items-center gap-2">
@@ -296,7 +297,6 @@ export default function DoctorSearch() {
             )}
           </div>
         </div>
-      </div>
 
       <div className="bg-[#152a63] py-4 mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -356,6 +356,7 @@ export default function DoctorSearch() {
           </div>
         </div>
       )}
+    </div>
     </div>
   )
 }
