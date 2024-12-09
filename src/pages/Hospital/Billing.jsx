@@ -84,16 +84,9 @@ export default function Billing() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 relative">
-      <div 
-        className="absolute inset-0 bg-cover bg-center z-0" 
-        style={{
-          backgroundImage: "url('/hospital/bg6.jpg')",
-          filter: "brightness(0.7)"
-        }}
-      ></div>
+    <div className="min-h-screen relative">
       <div className="relative z-10 p-4 md:p-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">Billing Management</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-black mb-6">Billing Management</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div className="bg-white bg-opacity-80 p-4 rounded-lg shadow-md">

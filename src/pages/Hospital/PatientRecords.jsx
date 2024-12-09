@@ -114,14 +114,7 @@ export default function PatientRecords() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 relative">
-      <div 
-        className="absolute inset-0 bg-cover bg-center z-0" 
-        style={{
-          backgroundImage: "url('/hospital/bg2.jpg')",
-          filter: "brightness(0.7)"
-        }}
-      ></div>
+    <div className="min-h-screen relative">
       <div className="relative z-10 p-4 md:p-8">
         {(selectedProfile || selectedReport) && (
           <button
@@ -133,7 +126,7 @@ export default function PatientRecords() {
           </button>
         )}
         
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-black mb-6">
           {selectedReport ? "Report Details" : selectedProfile ? `${selectedProfile.name}'s Reports` : "Patient Records"}
         </h1>
 

@@ -47,14 +47,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 relative">
-      <div 
-        className="absolute inset-0 bg-cover bg-center z-0" 
-        style={{
-          backgroundImage: "url('/hospital/bg1.jpg')",
-          filter: "brightness(0.7)"
-        }}
-      ></div>
+    <div className="min-h-screen relative">
       <div className="relative z-10 flex flex-col gap-4 p-4 md:gap-6 md:p-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white bg-opacity-90 p-4 rounded-lg shadow-md">
           <h1 className="text-xl sm:text-2xl font-bold text-green-800 mb-2 sm:mb-0">Hospital Profile</h1>
