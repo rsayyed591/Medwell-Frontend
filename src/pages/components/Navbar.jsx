@@ -105,9 +105,10 @@ export default function Navbar() {
               <li key={link.name} className="my-3 md:my-0">
                 <Link
                   to={link.link}
-                  className="text-gray-700 hover:text-blue-600 transition duration-300"
+                  className="flex items-center text-gray-700 hover:text-blue-800 transition duration-300"
                   onClick={() => setIsOpen(false)}
                 >
+                  <link.icon className="mr-2 h-5 w-5" />
                   {link.name}
                 </Link>
               </li>
