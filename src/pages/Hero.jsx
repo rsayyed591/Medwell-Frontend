@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { Activity, Calendar, FileText, Lock, MessageCircle, DollarSign, Heart, Stethoscope, Microscope, Brain } from 'lucide-react';
+import { MessageSquare, PenTool, Users, FileText, Calendar, Lock, MessageCircle, Activity, DollarSign } from 'lucide-react';
 import { Link } from "react-router-dom";
 
 // Access environment variables
@@ -39,11 +39,16 @@ const AnimatedSection = ({ children, className }) => {
   );
 };
 
-const Box3D = ({ children, className }) => (
-  <div className={`transform transition-all duration-300 hover:rotate-y-10 hover:rotate-x-10 hover:scale-105 ${className}`}>
-    <div className="bg-white rounded-lg shadow-lg p-6 transform preserve-3d perspective-1000">
-      {children}
+const ServiceCard = ({ icon: Icon, title, description }) => (
+  <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col items-center text-center">
+    <div className="w-16 h-16 mb-6 rounded-full bg-blue-50 flex items-center justify-center">
+      <Icon className="w-8 h-8 text-blue-600" />
     </div>
+    <h3 className="text-xl mb-3 text-gray-800 font-semibold">{title}</h3>
+    <p className="text-gray-600 mb-6 leading-relaxed">{description}</p>
+    <button className="mt-auto px-6 py-2 text-blue-600 border border-blue-200 rounded-full hover:bg-blue-50 transition-colors duration-300">
+      Read More
+    </button>
   </div>
 );
 
@@ -143,7 +148,7 @@ const RollingTestimonials = ({ testimonials }) => {
 
 export default function Hero() {
   const [formStatus, setFormStatus] = useState('');
-
+  
   const testimonials = [
     { comment: "The health tips provided here have been life-changing!", author: "Vivek" },
     { comment: "The articles here are clear and incredibly informative. I trust the advice!", author: "Nishi" },
@@ -182,134 +187,150 @@ export default function Hero() {
   };
 
   return (
-    <div className="font-sans text-blue-900">
-      <section className="relative h-screen w-full overflow-hidden">
-        <picture>
-          <source media="(max-width: 640px)" srcSet="./mhero.jpg" />
-          <source media="(min-width: 641px)" srcSet="./hero.jpg" />
-          <img
-            src="./hero.jpg"
-            alt="Medical background"
-            className="absolute inset-0 h-full w-full object-cover filter brightness-50"
-          />
-        </picture>
-
-        <div className="absolute inset-0 bg-blue-900/40"></div>
-
-        <div className="relative z-10 flex h-full items-center justify-center px-4">
-          <div className="text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: -50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="mb-6 font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-wide text-white"
-            >
-              MedWell
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-              className="max-w-xs mx-auto text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-white sm:max-w-sm md:max-w-lg lg:max-w-2xl"
-            >
-              Empowering health, one patient at a time.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
-              className="mt-8 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
-            >
-              <button className="px-6 py-3 font-semibold bg-blue-600 text-white rounded-full hover:bg-blue-700 transition shadow-lg"><Link to="/Dashboard">Get Started</Link></button>
-              <button className="px-6 py-3 font-semibold text-white bg-transparent rounded-full border-2 border-white hover:bg-white hover:text-blue-600 transition shadow-lg" onClick={() => document.getElementById('about').scrollIntoView({ behavior: 'smooth' })}>Learn More</button>
-            </motion.div>
+    <div className="font-sans">
+      {/* Hero Section */}
+      <AnimatedSection className="py-12 lg:py-24 lg:px-12 w-full overflow-hidden bg-gray-50">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+            <div className="lg:w-6/12">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="space-y-8"
+              >
+                <h1 className="text-4xl lg:text-5xl font-bold leading-tight">
+                  Great <span className="text-purple-500">Healthcare</span> is{' '}
+                  <br className="hidden sm:block" />
+                  <span className="mt-2 sm:mt-4 inline-block">built by great <span className="text-blue-500">teams</span></span>
+                </h1>
+                <p className="text-gray-600 text-lg max-w-xl leading-relaxed">
+                  We help build and manage a team of world-class healthcare professionals
+                  to bring your wellness vision to life
+                </p>
+                <Link
+  to="/auth"
+  className="w-full lg:w-auto px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none inline-block text-center">
+  Let's get started!
+</Link>
+              </motion.div>
+            </div>
+            <div className="lg:w-6/12">
+              <motion.img
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                src="/HealthcareGroup.png"
+                alt="Healthcare Team"
+                className="w-full h-auto object-contain"
+              />
+            </div>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
 
-      <AnimatedSection className="py-20 bg-blue-50 text-center">
-        <h2 id="about" className="text-3xl font-bold text-blue-800 mb-4">About Us</h2>
-        <p className="max-w-2xl mx-auto text-blue-600 mb-8 px-4">
-          MedWell is committed to providing the best health services. From virtual consultations to advanced health tracking, we're here to support your wellness journey.
-        </p>
-        <div className="flex flex-wrap justify-center gap-8 px-4">
-          {[
-            { icon: FileText, title: "Report Summarization", description: "Easily distinguish key components of your report" },
-            { icon: Stethoscope, title: "Patient Management", description: "Organize and manage patient information easily." },
-            { icon: Activity, title: "Health Tracking", description: "Monitor your health with detailed records." }
-          ].map((item, index) => (
-            <Box3D key={index} className="w-full sm:w-64">
-              <item.icon className="w-12 h-12 mx-auto mb-4 text-blue-500" />
-              <h3 className="font-semibold text-xl mb-2 text-blue-800">{item.title}</h3>
-              <p className="text-blue-600">{item.description}</p>
-            </Box3D>
-          ))}
+      {/* Services Section */}
+      <AnimatedSection className="py-24 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-16">
+            Our Features & Services
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <ServiceCard 
+              icon={MessageSquare}
+              title="Communication"
+              description="Connect with healthcare providers seamlessly through our integrated messaging platform."
+            />
+            <ServiceCard 
+              icon={PenTool}
+              title="Smart Design"
+              description="User-friendly interface designed to make your healthcare journey smoother."
+            />
+            <ServiceCard 
+              icon={Users}
+              title="Happy Customers"
+              description="Join thousands of satisfied users managing their health effectively."
+            />
+          </div>
         </div>
       </AnimatedSection>
 
-      <AnimatedSection className="py-20 bg-white text-center">
-        <h2 className="text-3xl font-bold text-blue-800 mb-4">Our Services</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto px-4">
-          {[
-            { icon: DollarSign, title: "Cost Tracker", description: "Track your medical expenses." },
-            { icon: Calendar, title: "Appointment Scheduling", description: "Easily schedule and manage appointments." },
-            { icon: FileText, title: "Medical Records Access", description: "Access and manage your medical records securely." },
-            { icon: Activity, title: "Health Monitoring", description: "Track health metrics and improvements." },
-            { icon: Lock, title: "Privacy", description: "Ensure your data is private and inaccessible without your consent." },
-            { icon: MessageCircle, title: "Personal Helper", description: "Chat with Rajni to get to know your nutrition and calorie needs." }
-          ].map((service, index) => (
-            <Box3D key={index}>
-              <service.icon className="w-12 h-12 mx-auto mb-4 text-blue-500" />
-              <h3 className="text-xl font-semibold mb-2 text-blue-800">{service.title}</h3>
-              <p className="text-blue-600">{service.description}</p>
-            </Box3D>
-          ))}
+      {/* Features Grid */}
+      <AnimatedSection className="py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-16">
+            Additional Features
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {[
+              { icon: DollarSign, title: "Cost Tracking", description: "Monitor and manage your healthcare expenses efficiently" },
+              { icon: Calendar, title: "Smart Scheduling", description: "Book and manage appointments with ease" },
+              { icon: FileText, title: "Digital Records", description: "Access your medical history anytime, anywhere" },
+              { icon: Activity, title: "Health Monitoring", description: "Track your vital signs and health metrics" },
+              { icon: Lock, title: "Secure Platform", description: "Your data is protected with enterprise-grade security" },
+              { icon: MessageCircle, title: "24/7 Support", description: "Get help whenever you need it" }
+            ].map((feature, index) => (
+              <div key={index} className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <feature.icon className="w-10 h-10 text-blue-600 mb-4" />
+                <h3 className="text-lg font-semibold mb-2 text-gray-800">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </AnimatedSection>
 
-      <AnimatedSection className="py-20 bg-blue-50">
-        <h2 className="text-3xl font-bold text-blue-800 mb-8 text-center">What Our Users Say</h2>
-        <RollingTestimonials testimonials={testimonials} />
+      {/* Testimonials Section */}
+      <AnimatedSection className="py-24 bg-blue-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-16">
+            What Our Users Say
+          </h2>
+          <RollingTestimonials testimonials={testimonials} />
+        </div>
       </AnimatedSection>
 
-      <AnimatedSection className="py-20 bg-white text-center">
-        <h2 className="text-3xl font-bold text-blue-800 mb-8">Contact Us</h2>
-        <form onSubmit={sendEmail} className="max-w-lg mx-auto space-y-4 px-4">
-          <input 
-            type="text" 
-            name="user_name" 
-            placeholder="Name" 
-            className="w-full px-4 py-2 border border-blue-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" 
-            required 
-          />
-          <input 
-            type="email" 
-            name="user_email" 
-            placeholder="Email" 
-            className="w-full px-4 py-2 border border-blue-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" 
-            required 
-          />
-          <textarea 
-            name="message" 
-            placeholder="Message" 
-            rows={4} 
-            className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
-            required 
-          />
-          <button 
-            type="submit" 
-            className="w-full px-6 py-3 font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 transition shadow-lg"
-          >
-            Send Message
-          </button>
-          {formStatus && (
-            <p className={`text-${formStatus.includes('success') ? 'green' : 'red'}-500`}>
-              {formStatus}
-            </p>
-          )}
-        </form>
+      {/* Contact Section */}
+      <AnimatedSection className="py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-16">
+            Get in Touch
+          </h2>
+          <form onSubmit={sendEmail} className="max-w-lg mx-auto space-y-6">
+            <input 
+              type="text" 
+              name="user_name" 
+              placeholder="Your Name" 
+              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              required 
+            />
+            <input 
+              type="email" 
+              name="user_email" 
+              placeholder="Your Email" 
+              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              required 
+            />
+            <textarea 
+              name="message" 
+              placeholder="Your Message" 
+              rows={4} 
+              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              required 
+            />
+            <button 
+              type="submit" 
+              className="w-full px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-300"
+            >
+              Send Message
+            </button>
+            {formStatus && (
+              <p className={`text-${formStatus.includes('success') ? 'green' : 'red'}-600 text-center`}>
+                {formStatus}
+              </p>
+            )}
+          </form>
+        </div>
       </AnimatedSection>
     </div>
   );
