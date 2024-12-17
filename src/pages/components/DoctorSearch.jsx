@@ -26,7 +26,6 @@ export default function DoctorSearch() {
   const [mapCenter, setMapCenter] = useState([20.5937, 78.9629])
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedDoctor, setSelectedDoctor] = useState(null)
   const [locationOption, setLocationOption] = useState('') 
   const [selectedSpecialty, setSelectedSpecialty] = useState("No Specialty")
 
@@ -232,9 +231,6 @@ export default function DoctorSearch() {
                             key={doctor.id} 
                             position={[doctor.data.location.lat, doctor.data.location.lon]} 
                             icon={DoctorIcon}
-                            eventHandlers={{
-                              click: () => setSelectedDoctor(doctor.data),
-                            }}
                           />
                         ))}
                       </MapContainer>
@@ -248,8 +244,7 @@ export default function DoctorSearch() {
                       {doctors.map((doctor) => (
                         <div 
                           key={doctor.id} 
-                          className={`bg-gray-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer ${selectedDoctor && selectedDoctor.user_id === doctor.data.user_id ? 'ring-2 ring-blue-500' : ''}`}
-                          onClick={() => setSelectedDoctor(doctor.data)}
+                          className="bg-gray-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
                         >
                           <h3 className="font-bold text-lg text-blue-600">{doctor.data.name}</h3>
                           <p className="text-gray-700">{doctor.data.speciality || 'General'}</p>
@@ -268,22 +263,6 @@ export default function DoctorSearch() {
               </div>
             </div>
           </div>
-
-          {selectedDoctor && (
-            <div className="fixed inset-x-0 bottom-0 bg-white p-6 shadow-lg z-30">
-              <div className="max-w-3xl mx-auto">
-                <h2 className="text-2xl font-bold mb-4">{selectedDoctor.name}</h2>
-                <p><strong>Specialty:</strong> {selectedDoctor.speciality || 'General'}</p>
-                <p><strong>Address:</strong> {selectedDoctor.address}</p>
-                <button 
-                  onClick={() => setSelectedDoctor(null)}
-                  className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
