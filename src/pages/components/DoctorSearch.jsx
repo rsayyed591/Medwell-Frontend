@@ -7,8 +7,8 @@ import { MapPin, Search } from 'lucide-react'
 
 const DoctorIcon = new L.Icon({
   iconUrl: '/logo.png',
-  iconAnchor: [44, 60],
-  popupAnchor: [1, -34],
+  iconAnchor: [40, 60],
+  popupAnchor: [0, -60],
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-shadow.png',
   shadowSize: [41, 41],
   iconSize: [80, 100],
