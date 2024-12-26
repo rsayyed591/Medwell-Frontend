@@ -7,9 +7,6 @@ import 'leaflet-routing-machine'
 import { useDocData } from './useDocData'
 import { google_ngrok_url, ngrok_url } from '../../utils/global'
 
-delete L.Icon.Default.prototype._getIconUrl;
-
-
 const initialDoctorInfo = {
   name: "",
   specialization: "",
@@ -30,9 +27,12 @@ const initialDoctorInfo = {
   submittedAt: ''
 }
 
+delete L.Icon.Default.prototype._getIconUrl;
+
+
 export function DoctorProfile() {
   const {
-    doctorInfo,
+    doctorInfo: fetchedDoctorInfo,
     addresses,
     loading,
     addressesLoading,
@@ -40,6 +40,14 @@ export function DoctorProfile() {
     updateDoctorInfo,
     uploadMultimedia,
   } = useDocData();
+
+  const [doctorInfo, setDoctorInfo] = useState(initialDoctorInfo);
+
+  useEffect(() => {
+    if (!loading && fetchedDoctorInfo) {
+      setDoctorInfo(fetchedDoctorInfo);
+    }
+  }, [loading, fetchedDoctorInfo]);
 
   const [isEditing, setIsEditing] = useState(false)
   const [activeTab, setActiveTab] = useState('personal')
