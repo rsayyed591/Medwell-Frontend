@@ -59,7 +59,7 @@ export function useDocData() {
         email: doctor_info.email || "",
         phone: otherData.phone_number || "",
         specialization: otherData.speciality || "",
-        profilePicture: otherData.profile_pic || './doctorpfp(female).png',
+        profilePicture: ngrok_url+otherData.profile_pic || './doctorpfp(female).png',
         registrationNumber: otherData.registeration_number || '',
         verified: otherData.verified || false,
         submittedAt: otherData.submitted_at || '',

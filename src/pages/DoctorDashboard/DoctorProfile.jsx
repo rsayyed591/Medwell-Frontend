@@ -7,6 +7,9 @@ import 'leaflet-routing-machine'
 import { useDocData } from './useDocData'
 import { google_ngrok_url, ngrok_url } from '../../utils/global'
 
+delete L.Icon.Default.prototype._getIconUrl;
+
+
 const initialDoctorInfo = {
   name: "",
   specialization: "",
@@ -27,12 +30,9 @@ const initialDoctorInfo = {
   submittedAt: ''
 }
 
-delete L.Icon.Default.prototype._getIconUrl;
-
-
 export function DoctorProfile() {
   const {
-    doctorInfo: fetchedDoctorInfo,
+    doctorInfo,
     addresses,
     loading,
     addressesLoading,
@@ -40,14 +40,6 @@ export function DoctorProfile() {
     updateDoctorInfo,
     uploadMultimedia,
   } = useDocData();
-
-  const [doctorInfo, setDoctorInfo] = useState(initialDoctorInfo);
-
-  useEffect(() => {
-    if (!loading && fetchedDoctorInfo) {
-      setDoctorInfo(fetchedDoctorInfo);
-    }
-  }, [loading, fetchedDoctorInfo]);
 
   const [isEditing, setIsEditing] = useState(false)
   const [activeTab, setActiveTab] = useState('personal')
@@ -405,13 +397,11 @@ export function DoctorProfile() {
     <div className="w-full max-w-[1200px] mx-auto p-4 sm:p-6 md:p-8">
       {!isEditing ? (
         <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-200">
-          {/* Header Section */}
           <div className="flex flex-col sm:flex-row justify-between items-start mb-8 gap-4">
-            {/* Left: Doctor Info */}
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full sm:w-auto">
               <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
                 <img
-                  src={ngrok_url+doctorInfo.profilePicture}
+                  src={doctorInfo.profilePicture}
                   alt={"Dr. "+doctorInfo.name}
                   className="w-full h-full object-cover"
                 />
@@ -499,7 +489,7 @@ export function DoctorProfile() {
 
             {/* Right Column */}
             <div>
-              <h2 className="text-lg font-semibold mb-3">Practice Locations</h2>
+              <h2 className="text-lg font-semibold mb-3">Locations</h2>
               {addressesLoading ? (
                 <div className="text-center py-4">Loading addresses...</div>
               ) : (addresses || []).length > 0 ? (
