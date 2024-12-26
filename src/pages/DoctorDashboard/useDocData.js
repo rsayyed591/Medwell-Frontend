@@ -3,11 +3,11 @@ import axios from 'axios';
 import { google_ngrok_url } from '../../utils/global';
 
 const dummyDoctorInfo = {
-  name: "Dr. John Doe",
+  name: "Dr. Rehan",
   specialization: "General Practitioner",
-  email: "john.doe@example.com",
+  email: "Rehan.zooby_dooby@example.com",
   phone: "+1234567890",
-  profilePicture: './doctorpfp(male).png',
+  profilePicture: './doctorpfp(female).png',
   rating: 4.5,
   services: [
     { name: "Consultation", price: "Rs. 500" },
