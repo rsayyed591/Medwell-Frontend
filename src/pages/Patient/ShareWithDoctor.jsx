@@ -8,7 +8,6 @@ import { google_ngrok_url } from '../../utils/global';
 export default function ShareWithDoctor() {
   const [scanResult, setScanResult] = useState('');
   const [isScannerVisible, setIsScannerVisible] = useState(false);
-  const [manualUrl, setManualUrl] = useState('');
   const [status, setStatus] = useState(null);
   const [message, setMessage] = useState('');
 
@@ -43,13 +42,6 @@ export default function ShareWithDoctor() {
       }
     };
   }, [isScannerVisible]);
-
-  const handleManualSubmit = (e) => {
-    e.preventDefault();
-    setScanResult(manualUrl);
-    handleProvideAccess(manualUrl);
-    setManualUrl('');
-  };
 
   const handleProvideAccess = async (encData) => {
     setStatus(null);
@@ -148,26 +140,6 @@ export default function ShareWithDoctor() {
               transition={{ delay: 0.8, duration: 0.5 }}
               className="text-center"
             >
-              <form onSubmit={handleManualSubmit}>
-                <p className="text-sm text-blue-600 mb-2">Or enter the encrypted data manually:</p>
-                <div className="flex">
-                  <input
-                    type="text"
-                    placeholder="Enter encrypted data here"
-                    className="flex-grow px-4 py-2 border border-blue-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-blue-800 placeholder-blue-300"
-                    value={manualUrl}
-                    onChange={(e) => setManualUrl(e.target.value)}
-                    aria-label="Enter encrypted data manually"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r-full transition duration-300 ease-in-out"
-                    aria-label="Submit manually entered encrypted data"
-                  >
-                    Submit
-                  </button>
-                </div>
-              </form>
             </motion.div>
 
             {status && (

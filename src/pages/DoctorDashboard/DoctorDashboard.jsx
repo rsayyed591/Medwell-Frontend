@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { Home, User, Users, Calendar, ChevronRight, ChevronUp, ChevronDown, Menu, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { Patients } from './Patients'
-import { DoctorProfile } from './DoctorProfile'
-import Dashboard from './Dashboard'
-import PatientAppointments from './PatientAppointments'
+import { Link, useLocation, Outlet } from 'react-router-dom'
 
 export default function DoctorDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState('Dashboard')
   const [isMobile, setIsMobile] = useState(false)
   const [isProfileExpanded, setIsProfileExpanded] = useState(false)
+  const location = useLocation()
   
   const doctorInfo = {
     name: 'Dr. Vivek Ammonia',
@@ -22,10 +18,10 @@ export default function DoctorDashboard() {
   }
 
   const navItems = [
-    { label: "Dashboard", icon: Home, component: Dashboard },
-    { label: "Profile", icon: User, component: DoctorProfile },
-    { label: "Patients", icon: Users, component: Patients },
-    { label: "Appointments", icon: Calendar, component: PatientAppointments },
+    { label: "Dashboard", icon: Home, path: "/doctor" },
+    { label: "Profile", icon: User, path: "/doctor/profile" },
+    { label: "Patients", icon: Users, path: "/doctor/patients" },
+    { label: "Appointments", icon: Calendar, path: "/doctor/appointments" },
   ]
 
   useEffect(() => {
@@ -71,15 +67,6 @@ export default function DoctorDashboard() {
     </div>
   )
 
-  const renderActiveComponent = () => {
-    const activeItem = navItems.find(item => item.label === activeSection)
-    if (activeItem && activeItem.component) {
-      const Component = activeItem.component
-      return <Component />
-    }
-    return <div className="text-2xl text-blue-800">Select a section from the sidebar</div>
-  }
-
   return (
     <div className="bg-gradient-to-br from-blue-50 to-white text-blue-900 min-h-screen flex">
       <AnimatePresence>
@@ -120,21 +107,21 @@ export default function DoctorDashboard() {
             <ProfileSection />
             <nav className={`${(!isMobile && !isSidebarOpen) ? 'px-2 mt-4' : 'px-4'}`}>
               {navItems.map((item, index) => (
-                <button
+                <Link
                   key={index}
+                  to={item.path}
                   className={`w-full text-left py-2 px-4 rounded-lg mb-2 flex items-center ${
-                    activeSection === item.label
+                    location.pathname === item.path
                       ? 'bg-blue-100 text-blue-800'
                       : 'hover:bg-blue-50 text-blue-700'
                   } ${(!isMobile && !isSidebarOpen) ? 'justify-center' : ''}`}
                   onClick={() => {
-                    setActiveSection(item.label)
                     if (isMobile) setIsSidebarOpen(false)
                   }}
                 >
                   <item.icon className={`${(!isMobile && !isSidebarOpen) ? '' : 'mr-2'} h-5 w-5`} />
                   {(isMobile || isSidebarOpen) && item.label}
-                </button>
+                </Link>
               ))}
             </nav>
           </motion.div>
@@ -144,7 +131,9 @@ export default function DoctorDashboard() {
       <div className="flex-1 p-8 md:p-3">
         {isMobile && (
           <div className="flex justify-between mb-4">
-          <h1 className="text-3xl font-bold text-blue-800">{activeSection}</h1>
+            <h1 className="text-3xl font-bold text-blue-800">
+              {navItems.find(item => item.path === location.pathname)?.label || 'Dashboard'}
+            </h1>
             <button
               className="p-2 rounded-lg border border-blue-300 hover:bg-blue-100 transition-colors duration-200"
               onClick={toggleSidebar}
@@ -153,7 +142,7 @@ export default function DoctorDashboard() {
             </button>
           </div>
         )}
-        {renderActiveComponent()}
+        <Outlet />
       </div>
 
       {isMobile && isSidebarOpen && (
@@ -165,3 +154,4 @@ export default function DoctorDashboard() {
     </div>
   )
 }
+

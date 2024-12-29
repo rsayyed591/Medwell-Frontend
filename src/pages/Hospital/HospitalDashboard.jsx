@@ -1,22 +1,15 @@
+'use client'
+
 import React, { useState, useEffect } from 'react'
 import { Home, User, FileText, Users, Calendar, BarChart, CreditCard, Package, ChevronRight, ChevronUp, ChevronDown, Menu, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
-
-import Dashboard from './Dashboard'
-import Profile from './Profile'
-import PatientRecords from './PatientRecords'
-import Doctors from './Doctors'
-import Appointments from './Appointments'
-import Analytics from './Analytics'
-import Billing from './Billing'
-import Inventory from './Inventory'
+import { Link, useLocation, Outlet } from 'react-router-dom'
 
 export default function HospitalDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState('Dashboard')
   const [isMobile, setIsMobile] = useState(false)
   const [isProfileExpanded, setIsProfileExpanded] = useState(false)
+  const location = useLocation()
   
   const hospitalInfo = {
     id: 'H12345',
@@ -26,14 +19,14 @@ export default function HospitalDashboard() {
   }
 
   const navItems = [
-    { label: "Dashboard", icon: Home, component: Dashboard },
-    { label: "Profile", icon: User, component: Profile },
-    { label: "Patient Records", icon: FileText, component: PatientRecords },
-    { label: "Doctors", icon: Users, component: Doctors },
-    { label: "Appointments", icon: Calendar, component: Appointments },
-    { label: "Analytics", icon: BarChart, component: Analytics },
-    { label: "Billing", icon: CreditCard, component: Billing },
-    { label: "Inventory", icon: Package, component: Inventory },
+    { label: "Dashboard", icon: Home, path: "/hospital" },
+    { label: "Profile", icon: User, path: "/hospital/profile" },
+    { label: "Patient Records", icon: FileText, path: "/hospital/patient-records" },
+    { label: "Doctors", icon: Users, path: "/hospital/doctors" },
+    { label: "Appointments", icon: Calendar, path: "/hospital/appointments" },
+    { label: "Analytics", icon: BarChart, path: "/hospital/analytics" },
+    { label: "Billing", icon: CreditCard, path: "/hospital/billing" },
+    { label: "Inventory", icon: Package, path: "/hospital/inventory" },
   ]
 
   useEffect(() => {
@@ -79,15 +72,6 @@ export default function HospitalDashboard() {
     </div>
   )
 
-  const renderActiveComponent = () => {
-    const activeItem = navItems.find(item => item.label === activeSection)
-    if (activeItem && activeItem.component) {
-      const Component = activeItem.component
-      return <Component />
-    }
-    return <div className="text-2xl text-green-800">Select a section from the sidebar</div>
-  }
-
   return (
     <div className="bg-gradient-to-br from-green-50 to-white text-green-900 min-h-screen flex">
       <AnimatePresence>
@@ -128,21 +112,21 @@ export default function HospitalDashboard() {
             <ProfileSection />
             <nav className={`${(!isMobile && !isSidebarOpen) ? 'px-2 mt-4' : 'px-4'} flex-grow overflow-y-auto`}>
               {navItems.map((item, index) => (
-                <button
+                <Link
                   key={index}
+                  to={item.path}
                   className={`w-full text-left py-2 px-4 rounded-lg mb-2 flex items-center ${
-                    activeSection === item.label
+                    location.pathname === item.path
                       ? 'bg-green-700 text-white'
                       : 'hover:bg-green-800 text-green-500'
                   } ${(!isMobile && !isSidebarOpen) ? 'justify-center' : ''}`}
                   onClick={() => {
-                    setActiveSection(item.label)
                     if (isMobile) setIsSidebarOpen(false)
                   }}
                 >
                   <item.icon className={`${(!isMobile && !isSidebarOpen) ? '' : 'mr-2'} h-5 w-5`} />
                   {(isMobile || isSidebarOpen) && item.label}
-                </button>
+                </Link>
               ))}
             </nav>
           </motion.div>
@@ -152,7 +136,9 @@ export default function HospitalDashboard() {
       <div className="flex-1 p-8 md:p-3 overflow-auto">
         {isMobile && (
           <div className="flex justify-between mb-4">
-            <h1 className="text-3xl font-bold text-green-800">{activeSection}</h1>
+            <h1 className="text-3xl font-bold text-green-800">
+              {navItems.find(item => item.path === location.pathname)?.label || 'Dashboard'}
+            </h1>
             <button
               className="p-2 rounded-lg border border-green-300 hover:bg-green-100 transition-colors duration-200"
               onClick={toggleSidebar}
@@ -161,7 +147,7 @@ export default function HospitalDashboard() {
             </button>
           </div>
         )}
-        {renderActiveComponent()}
+        <Outlet />
       </div>
 
       {isMobile && isSidebarOpen && (
@@ -173,3 +159,4 @@ export default function HospitalDashboard() {
     </div>
   )
 }
+

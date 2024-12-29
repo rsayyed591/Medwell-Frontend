@@ -1,22 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { Home, User, Heart, FileText, PlusCircle, DollarSign, Calendar, Share2, ChevronRight, ChevronUp, ChevronDown, Menu, X, Activity, Droplet, Thermometer, Brain } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link, useNavigate } from 'react-router-dom'
-import Profile from './Patient/Profile'
-import HealthCheck from './Patient/HealthCheck'
-import Reports from './Patient/Reports'
-import AddReport from './Patient/AddReport'
-import ExpenseTracker from './Expenses/ExpenseTracker'
-import PatientDashboard from './Patient/PatientDashboard'
-import Appointments from './Patient/Appointments'
-import ShareWithDoctor from './Patient/ShareWithDoctor'
+import { Link, useNavigate, Outlet, useLocation, Routes, Route } from 'react-router-dom'
 import { useFetch } from './components/useFetch'
+import HealthCheck from './Patient/HealthCheck'
 
 export default function MedicalDashboard() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [chartData, setChartData] = useState({})
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState('Dashboard')
   const [isMobile, setIsMobile] = useState(false)
   const [isProfileExpanded, setIsProfileExpanded] = useState(false)
   const { isLoading, error, fetchHealthCheck, getPatientInfo } = useFetch()
@@ -29,10 +21,23 @@ export default function MedicalDashboard() {
     profile_pic:"/Vivek.jpg",
     user_info:{email:'123@gmail.com'}
   })
+  const [healthCheckData, setHealthCheckData] = useState({
+    isLoaded: false,
+    charts: []
+  });
 
-  const [expenseData, setExpenseData] = useState({ overall_expense: 0 })
-  const [appointmentData, setAppointmentData] = useState({ doctor: 'N/A', date: 'N/A' })
-  const [healthData, setHealthData] = useState({ wbc_count: [], hemoglobin: [] })
+  const location = useLocation()
+
+  const navItems = [
+    { label: "Dashboard", icon: Home, path: "/patient" },
+    { label: "Profile", icon: User, path: "/patient/profile" },
+    { label: "Health Check", icon: Heart, path: "/patient/health-check" },
+    { label: "Reports", icon: FileText, path: "/patient/reports" },
+    { label: "Add Report", icon: PlusCircle, path: "/patient/add-report" },
+    { label: "Expense Tracker", icon: DollarSign, path: "/patient/expense-tracker" },
+    { label: "Appointments", icon: Calendar, path: "/patient/appointments" },
+    { label: "Share with Doctor", icon: Share2, path: "/patient/share-with-doctor" },
+  ]
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -43,12 +48,6 @@ export default function MedicalDashboard() {
         const patientInfoResult = await getPatientInfo()
         setPatientInfo(patientInfoResult)
         console.log(patientInfoResult)
-        setExpenseData({ overall_expense: 1000 })
-        setAppointmentData({ doctor: 'Dr. Smith', date: '2024-03-15' })
-        setHealthData({
-          wbc_count: [4.5, 5.0, 4.8],
-          hemoglobin: [14.2, 14.5, 14.0]
-        })
 
         setIsLoaded(true)
       } catch (error) {
@@ -56,67 +55,46 @@ export default function MedicalDashboard() {
       }
     }
     fetchAllData()
-  }, [fetchHealthCheck, getPatientInfo])
-  
-  const navigate = useNavigate()
-  const charts = [
-    { label: "Hemoglobin", color: "#ff6b6b", icon: Heart, data: chartData.hemoglobin || [] },
-    { label: "RBC Count", color: "#4ecdc4", icon: Activity, data: chartData.rbc_count || [] },
-    { label: "WBC Count", color: "#45aaf2", icon: Droplet, data: chartData.wbc_count || [] },
-    { label: "Platelet Count", color: "#fed330", icon: Thermometer, data: chartData.platelet_count || [] },
-    { label: "PCV", color: "#26de81", icon: User, data: chartData.pcv || [] },
-    { label: "Bilirubin", color: "#a55eea", icon: Brain, data: chartData.bilirubin || [] },
-    { label: "Proteins", color: "#fd9644", icon: Thermometer, data: chartData.proteins || [] },
-    { label: "Calcium", color: "#2bcbba", icon: User, data: chartData.calcium || [] },
-    { label: "Blood Urea", color: "#eb3b5a", icon: Brain, data: chartData.blood_urea || [] },
-    { label: "SR Cholesterol", color: "#778ca3", icon: Thermometer, data: chartData.sr_cholestrol || [] }
-  ]
 
-  const navItems = [
-    { label: "Profile", icon: User },
-    { label: "Dashboard", icon: Home},
-    { label: "Health Check", icon: Heart },
-    { label: "Reports", icon: FileText },
-    { label: "Add Report", icon: PlusCircle },
-    { label: "Expense Tracker", icon: DollarSign },
-    { label: "Appointments", icon: Calendar },
-    { label: "Share with Doctor", icon: Share2 },
-  ]
-
-  useEffect(() => {
-    const user = localStorage.getItem("Token")
-    setIsLoaded(true)
     const checkIfMobile = () => setIsMobile(window.innerWidth < 768)
     checkIfMobile()
     window.addEventListener('resize', checkIfMobile)
     return () => window.removeEventListener('resize', checkIfMobile)
-  }, [])
+  }, [fetchHealthCheck, getPatientInfo])
+
+  useEffect(() => {
+    const fetchHealthCheckData = async () => {
+      try {
+        const result = await fetchHealthCheck();
+        setHealthCheckData({
+          isLoaded: true,
+          charts: [
+            { label: "Hemoglobin", color: "#ff6b6b", icon: Heart, data: result.hemoglobin || [] },
+            { label: "RBC Count", color: "#4ecdc4", icon: Activity, data: result.rbc_count || [] },
+            { label: "WBC Count", color: "#45aaf2", icon: Droplet, data: result.wbc_count || [] },
+            { label: "Platelet Count", color: "#fed330", icon: Thermometer, data: result.platelet_count || [] },
+            { label: "PCV", color: "#26de81", icon: User, data: result.pcv || [] },
+            { label: "Bilirubin", color: "#a55eea", icon: Brain, data: result.bilirubin || [] },
+            { label: "Proteins", color: "#fd9644", icon: Thermometer, data: result.proteins || [] },
+            { label: "Calcium", color: "#2bcbba", icon: User, data: result.calcium || [] },
+            { label: "Blood Urea", color: "#eb3b5a", icon: Brain, data: result.blood_urea || [] },
+            { label: "SR Cholesterol", color: "#778ca3", icon: Thermometer, data: result.sr_cholestrol || [] }
+          ]
+        });
+      } catch (error) {
+        console.error('Error fetching health check data:', error);
+        setHealthCheckData({
+          isLoaded: true,
+          charts: []
+        });
+      }
+    };
+
+    fetchHealthCheckData();
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen)
-  }
-
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'Dashboard':
-        return <PatientDashboard />
-      case 'Profile':
-        return <Profile patientInfo={patientInfo} />
-      case 'Health Check':
-        return <HealthCheck isLoaded={isLoaded} charts={charts} />
-      case 'Reports':
-        return <Reports  />
-      case 'Add Report':
-        return <AddReport />
-      case 'Expense Tracker':
-        return <ExpenseTracker />
-      case 'Appointments':
-        return <Appointments />
-      case 'Share with Doctor':
-        return <ShareWithDoctor />
-      default:
-        return <div className="text-2xl">Select a section from the sidebar</div>
-    }
   }
 
   const ProfileSection = () => (
@@ -193,21 +171,21 @@ export default function MedicalDashboard() {
             <ProfileSection />
             <nav className={`${(!isMobile && !isSidebarOpen) ? 'px-2 mt-4' : 'px-4'}`}>
               {navItems.map((item, index) => (
-                <button
+                <Link
                   key={index}
+                  to={item.path}
                   className={`w-full text-left py-2 px-4 rounded-lg mb-2 flex items-center ${
-                    activeSection === item.label
+                    location.pathname === item.path
                       ? 'bg-gray-100 text-gray-600'
                       : 'hover:bg-gray-50 text-gray-700'
                   } ${(!isMobile && !isSidebarOpen) ? 'justify-center' : ''}`}
                   onClick={() => {
-                    setActiveSection(item.label)
                     if (isMobile) setIsSidebarOpen(false)
                   }}
                 >
                   <item.icon className={`${(!isMobile && !isSidebarOpen) ? '' : 'mr-2'} h-5 w-5`} />
                   {(isMobile || isSidebarOpen) && item.label}
-                </button>
+                </Link>
               ))}
             </nav>
           </motion.div>
@@ -217,7 +195,9 @@ export default function MedicalDashboard() {
       {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">{activeSection}</h1>
+          <h1 className="text-3xl font-bold text-gray-800">
+            {navItems.find(item => item.path === location.pathname)?.label || 'Dashboard'}
+          </h1>
           {(isMobile || !isSidebarOpen) && (
             <button
               className="p-2 rounded-lg border border-blue-300 hover:bg-blue-100 transition-colors duration-200"
@@ -236,10 +216,21 @@ export default function MedicalDashboard() {
         ) : error ? (
           <div>
             <div className="text-center text-red-500 mb-4">Error: {error}</div>
-            {renderContent()}
+            <Outlet />
           </div>
         ) : (
-          renderContent()
+          <Routes>
+            <Route 
+              path="health-check" 
+              element={
+                <HealthCheck 
+                  isLoaded={healthCheckData.isLoaded} 
+                  charts={healthCheckData.charts} 
+                />
+              } 
+            />
+            <Route path="*" element={<Outlet />} />
+          </Routes>
         )}
       </div>
 
@@ -252,3 +243,4 @@ export default function MedicalDashboard() {
     </div>
   )
 }
+

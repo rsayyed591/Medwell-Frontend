@@ -28,7 +28,7 @@ export const useAuth = () => {
         localStorage.setItem("Token", data.access_token)
         localStorage.setItem("Role", role)
         notifyAuthStateChange()
-        navigate("/Dashboard")
+        navigate("/patient")
         return true
       }
     } catch (error) {
@@ -61,7 +61,7 @@ export const useAuth = () => {
         localStorage.setItem("Token", data.access_token)
         localStorage.setItem("Role",role)
         notifyAuthStateChange()
-        navigate("/Dashboard")
+        navigate("/patient")
         return true
       }
     } catch (error) {
@@ -86,7 +86,7 @@ export const useAuth = () => {
       localStorage.setItem("Token", data.access)
       localStorage.setItem("Role", role)
       notifyAuthStateChange()
-      navigate("/Dashboard")
+      navigate("/patient")
       return true
     } catch (error) {
       setErrorMessage("An error occurred during Google login. Please try again.")
@@ -104,7 +104,7 @@ export const useAuth = () => {
   const checkAuth = () => {
     const token = localStorage.getItem("Token")
     if (token) {
-      navigate("/Dashboard")
+      navigate("/patient")
       return true
     }
     return false
