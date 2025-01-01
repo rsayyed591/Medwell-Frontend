@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate, Outlet, useLocation, Routes, Route } from 'react-router-dom'
 import { useFetch } from './components/useFetch'
 import HealthCheck from './Patient/HealthCheck'
+import { MobileNav } from './Patient/MobileNav'
 
 export default function MedicalDashboard() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -193,7 +194,7 @@ export default function MedicalDashboard() {
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-8 pb-24 md:pb-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">
             {navItems.find(item => item.path === location.pathname)?.label || 'Dashboard'}
@@ -233,6 +234,9 @@ export default function MedicalDashboard() {
           </Routes>
         )}
       </div>
+
+      {/* Mobile Navigation */}
+      <MobileNav />
 
       {isMobile && isSidebarOpen && (
         <div
