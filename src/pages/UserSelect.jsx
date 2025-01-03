@@ -7,7 +7,7 @@ const CardLink = ({ to, icon: Icon, children, primary = false }) => (
   <Link
     to={to}
     className={`block w-full ${
-      primary ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+      primary ? 'bg-[#005B96] text-[#FFFFFF] hover:bg-[#003E5C]' : 'bg-[#AEDFF7] text-[#005B96] hover:bg-[#8FCB9B]'
     } text-center py-3 rounded-lg transition-colors`}
   >
     <div className="flex items-center justify-center gap-2">
@@ -19,9 +19,9 @@ const CardLink = ({ to, icon: Icon, children, primary = false }) => (
 
 export default function UserSelect() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-[#AEDFF7] to-[#FFFFFF] flex items-center justify-center p-4">
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8"
@@ -29,19 +29,19 @@ export default function UserSelect() {
         {/* Hospital Section */}
         <motion.div 
           whileHover={{ scale: 1.02 }}
-          className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl"
+          className="bg-[#FFFFFF] rounded-3xl p-6 sm:p-8 shadow-xl"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">For <span className="text-emerald-600">Hospitals</span></h2>
-          <p className="text-gray-600 mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">For <span className="text-[#8FCB9B]">Hospitals</span></h2>
+          <p className="text-[#003E5C] mb-8">
             Join our network of healthcare providers. Streamline your operations, manage patient records, and enhance healthcare delivery with our comprehensive hospital management system.
           </p>
           <div className="space-y-4">
             <CardLink to="/hospital/login" icon={Building2} primary>
               Hospital Login
             </CardLink>
-            <p className="text-center text-gray-600">
+            <p className="text-center text-[#003E5C]">
               Don't have an account?{' '}
-              <Link to="/hospital/signup" className="text-emerald-600 hover:underline inline-flex items-center">
+              <Link to="/hospital/signup" className="text-[#8FCB9B] hover:underline inline-flex items-center">
                 Signup <ChevronRight size={16} />
               </Link>
             </p>
@@ -51,13 +51,13 @@ export default function UserSelect() {
         {/* Doctors and Patients Section */}
         <motion.div 
           whileHover={{ scale: 1.02 }}
-          className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl"
+          className="bg-[#FFFFFF] rounded-3xl p-6 sm:p-8 shadow-xl"
         >
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            For <span className="text-blue-600">Doctors</span> and{' '}
-            <span className="text-blue-600">Patients</span>
+            For <span className="text-[#005B96]">Doctors</span> and{' '}
+            <span className="text-[#005B96]">Patients</span>
           </h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-[#003E5C] mb-8">
             Connect with healthcare professionals, manage appointments, access medical records, and receive quality care through our integrated healthcare platform.
           </p>
           <div className="space-y-4">
@@ -67,13 +67,13 @@ export default function UserSelect() {
             <CardLink to="/login" icon={Users}>
               Patient Login
             </CardLink>
-            <p className="text-center text-gray-600">
+            <p className="text-center text-[#003E5C]">
               Don't have an account?{' '}
-              <Link to="/doctor/signup" className="text-blue-600 hover:underline inline-flex items-center">
+              <Link to="/doctor/signup" className="text-[#005B96] hover:underline inline-flex items-center">
                 Sign Up as Doctor <ChevronRight size={16} />
               </Link>
               {' or '}
-              <Link to="/signup" className="text-blue-600 hover:underline inline-flex items-center">
+              <Link to="/signup" className="text-[#005B96] hover:underline inline-flex items-center">
                 Sign Up as Patient <ChevronRight size={16} />
               </Link>
             </p>
@@ -83,3 +83,4 @@ export default function UserSelect() {
     </div>
   )
 }
+

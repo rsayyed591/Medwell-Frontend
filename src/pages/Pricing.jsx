@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckIcon, Heart, Brain, Stethoscope, Microscope } from "lucide-react";
+import { CheckIcon, Heart, Brain, Stethoscope, Microscope } from 'lucide-react';
 
 const pricingPlans = [
   {
@@ -31,13 +31,13 @@ const pricingPlans = [
 
 export default function Pricing() {
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-blue-50 to-white">
+    <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-[#AEDFF7] to-[#FFFFFF]">
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
         <motion.h2 
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center text-4xl font-bold tracking-tight text-blue-800 sm:text-5xl"
+          className="text-center text-4xl font-bold tracking-tight text-[#005B96] sm:text-5xl"
         >
           Choose Your MedWell Plan
         </motion.h2>
@@ -45,7 +45,7 @@ export default function Pricing() {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mx-auto mt-4 max-w-2xl text-center text-xl text-blue-600"
+          className="mx-auto mt-4 max-w-2xl text-center text-xl text-[#003E5C]"
         >
           Select the perfect plan to unlock the full potential of AI-powered healthcare
         </motion.p>
@@ -56,15 +56,15 @@ export default function Pricing() {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.1 * index }}
-              className={`rounded-2xl bg-white p-8 shadow-lg ring-1 ring-blue-100 transition-all hover:shadow-xl ${
-                plan.highlighted ? "lg:scale-110 bg-blue-50" : ""
+              className={`rounded-2xl bg-white p-8 shadow-lg ring-1 ring-[#AEDFF7] transition-all hover:shadow-xl ${
+                plan.highlighted ? "lg:scale-110 bg-[#AEDFF7]" : ""
               }`}
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-blue-800">{plan.name}</h3>
-                <plan.icon className={`h-8 w-8 ${plan.highlighted ? 'text-blue-500' : 'text-blue-400'}`} />
+                <h3 className="text-xl font-semibold text-[#005B96]">{plan.name}</h3>
+                <plan.icon className={`h-8 w-8 ${plan.highlighted ? 'text-[#005B96]' : 'text-[#003E5C]'}`} />
               </div>
-              <p className="mt-4 flex items-baseline text-blue-800">
+              <p className="mt-4 flex items-baseline text-[#005B96]">
                 <span className="text-5xl font-bold tracking-tight">{plan.price}</span>
                 {plan.price !== "Custom" && <span className="ml-1 text-xl font-semibold">/month</span>}
               </p>
@@ -72,9 +72,9 @@ export default function Pricing() {
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex items-start">
                     <div className="flex-shrink-0">
-                      <CheckIcon className="h-6 w-6 text-green-500" />
+                      <CheckIcon className="h-6 w-6 text-[#8FCB9B]" />
                     </div>
-                    <p className="ml-3 text-base text-blue-600">{feature}</p>
+                    <p className="ml-3 text-base text-[#003E5C]">{feature}</p>
                   </li>
                 ))}
               </ul>
@@ -83,8 +83,8 @@ export default function Pricing() {
                 whileTap={{ scale: 0.95 }}
                 className={`mt-8 block w-full rounded-md px-3 py-2 text-center text-sm font-semibold shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
                   plan.highlighted
-                    ? "bg-blue-600 text-white hover:bg-blue-500 focus-visible:outline-blue-600"
-                    : "bg-blue-100 text-blue-800 hover:bg-blue-200 focus-visible:outline-blue-100"
+                    ? "bg-[#005B96] text-white hover:bg-[#003E5C] focus-visible:outline-[#005B96]"
+                    : "bg-[#AEDFF7] text-[#005B96] hover:bg-[#8FCB9B] focus-visible:outline-[#AEDFF7]"
                 }`}
               >
                 {plan.cta}
@@ -96,3 +96,4 @@ export default function Pricing() {
     </div>
   );
 }
+

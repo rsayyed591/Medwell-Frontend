@@ -40,13 +40,13 @@ const AnimatedSection = ({ children, className }) => {
 };
 
 const ServiceCard = ({ icon: Icon, title, description }) => (
-  <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col items-center text-center">
-    <div className="w-16 h-16 mb-6 rounded-full bg-blue-50 flex items-center justify-center">
-      <Icon className="w-8 h-8 text-blue-600" />
+  <div className="bg-[#FFFFFF] rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col items-center text-center">
+    <div className="w-16 h-16 mb-6 rounded-full bg-[#AEDFF7] flex items-center justify-center">
+      <Icon className="w-8 h-8 text-[#005B96]" />
     </div>
-    <h3 className="text-xl mb-3 text-gray-800 font-semibold">{title}</h3>
-    <p className="text-gray-600 mb-6 leading-relaxed">{description}</p>
-    <button className="mt-auto px-6 py-2 text-blue-600 border border-blue-200 rounded-full hover:bg-blue-50 transition-colors duration-300">
+    <h3 className="text-xl mb-3 text-[#005B96] font-semibold">{title}</h3>
+    <p className="text-[#003E5C] mb-6 leading-relaxed">{description}</p>
+    <button className="mt-auto px-6 py-2 text-[#005B96] border border-[#AEDFF7] rounded-full hover:bg-[#AEDFF7] transition-colors duration-300">
       Read More
     </button>
   </div>
@@ -133,10 +133,10 @@ const RollingTestimonials = ({ testimonials }) => {
             className="w-[300px] sm:w-[500px] flex-shrink-0 px-4 mb-8"
             whileHover={{ scale: 1.02 }}
           >
-            <div className="bg-white rounded-lg shadow-lg p-6 h-full border border-blue-100">
+            <div className="bg-[#FFFFFF] rounded-lg shadow-lg p-6 h-full border border-[#AEDFF7]">
               <div className="h-full flex flex-col justify-between">
-                <p className="text-blue-800 text-base sm:text-lg mb-4">{testimonial.comment}</p>
-                <cite className="block text-right font-semibold text-blue-600">- {testimonial.author}</cite>
+                <p className="text-[#005B96] text-base sm:text-lg mb-4">{testimonial.comment}</p>
+                <cite className="block text-right font-semibold text-[#003E5C]">- {testimonial.author}</cite>
               </div>
             </div>
           </motion.div>
@@ -189,7 +189,7 @@ export default function Hero() {
   return (
     <div className="font-sans">
       {/* Hero Section */}
-      <AnimatedSection className="py-12 lg:py-24 lg:px-12 w-full overflow-hidden bg-gray-50">
+      <AnimatedSection className="py-12 lg:py-24 lg:px-12 w-full overflow-hidden bg-[#F5F5F5]">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
             <div className="lg:w-6/12">
@@ -200,19 +200,19 @@ export default function Hero() {
                 className="space-y-8"
               >
                 <h1 className="text-4xl lg:text-5xl font-bold leading-tight">
-                  Great <span className="text-purple-500">Healthcare</span> is{' '}
+                  Great <span className="text-[#8FCB9B]">Healthcare</span> is{' '}
                   <br className="hidden sm:block" />
-                  <span className="mt-2 sm:mt-4 inline-block">built by great <span className="text-blue-500">teams</span></span>
+                  <span className="mt-2 sm:mt-4 inline-block">built by great <span className="text-[#005B96]">teams</span></span>
                 </h1>
-                <p className="text-gray-600 text-lg max-w-xl leading-relaxed">
+                <p className="text-[#003E5C] text-lg max-w-xl leading-relaxed">
                   We help build and manage a team of world-class healthcare professionals
                   to bring your wellness vision to life
                 </p>
                 <Link
-  to="/auth"
-  className="w-full lg:w-auto px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none inline-block text-center">
-  Let's get started!
-</Link>
+                  to="/auth"
+                  className="w-full lg:w-auto px-8 py-3 bg-[#005B96] text-[#FFFFFF] rounded-lg hover:bg-[#003E5C] transition-colors focus:outline-none inline-block text-center">
+                  Let's get started!
+                </Link>
               </motion.div>
             </div>
             <div className="lg:w-6/12">
@@ -230,9 +230,9 @@ export default function Hero() {
       </AnimatedSection>
 
       {/* Services Section */}
-      <AnimatedSection className="py-24 bg-gray-50">
+      <AnimatedSection className="py-24 bg-[#F5F5F5]">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#005B96] text-center mb-16">
             Our Features & Services
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -256,9 +256,9 @@ export default function Hero() {
       </AnimatedSection>
 
       {/* Features Grid */}
-      <AnimatedSection className="py-24 bg-white">
+      <AnimatedSection className="py-24 bg-[#FFFFFF]">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#005B96] text-center mb-16">
             Additional Features
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
@@ -270,10 +270,10 @@ export default function Hero() {
               { icon: Lock, title: "Secure Platform", description: "Your data is protected with enterprise-grade security" },
               { icon: MessageCircle, title: "24/7 Support", description: "Get help whenever you need it" }
             ].map((feature, index) => (
-              <div key={index} className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <feature.icon className="w-10 h-10 text-blue-600 mb-4" />
-                <h3 className="text-lg font-semibold mb-2 text-gray-800">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+              <div key={index} className="bg-[#FFFFFF] rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <feature.icon className="w-10 h-10 text-[#005B96] mb-4" />
+                <h3 className="text-lg font-semibold mb-2 text-[#005B96]">{feature.title}</h3>
+                <p className="text-[#003E5C]">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -281,9 +281,9 @@ export default function Hero() {
       </AnimatedSection>
 
       {/* Testimonials Section */}
-      <AnimatedSection className="py-24 bg-blue-50">
+      <AnimatedSection className="py-24 bg-[#AEDFF7]">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#005B96] text-center mb-16">
             What Our Users Say
           </h2>
           <RollingTestimonials testimonials={testimonials} />
@@ -291,9 +291,9 @@ export default function Hero() {
       </AnimatedSection>
 
       {/* Contact Section */}
-      <AnimatedSection className="py-24 bg-white">
+      <AnimatedSection className="py-24 bg-[#FFFFFF]">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#005B96] text-center mb-16">
             Get in Touch
           </h2>
           <form onSubmit={sendEmail} className="max-w-lg mx-auto space-y-6">
@@ -301,31 +301,31 @@ export default function Hero() {
               type="text" 
               name="user_name" 
               placeholder="Your Name" 
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              className="w-full px-4 py-3 rounded-lg border border-[#AEDFF7] focus:outline-none focus:ring-2 focus:ring-[#005B96]" 
               required 
             />
             <input 
               type="email" 
               name="user_email" 
               placeholder="Your Email" 
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              className="w-full px-4 py-3 rounded-lg border border-[#AEDFF7] focus:outline-none focus:ring-2 focus:ring-[#005B96]" 
               required 
             />
             <textarea 
               name="message" 
               placeholder="Your Message" 
               rows={4} 
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              className="w-full px-4 py-3 rounded-lg border border-[#AEDFF7] focus:outline-none focus:ring-2 focus:ring-[#005B96]" 
               required 
             />
             <button 
               type="submit" 
-              className="w-full px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-300"
+              className="w-full px-6 py-3 text-[#FFFFFF] bg-[#005B96] rounded-lg hover:bg-[#003E5C] transition-colors duration-300"
             >
               Send Message
             </button>
             {formStatus && (
-              <p className={`text-${formStatus.includes('success') ? 'green' : 'red'}-600 text-center`}>
+              <p className={`text-${formStatus.includes('success') ? '[#8FCB9B]' : '[#FF0000]'} text-center`}>
                 {formStatus}
               </p>
             )}
@@ -335,3 +335,4 @@ export default function Hero() {
     </div>
   );
 }
+

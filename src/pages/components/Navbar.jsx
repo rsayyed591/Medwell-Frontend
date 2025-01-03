@@ -6,7 +6,7 @@ import { useAuth } from '../Auth/useAuth'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
-  const [navBackground, setNavBackground] = useState('bg-white')
+  const [navBackground, setNavBackground] = useState('bg-[#FFFFFF]')
   const { logout } = useAuth()
   
   const Links = [
@@ -47,9 +47,9 @@ export default function Navbar() {
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
-        setNavBackground('bg-white shadow-md')
+        setNavBackground('bg-[#FFFFFF] shadow-md')
       } else {
-        setNavBackground('bg-white')
+        setNavBackground('bg-[#FFFFFF]')
       }
     }
 
@@ -78,12 +78,12 @@ export default function Navbar() {
             <div className="w-8 h-8 rounded-full flex items-center justify-center">
               <img src="/logo.png" alt="" />
             </div>
-            <span className="text-2xl font-bold text-blue-600">Medwell</span>
+            <span className="text-2xl font-bold text-[#005B96]">Medwell</span>
           </Link>
           <div className="md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-blue-600 hover:text-blue-800 focus:outline-none focus:text-blue-800"
+              className="text-[#005B96] hover:text-[#003E5C] focus:outline-none focus:text-[#003E5C]"
               aria-label="toggle menu"
             >
               {isOpen ? (
@@ -98,14 +98,14 @@ export default function Navbar() {
         <div
           className={`${
             isOpen ? 'block' : 'hidden'
-          } md:block mt-4 md:mt-0 bg-white`}
+          } md:block mt-4 md:mt-0 bg-[#FFFFFF]`}
         >
           <ul className="flex flex-col md:flex-row md:items-center md:space-x-6">
             {Links.map((link) => (
               <li key={link.name} className="my-3 md:my-0">
                 <Link
                   to={link.link}
-                  className="flex items-center text-gray-700 hover:text-blue-800 transition duration-300"
+                  className="flex items-center text-[#003E5C] hover:text-[#005B96] text-sm relative after:content-[''] after:absolute after:w-full after:h-[2px] after:bg-[#005B96] after:left-0 after:-bottom-1 after:rounded-full after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100"
                   onClick={() => setIsOpen(false)}
                 >
                   <link.icon className="mr-2 h-5 w-5" />
@@ -117,7 +117,7 @@ export default function Navbar() {
               <li className="my-3 md:my-0">
                 <button
                   onClick={handleLogout}
-                  className="flex items-center text-gray-700 hover:text-blue-600 transition duration-300"
+                  className="flex items-center text-[#003E5C] hover:text-[#005B96] transition duration-300"
                 >
                   <LogOut className="mr-2 h-5 w-5" />
                   Logout
@@ -127,7 +127,7 @@ export default function Navbar() {
               <li className="my-3 md:my-0">
                 <Link
                   to="/auth"
-                  className="inline-flex items-center text-white bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded transition duration-300"
+                  className="inline-flex items-center text-[#FFFFFF] bg-[#005B96] hover:bg-[#003E5C] px-4 py-1.5 rounded-full text-sm transition duration-300"
                   onClick={() => setIsOpen(false)}
                 >
                   Get Started
@@ -140,3 +140,4 @@ export default function Navbar() {
     </nav>
   )
 }
+
