@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
+import { useMediaQuery } from 'react-responsive'
 import axios from 'axios'
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { MapPin, Search } from 'lucide-react'
@@ -28,6 +29,8 @@ export default function DoctorSearch() {
   const [searchQuery, setSearchQuery] = useState('')
   const [locationOption, setLocationOption] = useState('') 
   const [selectedSpecialty, setSelectedSpecialty] = useState("No Specialty")
+
+  const isMobile = useMediaQuery({ maxWidth: 767 })
 
   const districts = [
     'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 
@@ -217,27 +220,9 @@ export default function DoctorSearch() {
             {/* Results Section */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <div className="relative">
-                <div className="flex flex-col lg:flex-row gap-8">
-                  <div className="lg:w-1/2">
-                    <div className="h-[calc(100vh-300px)] w-full rounded-lg overflow-hidden shadow-lg relative z-0">
-                      <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }}>
-                        <TileLayer
-                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        />
-                        <MapUpdater center={mapCenter} />
-                        {doctors.map((doctor) => (
-                          <Marker 
-                            key={doctor.id} 
-                            position={[doctor.data.location.lat, doctor.data.location.lon]} 
-                            icon={DoctorIcon}
-                          />
-                        ))}
-                      </MapContainer>
-                    </div>
-                  </div>
-
-                  <div className="lg:w-1/2">
+                {isMobile ? (
+                  // Mobile view: Only show doctor cards
+                  <div>
                     <h2 className="text-2xl font-bold mb-4">Doctors</h2>
                     {error && <p className="text-red-500 mb-4">{error}</p>}
                     <div className="space-y-4 max-h-[calc(100vh-450px)] overflow-y-auto pr-4">
@@ -253,7 +238,46 @@ export default function DoctorSearch() {
                       ))}
                     </div>
                   </div>
-                </div>
+                ) : (
+                  // Desktop view: Show map and doctor cards side by side
+                  <div className="flex flex-col lg:flex-row gap-8">
+                    <div className="lg:w-1/2">
+                      <div className="h-[calc(100vh-300px)] w-full rounded-lg overflow-hidden shadow-lg relative z-0">
+                        <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }}>
+                          <TileLayer
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                          />
+                          <MapUpdater center={mapCenter} />
+                          {doctors.map((doctor) => (
+                            <Marker 
+                              key={doctor.id} 
+                              position={[doctor.data.location.lat, doctor.data.location.lon]} 
+                              icon={DoctorIcon}
+                            />
+                          ))}
+                        </MapContainer>
+                      </div>
+                    </div>
+
+                    <div className="lg:w-1/2">
+                      <h2 className="text-2xl font-bold mb-4">Doctors</h2>
+                      {error && <p className="text-red-500 mb-4">{error}</p>}
+                      <div className="space-y-4 max-h-[calc(100vh-450px)] overflow-y-auto pr-4">
+                        {doctors.map((doctor) => (
+                          <div 
+                            key={doctor.id} 
+                            className="bg-gray-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                          >
+                            <h3 className="font-bold text-lg text-blue-600">{doctor.data.name}</h3>
+                            <p className="text-gray-700">{doctor.data.speciality || 'General'}</p>
+                            <p className="text-gray-600 text-sm mt-1">{doctor.data.address}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {loading && (
                   <div className="absolute inset-0 flex items-center justify-center z-20 bg-white bg-opacity-75">

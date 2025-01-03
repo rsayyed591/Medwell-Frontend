@@ -46,6 +46,7 @@
     "react-leaflet": "^4.2.1",
     "react-modal": "^3.16.1",
     "react-qr-code": "^2.0.15",
+    "react-responsive": "^10.0.0",
     "react-router-dom": "^6.26.2",
     "tailwind-merge": "^2.5.2",
     "vite-plugin-vercel": "^9.0.2"
