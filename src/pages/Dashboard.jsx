@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Home, User, Heart, FileText, PlusCircle, DollarSign, Calendar, Share2, ChevronRight, ChevronUp, ChevronDown, Menu, X, Activity, Droplet, Thermometer, Brain } from 'lucide-react'
+import { Home, User, Heart, FileText, PlusCircle, DollarSign, Calendar, Share2, ChevronUp, ChevronDown, Activity, Droplet, Thermometer, Brain } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate, Outlet, useLocation, Routes, Route } from 'react-router-dom'
 import { useFetch } from './components/useFetch'
@@ -9,9 +9,7 @@ import { MobileNav } from './Patient/MobileNav'
 export default function MedicalDashboard() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [chartData, setChartData] = useState({})
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const [isProfileExpanded, setIsProfileExpanded] = useState(false)
   const { isLoading, error, fetchHealthCheck, getPatientInfo } = useFetch()
   const [patientInfo, setPatientInfo] = useState({
     name: 'John Doe',
@@ -94,119 +92,53 @@ export default function MedicalDashboard() {
     fetchHealthCheckData();
   }, []);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen)
-  }
-
-  const ProfileSection = () => (
-    <div className={`p-4 ${(!isMobile && !isSidebarOpen) ? 'hidden' : ''}`}>
-      <button
-        onClick={() => setIsProfileExpanded(!isProfileExpanded)}
-        className="w-full flex items-center justify-between mb-4"
-      >
-        <div className="flex items-center">
-          <img src={patientInfo.profile_pic || "/patient.png"} alt="Patient" className="w-12 h-12 rounded-full mr-3 border-2 border-blue-500" />
-          <div>
-            <h2 className="text-lg font-bold text-gray-800">{patientInfo?.name || 'John Doe'}</h2>
-            <p className="text-sm text-blue-600">Patient ID: {patientInfo?.id || 'P12345'}</p>
-          </div>
-        </div>
-        {isProfileExpanded ? <ChevronUp className="h-5 w-5 text-blue-500" /> : <ChevronDown className="h-5 w-5 text-blue-500" />}
-      </button>
-      <AnimatePresence>
-        {isProfileExpanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="text-sm space-y-2 mb-4 bg-blue-50 p-4 rounded-lg"
-          >
-            <p><strong className="text-blue-700">Age:</strong> <span className="text-blue-600">{patientInfo?.age || 30}</span></p>
-            <p><strong className="text-blue-700">Blood Type:</strong> <span className="text-blue-600">{patientInfo?.blood_group || 'O+'}</span></p>
-            <p><strong className="text-blue-700">Allergies:</strong> <span className="text-blue-600">{patientInfo?.allergies?.join(', ') || 'None'}</span></p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-white text-blue-900 min-h-screen flex">
-      {/* Sidebar */}
-      <AnimatePresence>
-        {(isSidebarOpen || !isMobile) && (
-          <motion.div
-            initial={isMobile ? { x: -300 } : false}
-            animate={{ x: 0 }}
-            exit={isMobile ? { x: -300 } : {}}
-            transition={{ duration: 0.3 }}
-            className={`bg-white shadow-lg overflow-hidden flex flex-col ${
-              isMobile ? 'fixed inset-y-0 left-0 z-50' : 'relative'
-            }`}
-            style={{ width: isMobile ? '300px' : isSidebarOpen ? '300px' : '64px' }}
-          >
-            {(!isMobile && !isSidebarOpen) && (
-              <button
-                className="w-full flex justify-center items-center py-4 hover:bg-blue-50 transition-colors duration-200"
-                onClick={toggleSidebar}
-              >
-                <ChevronRight className="h-6 w-6 text-blue-500" />
-              </button>
-            )}
-            <div className="flex justify-between items-center p-4 bg-blue-100">
-              {isSidebarOpen ? (
-                <Link to="/" className="text-2xl font-bold text-gray-800">MedWell</Link>
-              ) : (
-                <img src="/patient.png" alt="MedWell" className="w-10 h-8" />
-              )}
-              {(isMobile || isSidebarOpen) && (
-                <button
-                  className="p-2 rounded-full hover:bg-blue-200 transition-colors duration-200"
-                  onClick={toggleSidebar}
-                >
-                  <X className="h-6 w-6 text-gray-500" />
-                </button>
-              )}
+      {/* Sidebar - Hidden on mobile */}
+      <div className="hidden md:flex bg-white shadow-lg overflow-hidden flex-col w-72">
+        <div className="flex justify-center items-center p-4 bg-blue-100 mb-6">
+          <Link to="/" className="text-2xl font-bold text-gray-800">MedWell</Link>
+        </div>
+        <nav className="px-4 flex-grow">
+          {navItems.map((item, index) => (
+            <Link
+              key={index}
+              to={item.path}
+              className={`w-full text-left py-2 px-4 rounded-lg mb-2 flex items-center ${
+                location.pathname === item.path
+                  ? 'bg-gray-100 text-gray-600'
+                  : 'hover:bg-gray-50 text-gray-700'
+              }`}
+            >
+              <item.icon className="mr-2 h-5 w-5" />
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="mt-8 p-4 border-t">
+          <div className="flex items-center">
+            <img src={patientInfo.profile_pic || "/patient.png"} alt="Patient" className="w-10 h-10 rounded-full mr-3 border-2 border-blue-500" />
+            <div>
+              <h2 className="text-sm font-bold text-gray-800">{patientInfo?.name || 'John Doe'}</h2>
+              <p className="text-xs text-blue-600">ID: {patientInfo?.id || 'P12345'}</p>
             </div>
-            <ProfileSection />
-            <nav className={`${(!isMobile && !isSidebarOpen) ? 'px-2 mt-4' : 'px-4'}`}>
-              {navItems.map((item, index) => (
-                <Link
-                  key={index}
-                  to={item.path}
-                  className={`w-full text-left py-2 px-4 rounded-lg mb-2 flex items-center ${
-                    location.pathname === item.path
-                      ? 'bg-gray-100 text-gray-600'
-                      : 'hover:bg-gray-50 text-gray-700'
-                  } ${(!isMobile && !isSidebarOpen) ? 'justify-center' : ''}`}
-                  onClick={() => {
-                    if (isMobile) setIsSidebarOpen(false)
-                  }}
-                >
-                  <item.icon className={`${(!isMobile && !isSidebarOpen) ? '' : 'mr-2'} h-5 w-5`} />
-                  {(isMobile || isSidebarOpen) && item.label}
-                </Link>
-              ))}
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8 pb-24 md:pb-8">
-        <div className="flex justify-between items-center mb-8">
+      <div className="flex-1 p-4 md:p-8 pb-24 md:pb-8">
+        {/* For mobile: Add a header with the MedWell logo */}
+        <div className="md:hidden flex justify-between items-center mb-4">
+          <Link to="/" className="text-2xl font-bold text-gray-800">MedWell</Link>
+          {/* You can add a menu button here if needed */}
+        </div>
+
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800">
             {navItems.find(item => item.path === location.pathname)?.label || 'Dashboard'}
           </h1>
-          {(isMobile || !isSidebarOpen) && (
-            <button
-              className="p-2 rounded-lg border border-blue-300 hover:bg-blue-100 transition-colors duration-200"
-              onClick={toggleSidebar}
-            >
-              <Menu className="h-6 w-6 text-gray-500" />
-            </button>
-          )}
         </div>
 
         {isLoading ? (
@@ -236,15 +168,7 @@ export default function MedicalDashboard() {
       </div>
 
       {/* Mobile Navigation */}
-      <MobileNav />
-
-      {isMobile && isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setIsSidebarOpen(false)}
-        ></div>
-      )}
+      {isMobile && <MobileNav />}
     </div>
   )
 }
-
