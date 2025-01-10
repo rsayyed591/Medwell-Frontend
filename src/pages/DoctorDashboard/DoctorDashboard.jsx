@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Home, User, Users, Calendar, ChevronRight, ChevronUp, ChevronDown, Menu, X } from 'lucide-react'
+import { Home, User, Users, Calendar, ChevronRight, ChevronUp, ChevronDown, Menu, X, Mail } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useLocation, Outlet } from 'react-router-dom'
+import Marketing from './Marketing' // Import the component
 
 export default function DoctorDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -22,6 +23,7 @@ export default function DoctorDashboard() {
     { label: "Profile", icon: User, path: "/doctor/profile" },
     { label: "Patients", icon: Users, path: "/doctor/patients" },
     { label: "Appointments", icon: Calendar, path: "/doctor/appointments" },
+    { label: "Marketing", icon: Mail, path: "/doctor/marketing" }, // Add new nav item
   ]
 
   useEffect(() => {

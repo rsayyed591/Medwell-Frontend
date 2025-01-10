@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { MapPin, Search } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 const DoctorIcon = new L.Icon({
   iconUrl: '/logo.png',
@@ -234,6 +235,11 @@ export default function DoctorSearch() {
                           <h3 className="font-bold text-lg text-blue-600">{doctor.data.name}</h3>
                           <p className="text-gray-700">{doctor.data.speciality || 'General'}</p>
                           <p className="text-gray-600 text-sm mt-1">{doctor.data.address}</p>
+                          <Link to={`/doctorsearch/appointment`}>
+                            <button className="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                              Take Appointment
+                            </button>
+                          </Link>
                         </div>
                       ))}
                     </div>
@@ -272,6 +278,11 @@ export default function DoctorSearch() {
                             <h3 className="font-bold text-lg text-blue-600">{doctor.data.name}</h3>
                             <p className="text-gray-700">{doctor.data.speciality || 'General'}</p>
                             <p className="text-gray-600 text-sm mt-1">{doctor.data.address}</p>
+                            <Link to={`/doctorsearch/appointment`}>
+                              <button className="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                Take Appointment
+                              </button>
+                            </Link>
                           </div>
                         ))}
                       </div>

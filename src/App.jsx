@@ -43,6 +43,9 @@ import ExpenseTracker from './pages/Expenses/ExpenseTracker'
 import PatientDashboard from './pages/Patient/PatientDashboard'
 import PAppointments from './pages/Patient/Appointments'
 import ShareWithDoctor from './pages/Patient/ShareWithDoctor'
+import TakeAppointment from './pages/components/TakeAppointment' // Import the component
+import Marketing from './pages/DoctorDashboard/Marketing'; //Import Marketing Component
+
 
 function LoaderWrapper() {
   const [isLoading, setIsLoading] = useState(true)
@@ -89,11 +92,13 @@ function Layout() {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/doctorsearch" element={<DoctorSearch />} />
+          <Route path="/doctorsearch/appointment" element={<TakeAppointment />} />
           <Route path="/doctor" element={<DoctorDashboard />}>
             <Route index element={<DDashboard />} />
             <Route path="profile" element={<DoctorProfile />} />
             <Route path="patients" element={<Patients />} />
             <Route path="appointments" element={<PatientAppointments />} />
+            <Route path="marketing" element={<Marketing />} />
           </Route>
           <Route path="/hospital" element={<HospitalDashboard />}>
             <Route index element={<HDashboard />} />
@@ -122,6 +127,7 @@ function Layout() {
           <Route path="/doctor/signup" element={<DoctorSignUp />} />
           <Route path="/hospital/login" element={<HospitalLogin />} />
           <Route path="/hospital/signup" element={<HospitalSignUp />} />
+         
         </Routes>
       </main>
       <Footer />
