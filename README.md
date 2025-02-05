@@ -93,10 +93,6 @@ Medwell-Frontend is a modern, user-friendly web application designed to help pat
 - To add new report types or fields, update the `mockReports` array in `Reports.jsx`.
 - Modify the PDF generation logic in the `handleDownloadPDF` function within `Reports.jsx` to change the PDF layout or content.
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
