@@ -109,9 +109,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [jsPDF](https://github.com/MrRio/jsPDF) for PDF generation
 - [react-modal](https://github.com/reactjs/react-modal) for the modal component
 
-## Deployment
-
-This project is set up for deployment on Vercel. The `vercel.json` file in the root directory contains the necessary configuration.
 
 ## Support
 
